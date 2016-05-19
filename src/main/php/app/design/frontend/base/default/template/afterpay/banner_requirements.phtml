@@ -1,0 +1,20 @@
+<?php /** @var Afterpay_Afterpay_Block_Banner $this */ ?>
+<script type="text/javascript">
+    window.jQuery || <?php echo $this->getScriptHtml($this->getSkinUrl('afterpay/js/jquery-1.11.2.min.js')); ?>
+</script>
+<script type="text/javascript">
+    jQuery.noConflict();
+
+    if (!window.jQuery.fn.fancybox) {
+        <?php echo $this->getScriptHtml($this->getSkinUrl('afterpay/js/fancybox2/jquery.fancybox.pack.js')); ?>
+        document.write('<link rel="stylesheet" type="text/css" media="all" href="<?php echo $this->getSkinUrl('afterpay/js/fancybox2/jquery.fancybox.css') . '?v=' . $this->getModuleVersion()?>" />');
+    }
+</script>
+<?php if ($this->isEnabled()): ?>
+<script type="text/javascript">
+    if (!window.jQuery.fn.afterpayYoutube) {
+        <?php echo $this->getScriptHtml($this->getSkinUrl('afterpay/js/afterpay_youtube.js')); ?>
+    }
+</script>
+<?php endif; ?>
+<script src="<?php echo $this->getSkinUrl('afterpay/js/modal.js') ?>"></script>

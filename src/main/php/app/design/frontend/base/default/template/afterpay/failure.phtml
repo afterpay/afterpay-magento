@@ -1,0 +1,6 @@
+<?php /* @var $this Mage_Checkout_Block_Onepage_Failure */ ?>
+<div class="page-title">
+    <h1><?php echo $this->__('Order Declined') ?></h1>
+</div>
+<?php echo $this->getChildHtml(); ?>
+<p><?php echo $this->__('<a href="%s">Continue to shop</a>', $this->getContinueShoppingUrl()) ?></p>

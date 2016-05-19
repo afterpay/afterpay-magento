@@ -1,0 +1,16 @@
+<?php /** @var $this Afterpay_Afterpay_Block_Form_Payovertime */ ?>
+<div id="payment_form_<?php echo $this->getMethodCode() ?>" style="display:none;">
+    <div id="<?php echo $this->getDetailsTemplateId() ?>"></div>
+</div>
+
+<script type="text/javascript">
+
+    /** @require /js/Afterpay/checkout/payovertime.js */
+    Afterpay.CheckoutForm.detailsConfiguration = <?php echo json_encode($this->getDetailsConfiguration()) ?>;
+
+//    // render pay over time checkout option form on dom:loaded event
+//    document.observe('dom:loaded', function () {
+//    });
+    Afterpay.CheckoutForm.detailsRender();
+
+</script>

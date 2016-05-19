@@ -1,0 +1,30 @@
+<?php /** @var Afterpay_Afterpay_Block_Redirect $this */ ?>
+<script src="<?php echo $this->getRedirectJsUrl() ?>"></script>
+<script>
+    window.addEventListener('load', function() {
+        var returnUrl = <?php echo json_encode($this->getReturnUrl()); ?>;
+        var transactionToken = <?php echo json_encode($this->getOrderToken()); ?>;
+
+        AfterPay.init({
+            relativeCallbackURL: returnUrl
+        });
+
+        if (!transactionToken) {
+            console.error('Afterpay Error: Order Token is not defined.');
+        }
+
+        switch (window.Afterpay.redirectMode) {
+            case 'lightbox':
+                AfterPay.display({
+                    token: transactionToken
+                });
+                break;
+
+            case 'redirect':
+                AfterPay.redirect({
+                    token: transactionToken
+                });
+                break;
+        }
+    });
+</script>

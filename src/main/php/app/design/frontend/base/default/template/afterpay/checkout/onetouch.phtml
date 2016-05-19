@@ -1,0 +1,14 @@
+<span class="paypal-or"><?php echo $this->__('-OR-'); ?></span>
+</li><li class="method-afterpay_onetouch">
+
+    <h3><?php echo $this->__('Check out with Afterpay and pay by instalment.') ?></h3>
+    <p><?php echo $this->__('Simply pay four interest-free payments of %s over 8 weeks.', $this->getInstalmentAmount()) ?></p>
+    <p>
+        <?php echo $this->__('No card application, instant approval.') ?>
+        <a href="#afterpay-what-is-modal" class="afterpay-what-is-modal-trigger">
+            <?php echo $this->__('Learn more') ?>
+        </a>
+    </p>
+    <a href="<?php echo $this->getUrl('afterpay/onetouch') ?>" class="button btn-proceed-checkout btn-checkout">
+        <?php echo $this->__('Buy now, pay later') ?>
+    </a>
