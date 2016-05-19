@@ -1,7 +1,5 @@
 # Afterpay magento extension changelog
-Copyright (c) 2014 Alinga Web Media Design (http://www.alinga.com.au/)  
-Copyright (c) 2014-2015 VEN Commerce Ltd (http://www.ven.com/)
-Copyright (c) 2015-2016 AfterPay (http://afterpay.com.au/)
+Copyright (c) 2016 AfterPay (http://afterpay.com.au/)
 
 ### 0.12.5 - 2016-05-19
  - Added a better error handling for AfterPay Payment observers
@@ -9,7 +7,7 @@ Copyright (c) 2015-2016 AfterPay (http://afterpay.com.au/)
  - Added default explanations for Late Fee 
 
 ### 0.10.1 - 2015-10-30
- - Upgraded to the changes made by www.ie.com.au (the lightbox now opens as a proper lightbox over the merchant site
+ - Upgraded to the changes made by www.ie.com.au (the lightbox now opens as a proper lightbox over the merchant site)
 
 ### 0.10.0 - 2015-06-24
  - Abandoned orders:
