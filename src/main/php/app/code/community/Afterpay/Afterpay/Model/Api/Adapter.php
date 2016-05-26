@@ -49,7 +49,7 @@ class Afterpay_Afterpay_Model_Api_Adapter
             /** @var Mage_Sales_Model_Order_Item $orderItem */
             $params['orderDetail']['items'][] = array(
                 'name'     => (string)$orderItem->getName(),
-                'sku'      => (string)$orderItem->getSku(),
+                'sku'      => $this->truncate_string( (string)$orderItem->getSku(), Afterpay_Afterpay_Model_Method_Base::TRUNCATE_SKU_LENGTH ),
                 'quantity' => (int)$orderItem->getQtyOrdered(),
                 'price'    => array(
                     'amount'   => round((float)$orderItem->getPriceInclTax(), $precision),
@@ -172,6 +172,23 @@ class Afterpay_Afterpay_Model_Api_Adapter
         }
 
         return false;
+    }
+
+    /**
+     * Since 0.12.7
+     * Truncate the string in case of very long custom values
+     *
+     * @param string $string    string to truncate
+     * @param string $length    string truncation length
+     * @param string $appendStr    string to be appended after truncate
+     * @return string
+     */
+    private function truncate_string($string, $length = 64, $appendStr = "") {
+        $truncated_str = "";
+        $useAppendStr = (strlen($string) > intval($length))? true:false;
+        $truncated_str = substr($string,0,$length);
+        $truncated_str .= ($useAppendStr)? $appendStr:"";
+        return $truncated_str;
     }
 }
 

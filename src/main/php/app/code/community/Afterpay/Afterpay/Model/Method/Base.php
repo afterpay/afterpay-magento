@@ -28,6 +28,8 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
     const RESPONSE_STATUS_FAILED   = 'FAILED';
     const RESPONSE_STATUS_DECLINED = 'DECLINED';
 
+    const TRUNCATE_SKU_LENGTH = 128;
+
     /**
      * Payment Method features common for all payment methods
      *

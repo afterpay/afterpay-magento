@@ -735,7 +735,7 @@ class Afterpay_Afterpay_Model_Observer
      */
     public function addTokenToOrderResponse($observer)
     {
-        $order = Mage::getSingleton('checkout/session')->getLastRealOrder();
+	$order = Mage::getModel('sales/order')->loadByIncrementId(Mage::getSingleton('checkout/session')->getLastRealOrderId());
         if ($order instanceof Mage_Sales_Model_Order) {
             $payment = $order->getPayment();
             if ($payment instanceof Mage_Payment_Model_Info && $payment->getMethodInstance() instanceof Afterpay_Afterpay_Model_Method_Base) {
