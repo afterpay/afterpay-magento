@@ -1,159 +1,18 @@
 /* What is Afterpay modal */
-#afterpay-what-is-modal .afterpay-logo {
-    margin: 10px auto 20px;
+#afterpay-what-is-modal  img.afterpay-modal-image {
+    display: block;
 }
-
-#afterpay-what-is-modal h3 {
-    font-family: "Raleway", "Helvetica Neue", Verdana, Arial, sans-serif;
-    font-weight: 600;
-    font-size: 20px;
-    color: #404040;
-    text-align: center;
-    text-transform: uppercase;
-}
-
-#afterpay-what-is-modal .partner-text {
+#afterpay-what-is-modal  img.afterpay-modal-image-mobile{
     display: none;
 }
 
-#afterpay-what-is-modal .afterpay-benefits {
-    display: table;
-}
-
-#afterpay-what-is-modal .afterpay-benefits li {
-    display: table-row;
-}
-
-#afterpay-what-is-modal .afterpay-benefits .image,
-#afterpay-what-is-modal .afterpay-benefits .description {
-    display: table-cell;
-    vertical-align: middle;
-    padding-bottom: 10px;
-}
-
-#afterpay-what-is-modal .afterpay-benefits .description {
-    padding-left: 20px;
-}
-
-#afterpay-what-is-modal .afterpay-benefits img {
-    width: 50px;
-}
-
-#afterpay-what-is-modal .afterpay-benefits h4 {
-    font-family: "Raleway", "Helvetica Neue", Verdana, Arial, sans-serif;
-    font-weight: 600;
-    font-size: 14px;
-    color: #404040;
-    margin: 0;
-    text-transform: uppercase;
-}
-
-#afterpay-what-is-modal .afterpay-benefits p {
-    font-family: Arial, sans-serif;
-    font-size: 12px;
-    color: #838383;
-}
-
-#afterpay-what-is-modal .afterpay-footer h4 {
-    font-family: Arial, sans-serif;
-    font-size: 14px;
-    color: #404040;
-    text-transform: none;
-    text-align: center;
-    margin: 15px 0 5px;
-}
-
-#afterpay-what-is-modal .afterpay-footer a {
-    display: block;
-    font-weight: bold;
-    text-align: center;
-}
-
-#afterpay-what-is-modal .terms-and-conditions,
-#afterpay-what-is-modal .terms-and-conditions a {
-    font-family: Arial, sans-serif;
-    font-size: 11px;
-    color: #A1A4A6;
-}
-
-#afterpay-what-is-modal .terms-and-conditions {
-    text-align: center;
-    margin-top: 30px;
-}
-
-#afterpay-what-is-modal .terms-and-conditions a {
-    text-decoration: underline;
-}
-
-#afterpay-what-is-modal .late-fee-information {
-    font-family: Arial, sans-serif;
-    font-size: 11px;
-    color: #A1A4A6;
-    text-align: left;
-}
-
-@media (min-width: 700px) {
-    #afterpay-what-is-modal {
-        width: 600px;
-    }
-
-    #afterpay-what-is-modal h3 {
-        font-size: 24px;
-    }
-
-    #afterpay-what-is-modal .partner-text {
+@media only screen
+and (max-width : 480px) {
+    #afterpay-what-is-modal  img.afterpay-modal-image-mobile {
         display: block;
-        padding: 0 50px;
-        text-align: center;
-        font-family: Arial, sans-serif;
-        font-size: 14px;
-        color: #636363;
-        margin-bottom: 20px;
     }
-
-    #afterpay-what-is-modal .afterpay-benefits {
-        display: table-row;
-    }
-
-    #afterpay-what-is-modal .afterpay-benefits li {
-        display: table-cell;
-        padding: 0 15px;
-    }
-
-    #afterpay-what-is-modal .afterpay-benefits li:nth-child(2) {
-        border-width: 1px;
-        border-style: none solid;
-        border-color: #e6e6e6;
-    }
-
-    #afterpay-what-is-modal .afterpay-benefits .image,
-    #afterpay-what-is-modal .afterpay-benefits .description {
-        display: block;
-        text-align: center;
-        padding: 0;
-    }
-
-    #afterpay-what-is-modal .afterpay-benefits img {
-        width: auto;
-        display: inline;
-    }
-
-    #afterpay-what-is-modal .afterpay-footer {
-        margin-top: 40px;
-        text-align: center;
-    }
-
-    #afterpay-what-is-modal .afterpay-footer h4,
-    #afterpay-what-is-modal .afterpay-footer a {
-        display: inline;
-    }
-
-    #afterpay-what-is-modal .afterpay-footer a {
-        margin-left: 10px;
-    }
-
-    #afterpay-what-is-modal .terms-and-conditions {
-        margin-top: 10px;
+    #afterpay-what-is-modal  img.afterpay-modal-image{
+        display: none;
     }
 }
 
@@ -209,11 +68,11 @@
 
 #payment_form_afterpaypayovertime .instalments .header-text {
     font-family: Arial, sans-serif;
-    font-weight: 600;
-    font-size: 9px;
-    color: #A1A4A6;
+    /*font-weight: 600;*/
+    /*font-size: 9px;*/
+    color: #379dd6;
     margin: 10px 0;
-    text-transform: uppercase;
+    /*text-transform: uppercase;*/
     line-height: 20px;
 }
 
@@ -286,7 +145,7 @@
     }
 
     .checkout-onepage-index #payment_form_afterpaypayovertime .instalments .header-text {
-        font-size: 12px;
+        font-size: 14px;
     }
 
     .checkout-onepage-index #payment_form_afterpaypayovertime .instalments .cost {

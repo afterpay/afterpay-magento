@@ -229,7 +229,7 @@
      position: relative;
  font-style: italic;
  line-height: 1.4;
-" class="afterpay-installments">or 4 interest free payments of {price_here}
+" class="afterpay-installments">or 4 interest-free fortnightly payments of {price_here}
 <br><img src="{skin_url}frontend/base/default/afterpay/images/ap-logo-152x31.png" style="
     width: 76px;
     vertical-align: middle;
@@ -271,7 +271,7 @@ with&nbsp;
     line-height: 1.4;
     padding-top: -5px;
     padding-left: 10px;
-">(or 4 payments of {price_here})</div>]]></product_list_html_template>
+">(or 4 fortnightly payments of {price_here})</div>]]></product_list_html_template>
                 <check_order_total_limits>1</check_order_total_limits>
             </payovertime_installments>
             <payovertime_checkout>
@@ -289,7 +289,7 @@ with&nbsp;
     <li class="form-alt">
         <div class="instalments">
             <p class="header-text">
-                Four interest-free payments totalling {order_amount}
+                Four fortnightly payments totalling <strong>{order_amount}</strong>
             </p>
             <ul class="cost">
                 <li>{instalment_amount}</li>
@@ -312,10 +312,10 @@ with&nbsp;
                 </li>
             </ul>
             <ul class="instalment">
-                <li>in 2 weeks</li>
-                <li>in 4 weeks</li>
-                <li>in 6 weeks</li>
-                <li>in 8 weeks</li>
+                <li>First instalment</li>
+                <li>2 weeks later</li>
+                <li>4 weeks later</li>
+                <li>6 weeks later</li>
             </ul>
         </div>
         <div class="instalment-footer">
