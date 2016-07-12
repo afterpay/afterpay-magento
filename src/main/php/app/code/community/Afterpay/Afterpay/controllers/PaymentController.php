@@ -193,6 +193,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
             if ($order->isPaymentReview()) {
                 $helper->log($logPrefix . 'Re-checking order payment status: ' . $order->getIncrementId(), Zend_Log::INFO);
                 $payment->registerPaymentReviewAction(Mage_Sales_Model_Order_Payment::REVIEW_ACTION_UPDATE, true);
+                $order->save();
             } else {
                 $helper->log($logPrefix . 'Order status was not re-checked. Order is not in Payment Review state. OrderID=' . $order->getIncrementId(), Zend_Log::NOTICE);
             }
