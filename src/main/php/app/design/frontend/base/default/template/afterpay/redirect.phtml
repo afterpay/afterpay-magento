@@ -5,9 +5,15 @@
         var returnUrl = <?php echo json_encode($this->getReturnUrl()); ?>;
         var transactionToken = <?php echo json_encode($this->getOrderToken()); ?>;
 
-        AfterPay.init({
-            relativeCallbackURL: returnUrl
-        });
+        //modified to suit API V1
+        if( returnUrl === false ) {
+            AfterPay.init(); 
+        }
+        else {
+            AfterPay.init({
+                relativeCallbackURL: returnUrl
+            });
+        }
 
         if (!transactionToken) {
             console.error('Afterpay Error: Order Token is not defined.');

@@ -4,8 +4,8 @@
  * Afterpay payment redirect block
  *
  * @package   Afterpay_Afterpay
- * @author    VEN Development Team <info@ven.com>
- * @copyright Copyright (c) 2014 VEN Commerce Ltd (http://www.ven.com)
+ * @author    Afterpay <steven.gunarso@touchcorp.com>
+ * @copyright Copyright (c) 2016 Afterpay (http://www.afterpay.com.au/)
  */
 
 /**
@@ -34,7 +34,8 @@ class Afterpay_Afterpay_Block_Redirect extends Mage_Core_Block_Template
     }
 
     /**
-     * @return string
+     * Get the return URL of the Afterpay, will return false if using API V1
+     * @return string | null
      */
     public function getReturnUrl()
     {
@@ -50,7 +51,14 @@ class Afterpay_Afterpay_Block_Redirect extends Mage_Core_Block_Template
             }
         }
 
-        return $result;
+        if( Mage::getModel('afterpay/method_payovertime')->getConfigPaymentAction() 
+            == Afterpay_Afterpay_Model_Method_Payovertime::ACTION_AUTHORIZE_CAPTURE ) {
+
+            return false;
+        }
+        else {
+            return $result;
+        }
     }
 
     /**

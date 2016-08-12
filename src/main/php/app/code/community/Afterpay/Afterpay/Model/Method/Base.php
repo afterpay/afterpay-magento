@@ -4,8 +4,8 @@
  * Abstract base class for Afterpay payment method models
  *
  * @package   Afterpay_Afterpay
- * @author    VEN Development Team <info@ven.com>
- * @copyright Copyright (c) 2014 VEN Commerce Ltd (http://www.ven.com)
+ * @author    Afterpay <steven.gunarso@touchcorp.com>
+ * @copyright Copyright (c) 2016 Afterpay (http://www.afterpay.com.au/)
  */
 
 /**
@@ -67,7 +67,7 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
      */
     public function getConfigPaymentAction()
     {
-        return self::ACTION_ORDER;
+        return $this->getConfigData('payment_action');
     }
 
     /**
@@ -80,6 +80,42 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
     {
         // TODO: Move list of supported currencies to config.xml
         return strtoupper($currencyCode) === "AUD";
+    }
+
+    /**
+     * @return Afterpay_Afterpay_Helper_Data
+     */
+    protected function helper()
+    {
+        return Mage::helper('afterpay');
+    }
+
+    /**
+     * flag for API version
+     *
+     * @return bool
+     */
+    public function isAPIVersion1()
+    {
+        if( $this->getConfigPaymentAction() == Afterpay_Afterpay_Model_Method_Payovertime::ACTION_AUTHORIZE_CAPTURE ) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    /**
+     * @return Afterpay_Afterpay_Model_Api_Adapter
+     */
+    protected function getApiAdapter()
+    {   
+        if ( $this->isAPIVersion1() ) {
+            return Mage::getModel('afterpay/api_adapters_adapterv1');
+        }
+        else {
+            return Mage::getModel('afterpay/api_adapters_adapter');
+        }
     }
 
     /**
@@ -272,8 +308,8 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
     protected function retrieveOrderToken(Mage_Sales_Model_Order_Payment $payment)
     {
         $order = $payment->getOrder();
-        $postData = $this->getApiAdapter()->buildOrderTokenRequest($order, $this->afterPayPaymentTypeCode);
-        $gatewayUrl = $this->getOrdersApiUrl();
+        $postData = $this->getApiAdapter()->buildOrderTokenRequest($order, array(), $this->afterPayPaymentTypeCode);
+        $gatewayUrl = $this->getApiAdapter()->getApiRouter()->getOrdersApiUrl();
 
         $helper = $this->helper();
         $helper->log(
@@ -343,21 +379,20 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
      * Retrieve payment status via API call
      *
      * @param string $afterPayOrderId
+     * @param  string $callName
+     *
      * @returns array
      *
      * @throws Mage_Core_Exception
      * @throws Afterpay_Afterpay_Exception
      */
-    protected function retrievePaymentInfoByTxnId($afterPayOrderId)
+    protected function retrievePaymentInfoByTxnId($afterPayOrderId, $callName = 'retrievePaymentInfo')
     {
-        $gatewayUrl = $this->getOrdersApiUrl();
-
-        $url = (substr($gatewayUrl, -1) == '/' ? $gatewayUrl : $gatewayUrl . '/') . $afterPayOrderId;
+        $url =  $this->getApiAdapter()->getApiRouter()->getOrdersApiUrl($afterPayOrderId, 'id');
 
         $helper = $this->helper();
-        $helper->log('Getting payment status from url: ' . $url, Zend_Log::DEBUG);
 
-        $result = $this->_sendRequest($url);
+        $result = $this->_sendRequest($url, false, Varien_Http_Client::GET, $callName);
 
         if ($result->isError()) {
             throw Mage::exception(
@@ -375,25 +410,17 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
             );
         }
 
-        $helper->log("retrievePaymentInfoByTxnId() Order info:\n" . print_r($resultObject, true), Zend_Log::DEBUG);
-        $helper->log(
-            sprintf(
-                'Payment info was successfully fetched for afterpay_order_id=%s: %s',
-                $afterPayOrderId,
-                $resultObject['status']
-            ),
-            Zend_Log::INFO
-        );
-
         return array(
             'id'                => $resultObject['id'],
             'token'             => $resultObject['token'],
             'status'            => $resultObject['status'],
-            'orderDate'         => $resultObject['orderDate'],
-            'paymentType'       => $resultObject['paymentType'],
-            'consumerEmail'     => $resultObject['consumer']['email'],
-            'consumerName'      => $resultObject['consumer']['givenNames'] . ' ' . $resultObject['consumer']['surname'],
-            'consumerTelephone' => $resultObject['consumer']['mobile']
+            'orderDate'         => !empty($resultObject['orderDate']) ? $resultObject['orderDate'] : '',
+            'paymentType'       => !empty($resultObject['paymentType']) ? $resultObject['paymentType'] : 'PBI',
+            'consumerEmail'     => !empty($resultObject['consumer']['email']) ? $resultObject['consumer']['email'] : '',
+            'consumerName'      => !empty($resultObject['consumer']['givenNames']) && !empty($resultObject['consumer']['surname']) ? $resultObject['consumer']['givenNames'] . ' ' . $resultObject['consumer']['surname'] : '',
+            'consumerTelephone' => !empty($resultObject['consumer']['mobile']) ? $resultObject['consumer']['mobile'] : '',
+            'merchantOrderId'   => !empty($resultObject['orderDetail']['merchantOrderId']) ? $resultObject['orderDetail']['merchantOrderId'] : '',
+            'amount'            => !empty($resultObject['orderDetail']['orderAmount']['amount']) ? $resultObject['orderDetail']['orderAmount']['amount'] : '',
         );
     }
 
@@ -408,9 +435,9 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
      */
     public function retrievePaymentInfoByToken($afterpayToken)
     {
-        $gatewayUrl = $this->getOrdersApiUrl();
-
-        $url = (substr($gatewayUrl, -1) == '/' ? $gatewayUrl : $gatewayUrl . '/') . '?token=' . urlencode($afterpayToken);
+        //API Version 1 should not even use this function
+        //but just in case I will implement the fallback for token searching
+        $url = $this->getApiAdapter()->getApiRouter()->getOrdersApiUrl($afterpayToken, 'token');
 
         $helper = $this->helper();
         $helper->log('Searching for order information, request url: ' . $url, Zend_Log::DEBUG);
@@ -468,7 +495,9 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
             'paymentType'       => $orderData['paymentType'],
             'consumerEmail'     => $orderData['consumer']['email'],
             'consumerName'      => $orderData['consumer']['givenNames'] . ' ' . $orderData['consumer']['surname'],
-            'consumerTelephone' => $orderData['consumer']['mobile']
+            'consumerTelephone' => $orderData['consumer']['mobile'],
+            'merchantOrderId'   => $resultObject['orderDetail']['merchantOrderId'],
+            'amount'            => $resultObject['orderDetail']['orderAmount']['amount'],
         );
     }
 
@@ -486,71 +515,6 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
     }
 
     /**
-     * Get configured gateway URL for payment method
-     *
-     * @return string|null
-     */
-    public function getOrdersApiUrl()
-    {
-        $apiMode      = $this->getConfigData(self::API_MODE_CONFIG_FIELD);
-        $settings     = Afterpay_Afterpay_Model_System_Config_Source_ApiMode::getEnvironmentSettings($apiMode);
-
-        return $settings[Afterpay_Afterpay_Model_System_Config_Source_ApiMode::KEY_API_URL] . 'merchants/orders/';
-    }
-
-    /**
-     * Get configured gateway URL for payment method
-     *
-     * @return string|null
-     */
-    public function getWebRedirectJsUrl()
-    {
-        $apiMode      = $this->getConfigData(self::API_MODE_CONFIG_FIELD);
-        $settings     = Afterpay_Afterpay_Model_System_Config_Source_ApiMode::getEnvironmentSettings($apiMode);
-
-        return $settings[Afterpay_Afterpay_Model_System_Config_Source_ApiMode::KEY_WEB_URL] . 'afterpay.js';
-    }
-
-    /**
-     * Get configured gateway URL for payment method
-     *
-     * @return string
-     */
-    public function getRefundUrl($id)
-    {
-        $apiMode      = $this->getConfigData(self::API_MODE_CONFIG_FIELD);
-        $settings     = Afterpay_Afterpay_Model_System_Config_Source_ApiMode::getEnvironmentSettings($apiMode);
-
-        return $settings[Afterpay_Afterpay_Model_System_Config_Source_ApiMode::KEY_API_URL] . 'merchants/orders/' . $id . '/refunds';
-    }
-
-    /**
-     * Redirect URL
-     *
-     * @return string
-     */
-    public function getOrderPlaceRedirectUrl()
-    {
-        return Mage::getUrl('afterpay/payment/redirect', array('_secure' => true));
-    }
-
-    /**
-     * @return Afterpay_Afterpay_Helper_Data
-     */
-    protected function helper()
-    {
-        return Mage::helper('afterpay');
-    }
-
-    /**
-     * @return Afterpay_Afterpay_Model_Api_Adapter
-     */
-    protected function getApiAdapter()
-    {
-        return Mage::getModel('afterpay/api_adapter');
-    }
-
-    /**
      * @param int    $afterPayOrderId
      * @param string $trackingNumber
      * @param string $courier
@@ -560,10 +524,10 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
      */
     public function sendShippedApiRequest($afterPayOrderId, $trackingNumber, $courier)
     {
-        $gatewayUrl = $this->getOrdersApiUrl();
+        $url = $this->getApiAdapter()->getApiRouter()->getOrdersApiUrl( $afterPayOrderId, "courier" );
         $postData   = $this->getApiAdapter()->buildSetShippedRequest($trackingNumber, $courier);
 
-        $url = (substr($gatewayUrl, -1) == '/' ? $gatewayUrl : $gatewayUrl . '/') . $afterPayOrderId . '/shippedstatus';
+        // $url = (substr($gatewayUrl, -1) == '/' ? $gatewayUrl : $gatewayUrl . '/') . $afterPayOrderId . '/shippedstatus';
 
         $helper = $this->helper();
         $helper->log('Sending SetShipped Api request to url: ' . $url, Zend_Log::DEBUG);
@@ -720,20 +684,15 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
 
     public function refund(Varien_Object $payment, $amount)
     {
-        $url = $this->getRefundUrl($payment->getAfterpayOrderId());
+        $url = $this->getApiAdapter()->getApiRouter()->getRefundUrl($payment->getAfterpayOrderId());
         $helper = $this->helper();
         $coreHelper = Mage::helper('core');
 
         $helper->log('Refunding order url: ' . $url . ' amount: ' . $amount, Zend_Log::DEBUG);
 
-        $body = array(
-            'amount'    => array(
-                'amount'    => abs($amount) * -1, // Afterpay API requires a negative amount
-                'currency'  => $payment->getOrder()->getGlobalCurrencyCode(),
-            ),
-            'merchantRefundId'  => null
-        );
-
+        //Ver 1 needs Merchant Reference variable
+        $body = $this->getApiAdapter()->buildRefundRequest($amount, $payment);
+        
         $response = $this->_sendRequest($url, $body, $method = Varien_Http_Client::POST);
 
         if ($response->isError()) {
@@ -757,7 +716,7 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
         return $this;
     }
 
-    protected function _sendRequest($url, $body = false, $method = Varien_Http_Client::GET)
+    protected function _sendRequest($url, $body = false, $method = Varien_Http_Client::GET, $call = null)
     {
         $client = new Varien_Http_Client($url);
         $helper = Mage::helper('afterpay');
@@ -769,15 +728,71 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
         );
 
         $client->setConfig(array(
-            'useragent' => 'AfterpayMagentoPlugin/' . $helper->getModuleVersion() . ' (Magento ' . Mage::getEdition() . ' ' . Mage::getVersion() . ')'
+            'useragent' => 'AfterpayMagentoPlugin/' . $helper->getModuleVersion() . ' (Magento ' . Mage::getEdition() . ' ' . Mage::getVersion() . ')',
+            'timeout' => 80
         ));
 
         if ($body !== false) {
             $client->setRawData($coreHelper->jsonEncode($body), 'application/json');
         }
 
+        // Do advanced logging before
+        $helper->log(array(
+            'url' => $url,
+            'type' => 'request',
+            'call' => $call,
+            'body' => $body
+        ), Zend_Log::DEBUG);
+
         $response = $client->request($method);
 
+        // Do advanced logging after
+        $helper->log(array(
+            'url' => $url,
+            'type' => 'response',
+            'call' => $call,
+            'body' => ($response->getBody() && json_decode($response->getBody())) ? json_decode($response->getBody()) : $response,
+        ), Zend_Log::DEBUG);
+
         return $response;
+    }
+
+    /**
+     * Get the valid order limits for a specific payment method
+     *
+     * @param string $method    method to get payment methods for
+     * @param string $tla       Three Letter Acronym used by Afterpay for the method
+     * @return array|bool
+     * @throws Mage_Core_Exception
+     * @throws Zend_Http_Client_Exception
+     */
+    public function getPaymentAmounts($method, $tla)
+    {
+        $helper = Mage::helper('afterpay');
+        $client = new Varien_Http_Client($this->getApiAdapter()->getApiRouter()->getPaymentUrl($method));
+        $client->setAuth(
+            trim(Mage::getStoreConfig('payment/' . $method . '/' . Afterpay_Afterpay_Model_Method_Base::API_USERNAME_CONFIG_FIELD)),
+            trim(Mage::getStoreConfig('payment/' . $method . '/' . Afterpay_Afterpay_Model_Method_Base::API_PASSWORD_CONFIG_FIELD))
+        );
+
+        $client->setConfig(array(
+            'useragent' => 'AfterpayMagentoPlugin/' . $helper->getModuleVersion() . ' (Magento ' . Mage::getEdition() . ' ' . Mage::getVersion() . ')'
+        ));
+
+        $response = $client->request();
+
+        if ($response->isError()) {
+            throw Mage::exception('Afterpay_Afterpay', 'Afterpay API error: ' . $response->getMessage());
+        }
+
+        $data = Mage::helper('core')->jsonDecode($response->getBody());
+
+        foreach ($data as $info) {
+            if ($info['type'] == $tla) {
+                return $info;
+            }
+        }
+
+        return false;
     }
 }

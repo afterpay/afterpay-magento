@@ -164,21 +164,34 @@ class Afterpay_Afterpay_Model_Observer
 
         $collection->setOrder('main_table.updated_at', Varien_Data_Collection::SORT_ORDER_ASC);
         $collection->setPageSize(self::ORDERS_PROCESSING_LIMIT);
+		
 
-        $jobCode = $schedule->getJobCode();
+        if( empty($schedule) ) {
+            //no schedule means this is being triggered from Admin
+            $jobCode = "Admin";
+        }
+        else {
+            $jobCode = $schedule->getJobCode();
+        }
+	
 
         if (!count($collection)) {
             $helper->log(sprintf('%s: There is no suitable orders to process', $jobCode), Zend_Log::DEBUG);
         }
 
         $pendingPaymentTimeout = (int)Mage::getStoreConfig('afterpay/cron/pending_payment_timeout');
+            
+        //store the cancellation warnings
+        $cancellation_warnings = array();
 
         foreach ($collection as $order) {
 
             try {
                 try {
                     $payment = $order->getPayment();
-                    if ($token = $payment->getData('afterpay_token')) { // try to fetch afterpay_order_id if order token is present
+                    $token == $payment->getData('afterpay_token');
+
+                    if ( !empty($token) ) { // try to fetch afterpay_order_id if order token is present
 
                         /** @var Afterpay_Afterpay_Model_Method_Base $paymentMethod */
                         $paymentMethod = $payment->getMethodInstance();
@@ -246,15 +259,36 @@ class Afterpay_Afterpay_Model_Observer
                         }
 
                         $helper->log(
-                            sprintf('Afterpay Error: Order %s should be cancelled, but it isn\'t cancallable in Magento meaning. Please cancel it manually.',
+                            sprintf('Afterpay Error: Order %s cannot be cancelled. Please edit it manually.',
                                 $order->getIncrementId()
                             )
                         );
+                        
+                        //If Admin Show Notifications
+                        if( empty($schedule) ) {
+                            $cancellation_warnings[] = $order->getIncrementId();
+                        }
                     }
                 }
 
             } catch (Mage_Core_Exception $e) {
                 $helper->log(sprintf("%s: Error on trial to update payment status for order %s\n%s", $jobCode, $order->getIncrementId(), $e->getMessage()), Zend_Log::ERR);
+            }
+        }
+
+
+
+        //If Admin Show Notifications
+        if( empty($schedule) ) {
+            if( count($cancellation_warnings) < 1 ) {
+                Mage::getSingleton('core/session')->addSuccess('Transactions Status Processed');
+            }
+            else {
+                Mage::getSingleton('core/session')->addWarning(
+                    sprintf('Afterpay Warning: Order %s cannot be cancelled. Please edit it manually.',
+                        implode(',', $cancellation_warnings)
+                    )
+                );
             }
         }
     }
@@ -587,6 +621,7 @@ class Afterpay_Afterpay_Model_Observer
 
         } catch (Mage_Core_Exception $e) {
             Mage::logException($e);
+
             $helper->log(
                 sprintf(
                     '%s: Error on fetching payment info for order %s: %s',
@@ -668,18 +703,19 @@ class Afterpay_Afterpay_Model_Observer
     public function updateOrderLimits($observer = null)
     {
         $configs = array(
-            'PBI' => 'afterpaypayovertime',
-            'PAD' => 'afterpaybeforeyoupay',
+            'PBI'                   => 'afterpaypayovertime',
+            'PAY_BY_INSTALLMENT'    => 'afterpaypayovertime',
+            // 'PAD'                   => 'afterpaybeforeyoupay',
         );
 
-        $api = new Afterpay_Afterpay_Model_Api_Adapter();
+        $base = new Afterpay_Afterpay_Model_Method_Payovertime();
 
         foreach ($configs as $tla => $payment) {
             if (!Mage::getStoreConfigFlag('payment/' . $payment . '/active')) {
                 continue;
             }
 
-            $values = $api->getPaymentAmounts($payment, $tla);
+            $values = $base->getPaymentAmounts($payment, $tla);
 
             $path = 'payment/' . $payment . '/';
 
@@ -750,5 +786,65 @@ class Afterpay_Afterpay_Model_Observer
             }
         }
         return $this;
+    }
+
+    public function adminhtmlWidgetContainerHtmlBefore($event)
+    {
+	
+    	$container = $event->getBlock();
+        
+        if( !empty($container) && $container->getType() == 'adminhtml/sales_order') {
+
+            $data = array(
+                'label'     => 'Afterpay Transaction Update',
+                'class'     => 'afterpay-transaction',
+                'onclick'   => 'setLocation(\' '  . Mage::helper('adminhtml')->getUrl('adminhtml/afterpay/fetchPendingPaymentOrdersInfo') . '\')',
+            );
+            $container->addButton('my_button_identifier', $data);
+        }
+ 
+        return $this;
+
+    }
+    
+    public function assignOrderStatus($observer)
+    {
+        /* @var Mage_Sales_Model_Order $order */
+        $payment = $observer->getEvent()->getPayment();
+        $order = $payment->getOrder();
+        $status = Mage::getModel('afterpay/method_payovertime')->getPaymentReviewStatus();
+
+        // Apply order status for specific order
+        if ($order->getState() == Mage_Sales_Model_Order::STATE_PAYMENT_REVIEW &&        // Order State is Payment Review
+            $payment->getMethod() == Afterpay_Afterpay_Model_Method_Payovertime::CODE && // Payment using Mony Payments
+            $order->getStatus() != $status                                               // Order status is not the same
+        ) {
+            // Set status to be selected payment review status from admin
+            $order->setStatus($status);
+        }
+    }
+
+    /**
+     * Adding extra layout handle (i.e <default_handle>_MODULE_<module_name_case_sensitive>)
+     *
+     * Due to some other checkout extension will use the same handle but different methodologies.
+     * Example: Idev_OneStepCheckout and MageStore_Onestepcheckout
+     *
+     * @param $observer
+     */
+    public function addModuleToHandle($observer)
+    {
+        // Get request
+        $request = Mage::app()->getRequest();
+
+        // Applied for only url onestepcheckout/index/index
+        if ($request->getModuleName() == 'onestepcheckout' &&
+            $request->getControllerName() == 'index' &&
+            $request->getActionName() == 'index') {
+
+            /* @var $update Mage_Core_Model_Layout_Update */
+            $update = $observer->getEvent()->getLayout()->getUpdate();
+            $update->addHandle('onestepcheckout_index_index_MODULE_' . $request->getControllerModule());
+        }
     }
 }

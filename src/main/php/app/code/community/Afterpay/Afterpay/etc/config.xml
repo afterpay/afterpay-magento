@@ -2,11 +2,21 @@
 <config>
     <modules>
         <Afterpay_Afterpay>
-            <version>0.12.8</version>
+            <version>0.13.0</version>
         </Afterpay_Afterpay>
     </modules>
     <afterpay>
         <environments>
+            <qa>
+                <name>QA Test</name>
+                <api_url>https://api-qa.secure-afterpay.com.au/</api_url>
+                <web_url>https://www-qa.secure-afterpay.com.au/</web_url>
+            </qa>
+            <threepi>
+                <name>3PI Test</name>
+                <api_url>https://api-3pi.secure-afterpay.com.au/</api_url>
+                <web_url>https://www-3pi.secure-afterpay.com.au/</web_url>
+            </threepi>
             <sandbox>
                 <name>Sandbox Test</name>
                 <api_url>https://api-sandbox.secure-afterpay.com.au/</api_url>
@@ -41,6 +51,16 @@
         </layout>
     </frontend>
     <global>
+        <fieldsets>
+            <sales_convert_quote_payment>
+                <afterpay_token>
+                    <to_order_payment>*</to_order_payment>
+                </afterpay_token>
+                <afterpay_order_id>
+                    <to_order_payment>*</to_order_payment>
+                </afterpay_order_id>
+            </sales_convert_quote_payment>
+        </fieldsets>
         <models>
             <afterpay>
                 <class>Afterpay_Afterpay_Model</class>
@@ -74,6 +94,14 @@
             </afterpay_setup>
         </resources>
         <events>
+            <sales_order_shipment_save_after>
+                <observers>
+                    <afterpay_sales_order_shipment_save_after>
+                        <class>afterpay/observer</class>
+                        <method>salesOrderShipmentSaveAfter</method>
+                    </afterpay_sales_order_shipment_save_after>
+                </observers>
+            </sales_order_shipment_save_after>
             <admin_system_config_changed_section_payment>
                 <observers>
                     <afterpay_payment_settings_changed>
@@ -131,7 +159,38 @@
                 </observers>
             </controller_action_postdispatch_firecheckout_index_saveOrder>
         </events>
+	<sales_order_payment_place_end>
+                <observers>
+                    <afterpay_order_payment_review>
+                        <type>singleton</type>
+                        <class>afterpay/observer</class>
+                        <method>assignOrderStatus</method>
+                    </afterpay_order_payment_review>
+                </observers>
+            </sales_order_payment_place_end>
+            <controller_action_layout_load_before>
+                <observers>
+                    <attributesethandle>
+                        <type>singleton</type>
+                        <class>afterpay/observer</class>
+                        <method>addModuleToHandle</method>
+                    </attributesethandle>
+                </observers>
+            </controller_action_layout_load_before>
     </global>
+    <adminhtml>
+        <events>
+            <adminhtml_widget_container_html_before>
+                <observers>
+                    <afterpay>
+                        <class>afterpay/observer</class>
+                        <type>singleton</type>
+                        <method>adminhtmlWidgetContainerHtmlBefore</method>
+                    </afterpay>
+                </observers>
+            </adminhtml_widget_container_html_before>
+        </events>
+    </adminhtml>
     <admin>
         <routers>
             <adminhtml>
@@ -229,7 +288,7 @@
      position: relative;
  font-style: italic;
  line-height: 1.4;
-" class="afterpay-installments">or 4 interest-free fortnightly payments of {price_here}
+" class="afterpay-installments">or 4 interest free payments of {price_here}
 <br><img src="{skin_url}frontend/base/default/afterpay/images/ap-logo-152x31.png" style="
     width: 76px;
     vertical-align: middle;
@@ -271,7 +330,7 @@ with&nbsp;
     line-height: 1.4;
     padding-top: -5px;
     padding-left: 10px;
-">(or 4 fortnightly payments of {price_here})</div>]]></product_list_html_template>
+">(or 4 payments of {price_here})</div>]]></product_list_html_template>
                 <check_order_total_limits>1</check_order_total_limits>
             </payovertime_installments>
             <payovertime_checkout>
@@ -289,7 +348,7 @@ with&nbsp;
     <li class="form-alt">
         <div class="instalments">
             <p class="header-text">
-                Four fortnightly payments totalling <strong>{order_amount}</strong>
+                Four interest-free payments totalling {order_amount}
             </p>
             <ul class="cost">
                 <li>{instalment_amount}</li>

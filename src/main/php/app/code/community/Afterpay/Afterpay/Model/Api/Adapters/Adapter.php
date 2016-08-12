@@ -2,18 +2,27 @@
 
 /**
  * @package   Afterpay_Afterpay
- * @author    VEN Development Team <info@ven.com>
- * @copyright Copyright (c) 2014 VEN Commerce Ltd (http://www.ven.com)
+ * @author    Aferpay <steven.gunarso@touchcorp.com>
+ * @copyright Copyright (c) 2016 Afterpay (http://www.afterpay.com.au)
  */
 
 /**
- * Class Afterpay_Afterpay_Model_Api_Adapter
+ * Class Afterpay_Afterpay_Model_Api_Adapters_Adapter
  *
  * Building API requests and parsing API responses.
  */
-class Afterpay_Afterpay_Model_Api_Adapter
+class Afterpay_Afterpay_Model_Api_Adapters_Adapter
 {
-    public function buildOrderTokenRequest(Mage_Sales_Model_Order $order, $afterPayPaymentTypeCode)
+
+    /**
+     * @return Afterpay_Afterpay_Model_Api_Router
+     */
+    public function getApiRouter()
+    {   
+        return Mage::getModel('afterpay/api_routers_router');
+    }
+
+    public function buildOrderTokenRequest($object, $override = array(), $afterPayPaymentTypeCode = NULL)
     {
         // TODO: Add warning log in case if rounding changes amount, because it's potential problem
         $precision = 2;
@@ -26,61 +35,62 @@ class Afterpay_Afterpay_Model_Api_Adapter
             'paymentType' => $afterPayPaymentTypeCode
         );
 
-        $orderData = $order->getData();
+        $data = $object->getData();
 
-        $billingAddress  = $order->getBillingAddress();
-        $shippingAddress = $order->getShippingAddress();
+        $billingAddress  = $object->getBillingAddress();
+        $shippingAddress = $object->getShippingAddress();
 
         $params['consumer'] = array(
-            'email'      => (string)$order->getCustomerEmail(),
-            'givenNames' => (string)$order->getCustomerFirstname(),
-            'surname'    => (string)$order->getCustomerLastname(),
+            'email'      => (string)$object->getCustomerEmail(),
+            'givenNames' => (string)$object->getCustomerFirstname(),
+            'surname'    => (string)$object->getCustomerLastname(),
             'mobile'     => (string)$billingAddress->getTelephone()
         );
 
         $params['orderDetail'] = array(
-            'merchantOrderDate' => strtotime($order->getCreatedAt()) * 1000,
-            'merchantOrderId'   => $order->getIncrementId(),
+            'merchantOrderDate' => strtotime($object->getCreatedAt()) * 1000,
+            'merchantOrderId'   => array_key_exists('merchantOrderId', $override) ? $override['merchantOrderId'] : $object->getIncrementId(),
             'shippingPriority'  => 'STANDARD',
             'items'             => array()
         );
 
-        foreach ($order->getAllVisibleItems() as $orderItem) {
+        foreach ($object->getAllVisibleItems() as $item) {
             /** @var Mage_Sales_Model_Order_Item $orderItem */
             $params['orderDetail']['items'][] = array(
-                'name'     => (string)$orderItem->getName(),
-                'sku'      => $this->truncate_string( (string)$orderItem->getSku(), Afterpay_Afterpay_Model_Method_Base::TRUNCATE_SKU_LENGTH ),
-                'quantity' => (int)$orderItem->getQtyOrdered(),
+                'name'     => (string)$item->getName(),
+                'sku'      => $this->truncate_string( (string)$item->getSku() ),
+                'quantity' => (int)$item->getQty(),
                 'price'    => array(
-                    'amount'   => round((float)$orderItem->getPriceInclTax(), $precision),
-                    'currency' => (string)$orderData['order_currency_code']
+                    'amount'   => round((float)$item->getPriceInclTax(), $precision),
+                    'currency' => (string)$data['store_currency_code']
                 )
             );
         }
 
-        if ($order->getShippingInclTax()) {
+        if ($object->getShippingInclTax()) {
             $params['orderDetail']['shippingCost'] = array(
-                'amount'   => round((float)$order->getShippingInclTax(), $precision), // with tax
-                'currency' => (string)$orderData['order_currency_code']
+                'amount'   => round((float)$object->getShippingInclTax(), $precision), // with tax
+                'currency' => (string)$data['store_currency_code']
             );
         }
 
-        if ($orderData['discount_amount']) {
+        if (isset($data['discount_amount'])) {
             $params['orderDetail']['discountType'] = 'Discount';
             $params['orderDetail']['discount']     = array(
-                'amount'   => round((float)$orderData['discount_amount'], $precision),
-                'currency' => (string)$orderData['order_currency_code']
+                'amount'   => round((float)$data['discount_amount'], $precision),
+                'currency' => (string)$data['store_currency_code']
             );
         }
 
+        $taxAmount = array_key_exists('tax_amount',$data) ? $data['tax_amount'] : $shippingAddress->getTaxAmount();
         $params['orderDetail']['includedTaxes'] = array(
-            'amount'   => round((float)$orderData['tax_amount'], $precision),
-            'currency' => (string)$orderData['order_currency_code']
+            'amount'   => isset($taxAmount) ? round((float)$taxAmount, $precision) : 0,
+            'currency' => (string)$data['store_currency_code']
         );
 
         $params['orderDetail']['subTotal'] = array(
-            'amount'   => round((float)$orderData['subtotal'], $precision),
-            'currency' => (string)$orderData['order_currency_code'],
+            'amount'   => round((float)$data['subtotal'], $precision),
+            'currency' => (string)$data['store_currency_code'],
         );
 
         $params['orderDetail']['shippingAddress'] = array(
@@ -100,12 +110,13 @@ class Afterpay_Afterpay_Model_Api_Adapter
         );
 
         $params['orderDetail']['orderAmount'] = array(
-            'amount'   => round((float)$order->getGrandTotal(), $precision),
-            'currency' => (string)$order->getOrderCurrencyCode(),
+            'amount'   => round((float)$object->getGrandTotal(), $precision),
+            'currency' => (string)$data['store_currency_code'],
         );
 
         return $params;
     }
+
 
     /**
      * @param string $trackingNumber
@@ -119,20 +130,6 @@ class Afterpay_Afterpay_Model_Api_Adapter
             'trackingNumber' => is_null($trackingNumber) ? null : (string)$trackingNumber,
             'courier'        => is_null($courier) ? null : (string)$courier
         );
-    }
-
-    /**
-     * Get the URL for valid payment types
-     *
-     * @param string $method Which payment method to get the URL for
-     * @return string
-     */
-    public function getPaymentUrl($method)
-    {
-        $apiMode      = Mage::getStoreConfig('payment/' . $method . '/' . Afterpay_Afterpay_Model_Method_Base::API_MODE_CONFIG_FIELD);
-        $settings     = Afterpay_Afterpay_Model_System_Config_Source_ApiMode::getEnvironmentSettings($apiMode);
-
-        return $settings[Afterpay_Afterpay_Model_System_Config_Source_ApiMode::KEY_API_URL] . 'merchants/valid-payment-types';
     }
 
     /**
@@ -173,6 +170,28 @@ class Afterpay_Afterpay_Model_Api_Adapter
 
         return false;
     }
+
+    /**
+     * Get the URL for Refunds API Ver 0
+     *
+     * @param float $amount
+     * @param object $payment
+     *
+     * @param string $method Which payment method to get the URL for
+     * @return array
+     */
+    public function buildRefundRequest($amount, $payment)
+    {
+        $params['amount'] = array(
+                                'amount'    => abs($amount) * -1, // Afterpay API requires a negative amount
+                                'currency'  => $payment->getOrder()->getGlobalCurrencyCode(),
+                            );
+
+        $params['merchantRefundId'] = NULL;
+
+        return $params;
+    }
+
 
     /**
      * Since 0.12.7

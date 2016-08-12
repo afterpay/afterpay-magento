@@ -68,11 +68,11 @@ and (max-width : 480px) {
 
 #payment_form_afterpaypayovertime .instalments .header-text {
     font-family: Arial, sans-serif;
-    /*font-weight: 600;*/
-    /*font-size: 9px;*/
-    color: #379dd6;
+    font-weight: 600;
+    font-size: 9px;
+    color: #A1A4A6;
     margin: 10px 0;
-    /*text-transform: uppercase;*/
+    text-transform: uppercase;
     line-height: 20px;
 }
 
@@ -145,7 +145,7 @@ and (max-width : 480px) {
     }
 
     .checkout-onepage-index #payment_form_afterpaypayovertime .instalments .header-text {
-        font-size: 14px;
+        font-size: 12px;
     }
 
     .checkout-onepage-index #payment_form_afterpaypayovertime .instalments .cost {

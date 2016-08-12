@@ -109,6 +109,8 @@
         </reference>
     </checkout_onepage_index>
 
+    <!-- Layout update for supported and tested checkout-->
+    <!-- Aheadworks OneStepCheckout-->
     <aw_onestepcheckout_index_index>
         <reference name="head">
             <action method="addJs"><name>Afterpay/checkout/aw_onestepcheckout.js</name></action>
@@ -120,6 +122,7 @@
         </reference>
     </aw_onestepcheckout_index_index>
 
+    <!-- Iwd One Page Checkout -->
     <opc_index_index>
         <reference name="head">
             <action method="addJs"><script>Afterpay/checkout/payovertime.js</script></action>
@@ -130,6 +133,7 @@
         </reference>
     </opc_index_index>
 
+    <!-- GoMage LightCheckout -->
     <gomage_checkout_onepage_index>
         <reference name="head">
             <action method="addJs"><script>Afterpay/checkout/payovertime.js</script></action>
@@ -140,6 +144,7 @@
         </reference>
     </gomage_checkout_onepage_index>
 
+    <!-- FireCheckout OnePageCheckout -->
     <firecheckout_index_index>
         <reference name="head">
             <action method="addJs"><script>Afterpay/checkout/payovertime.js</script></action>
@@ -150,10 +155,54 @@
         </reference>
     </firecheckout_index_index>
 
+    <!-- Awesome Checkout by Anatta Design -->
+    <anattadesign_awesomecheckout_onepage_index>
+        <reference name="head">
+            <block type="afterpay/require" name="afterpay.default.require" template="afterpay/checkout/require.phtml" />
+            <block type="afterpay/config" name="afterpay.default.config" template="afterpay/checkout/config.phtml" />
+        </reference>
+        <reference name="after_body_start">
+            <block type="afterpay/redirect" name="afterpay.checkout.gomage.info" after="-" template="afterpay/checkout/awesomecheckout.phtml" />
+        </reference>
+    </anattadesign_awesomecheckout_onepage_index>
+
+    <!-- One Step Checkout by FME -->
+    <checkout_onestep_index>
+        <reference name="head">
+            <action method="addJs"><script>Afterpay/checkout/payovertime.js</script></action>
+            <block type="afterpay/config" name="afterpay.quickcheckout.config" template="afterpay/checkout/config.phtml" />
+        </reference>
+        <reference name="after_body_start">
+            <block type="afterpay/redirect" name="afterpay.checkout.quickcheckout.info" after="-" template="afterpay/checkout/quickcheckout.phtml" />
+        </reference>
+    </checkout_onestep_index>
+
+    <!-- All One Step Checkout extension -->
     <onestepcheckout_index_index>
         <reference name="head">
             <action method="addJs"><script>Afterpay/checkout/payovertime.js</script></action>
             <block type="afterpay/config" name="afterpay.osc.config" template="afterpay/checkout/config.phtml" />
         </reference>
     </onestepcheckout_index_index>
+
+    <!-- Idev OneStepCheckout -->
+    <onestepcheckout_index_index_MODULE_Idev_OneStepCheckout>
+        <reference name="before_body_end">
+            <block type="afterpay/redirect" name="afterpay.checkout.idev.info" after="-" template="afterpay/checkout/onestep.phtml"/>
+        </reference>
+    </onestepcheckout_index_index_MODULE_Idev_OneStepCheckout>
+
+    <!-- OneStepCheckout by Iksanika -->
+    <onestepcheckout_index_index_MODULE_Iksanika_OneStepCheckout>
+        <reference name="before_body_end">
+            <block type="afterpay/redirect" name="afterpay.checkout.iksanika.info" after="-" template="afterpay/checkout/onestep.phtml"/>
+        </reference>
+    </onestepcheckout_index_index_MODULE_Iksanika_OneStepCheckout>
+
+    <!-- MageStore OneStepCheckout -->
+    <onestepcheckout_index_index_MODULE_Magestore_Onestepcheckout>
+        <reference name="before_body_end">
+            <block type="afterpay/redirect" name="afterpay.checkout.magestore.info" after="-" template="afterpay/checkout/magestore_onestep.phtml"/>
+        </reference>
+    </onestepcheckout_index_index_MODULE_Magestore_Onestepcheckout>
 </layout>

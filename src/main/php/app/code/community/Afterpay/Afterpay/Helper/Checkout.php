@@ -1,4 +1,9 @@
 <?php
+/**
+ * @package   Afterpay_Afterpay
+ * @author    Afterpay <steven.gunarso@touchcorp.com>
+ * @copyright Copyright (c) 2016 Afterpay (http://www.afterpay.com.au/)
+ */
 
 /**
  * Class Afterpay_Afterpay_Helper_Checkout

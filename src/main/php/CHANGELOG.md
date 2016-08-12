@@ -1,6 +1,13 @@
 # Afterpay magento extension changelog
 Copyright (c) 2016 AfterPay (http://afterpay.com.au/)
 
+### 0.13.0 - 2016-08-12
+ - Major changes to support API V1
+ - Added ability to select API V0 or V1
+ - Major code changes to accommodate API V1
+ - Major code refactoring to streamline the coding
+ - Plugin will only create orders after Payment Approval in V1 
+
 ### 0.12.8 - 2016-05-26
  - SKU truncation
 

@@ -1,0 +1,15 @@
+<?php
+/**
+ * Some Checkout extension has whitelisted when adding script by using AddJs or AddItem
+ * i.e AnattaDesign_AwesomeCheckout
+ *
+ * Use this instead of using magento adding JS when it doesn't work
+ */
+?>
+<?php foreach ($this->getRequireJs() as $js) :?>
+    <script src="<?php echo $js ?>"></script>
+<?php endforeach; ?>
+
+<?php foreach ($this->getRequireStyle() as $css) :?>
+    <link rel="stylesheet" type="text/css" href="<?php echo $css ?>" media="all" />
+<?php endforeach; ?>
