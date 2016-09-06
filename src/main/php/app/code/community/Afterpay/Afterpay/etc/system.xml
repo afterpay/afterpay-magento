@@ -57,7 +57,7 @@
                             <label>Payment Action</label>
                             <frontend_type>select</frontend_type>
                             <source_model>afterpay/system_config_source_paymentaction</source_model>
-                            <comment>Using &lt;strong&gt;Authorize and Capture&lt;&#47;strong&gt; will reduce the number of pending order created in the store. Please see list of &lt;a target&#61;"_blank" href&#61;""&gt;supported checkout&lt;&#47;&gt;</comment>
+                            <comment>Using &lt;strong&gt;Authorize and Capture&lt;&#47;strong&gt; will reduce the number of pending order created in the store. </comment>
                             <sort_order>43</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>

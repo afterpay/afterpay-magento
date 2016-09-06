@@ -7,6 +7,10 @@ Copyright (c) 2016 AfterPay (http://afterpay.com.au/)
  - Major code changes to accommodate API V1
  - Major code refactoring to streamline the coding
  - Plugin will only create orders after Payment Approval in V1 
+ 
+### 0.12.9 - 2016-05-26
+ - Admin Afterpay Transaction Update processing
+ - Cancellation Warning on uncancellable (hence stuck) transactions
 
 ### 0.12.8 - 2016-05-26
  - SKU truncation

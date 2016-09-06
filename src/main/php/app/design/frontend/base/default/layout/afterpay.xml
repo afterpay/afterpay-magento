@@ -102,6 +102,12 @@
     <checkout_onepage_index>
         <reference name="content">
             <block type="afterpay/redirect" name="afterpay.checkout.default.info" after="checkout.onepage" template="afterpay/checkout/default.phtml" />
+	    
+	    <!-- MW OneStep Checkout Handlers -->
+	    <action method="unsetChild" ifconfig="onestepcheckout/config/enabled">
+	       <child>afterpay.checkout.default.info</child>
+	    </action>
+            <block type="afterpay/redirect" name="afterpay.checkout.default.info" ifconfig="onestepcheckout/config/enabled" after="checkout.onepage" template="afterpay/checkout/mw_onestepcheckout.phtml" />
         </reference>
         <reference name="head">
             <action method="addJs"><script>Afterpay/checkout/payovertime.js</script></action>
@@ -183,26 +189,12 @@
             <action method="addJs"><script>Afterpay/checkout/payovertime.js</script></action>
             <block type="afterpay/config" name="afterpay.osc.config" template="afterpay/checkout/config.phtml" />
         </reference>
+	
+	<!-- Magestore_Onestepcheckout -->
+	<!-- Idev_Onestepcheckout -->
+	<!-- Iksanika_Onestepcheckout -->
+        <reference name="before_body_end">
+            <block type="afterpay/redirect" name="afterpay.checkout.magestore.info" after="-" template="afterpay/checkout/onestep.phtml"/>
+        </reference>
     </onestepcheckout_index_index>
-
-    <!-- Idev OneStepCheckout -->
-    <onestepcheckout_index_index_MODULE_Idev_OneStepCheckout>
-        <reference name="before_body_end">
-            <block type="afterpay/redirect" name="afterpay.checkout.idev.info" after="-" template="afterpay/checkout/onestep.phtml"/>
-        </reference>
-    </onestepcheckout_index_index_MODULE_Idev_OneStepCheckout>
-
-    <!-- OneStepCheckout by Iksanika -->
-    <onestepcheckout_index_index_MODULE_Iksanika_OneStepCheckout>
-        <reference name="before_body_end">
-            <block type="afterpay/redirect" name="afterpay.checkout.iksanika.info" after="-" template="afterpay/checkout/onestep.phtml"/>
-        </reference>
-    </onestepcheckout_index_index_MODULE_Iksanika_OneStepCheckout>
-
-    <!-- MageStore OneStepCheckout -->
-    <onestepcheckout_index_index_MODULE_Magestore_Onestepcheckout>
-        <reference name="before_body_end">
-            <block type="afterpay/redirect" name="afterpay.checkout.magestore.info" after="-" template="afterpay/checkout/magestore_onestep.phtml"/>
-        </reference>
-    </onestepcheckout_index_index_MODULE_Magestore_Onestepcheckout>
 </layout>

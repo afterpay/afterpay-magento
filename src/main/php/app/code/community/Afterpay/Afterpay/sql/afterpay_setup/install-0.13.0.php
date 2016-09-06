@@ -23,4 +23,5 @@ catch( Exception $e ) {
 
 }
 $installer->endSetup();
+
 ?>

@@ -95,7 +95,7 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
 
             // Check total amount
             $amount = round((float)$data->totalAmount->amount, 2); // convert to original value
-            if ($quote->getGrandTotal() != $amount) {
+            if (ceil($quote->getGrandTotal()) != ceil($amount)) {
                 Mage::throwException(
                     Mage::helper('afterpay')->__('Afterpay gateway has rejected request. Invalid amount.')
                 );
