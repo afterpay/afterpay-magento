@@ -2,4 +2,12 @@
 <script>
     var afterpayReturnUrl = <?php echo Mage::helper('core')->jsonEncode($this->getReturnUrl()) ?>;
 </script>
-<script src="<?php echo $this->getJsUrl('Afterpay/checkout/onepage.js') ?> "></script>
+
+<?php
+$mw_onestepcheckout = Mage::helper('core')->isModuleEnabled("MW_Onestepcheckout");
+?>
+<?php if( $mw_onestepcheckout ): ?>
+	<script src="<?php echo $this->getJsUrl('Afterpay/checkout/mw_onestepcheckout.js') ?> "></script>
+<?php else: ?>
+	<script src="<?php echo $this->getJsUrl('Afterpay/checkout/onepage.js') ?> "></script>
+<?php endif; ?>
