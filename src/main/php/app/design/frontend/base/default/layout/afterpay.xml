@@ -100,7 +100,7 @@
     </checkout_cart_index>
 
     <checkout_onepage_index>
-        <reference name="content">
+        <reference name="before_body_end">
             <!-- Default Checkout & MW OneStep Checkout Handlers -->
             <block type="afterpay/redirect" name="afterpay.checkout.default.info" after="checkout.onepage" template="afterpay/checkout/default.phtml" />
 	    </reference>

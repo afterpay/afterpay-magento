@@ -84,6 +84,9 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
     }
 
     public function directCapture( $orderToken, $merchantOrderId ) {
+
+        //need to do a check for stock levels here
+
         $postData = $this->getApiAdapter()->buildDirectCaptureRequest($orderToken,$merchantOrderId);
 
         $gatewayUrl = $this->getApiAdapter()->getApiRouter()->getDirectCaptureApiUrl();
