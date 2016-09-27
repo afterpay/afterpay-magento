@@ -13,7 +13,8 @@
      *
      * - Check if using Afterpay and use new flow, do Ajax and pop up or redirect
      */
-    form.submit = function() {
+    //form.submit = function() {
+    jQuery("#onestepcheckout-place-order").on("click", function() {
         if (payment.currentMethod == 'afterpaypayovertime' && window.Afterpay.paymentAction == 'authorize_capture') {
             // prepare params
             var params = this.serialize(true);
@@ -81,5 +82,6 @@
         } else {
             original.apply(this, arguments);
         }
-    };
+    });
+    //};
 })();

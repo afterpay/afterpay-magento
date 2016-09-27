@@ -237,4 +237,11 @@ and (max-width : 480px) {
 
 .method-afterpay_onetouch .button {
     margin-top: 10px;
+    padding: 7px 30px 7px 30px;
+}
+
+.method-afterpay_onetouch .button img {
+    display:block;
+    width: 90px;
+    height: 18px;
 }

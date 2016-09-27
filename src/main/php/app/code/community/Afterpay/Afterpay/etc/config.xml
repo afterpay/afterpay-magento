@@ -272,7 +272,7 @@
                 <!-- Payment status checking interval for processing orders (1h by default) -->
                 <check_preapproved_orders_interval>3600</check_preapproved_orders_interval>
                 <!-- Non-paid Pending Payment orders are cancelled automatically 1 hour -->
-                <pending_payment_timeout>2700</pending_payment_timeout> <!-- 2700 seconds == 45 minutes -->
+                <pending_payment_timeout>4500</pending_payment_timeout> <!-- 4500 seconds == 75 minutes -->
                 <!-- Payment status checked during next N hours for Processing orders (24h by default) -->
                 <check_preapproved_orders_timeout>86400</check_preapproved_orders_timeout>
             </cron>

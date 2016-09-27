@@ -439,7 +439,9 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
 
             // order payment is pending review -> send email and just redirect to success
             if (!$order->getEmailSent() && $paymentMethod->getConfigData('order_email')) {
-                $order->sendNewOrderEmail()->setEmailSent(true);
+                $order->setEmailSent(true);
+                $order->save();
+                $order->sendNewOrderEmail();
             }
 
             $helper->log($logPrefix . 'Order is in Payment Review status. Redirecting customer to success page. OrderID=' . $order->getIncrementId(), Zend_Log::INFO);
@@ -451,7 +453,9 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
 
             // order payment has been approved -> send email and redirect to success
             if (!$order->getEmailSent() && $paymentMethod->getConfigData('order_email')) {
-                $order->sendNewOrderEmail()->setEmailSent(true);
+                $order->setEmailSent(true);
+                $order->save();
+                $order->sendNewOrderEmail();
             }
 
             $helper->log($logPrefix . 'Creating invoice...', Zend_Log::DEBUG);
