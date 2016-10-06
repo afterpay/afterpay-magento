@@ -116,12 +116,18 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
      */
     public function place(Mage_Sales_Model_Quote $quote)
     {
+    	
         // Converting quote to order
         $service = Mage::getModel('sales/service_quote', $quote);
 
         $service->submitAll();
         $quote->save();
         $order = $service->getOrder();
+	
+	//ensure that Grand Total is not doubled
+        $order->setBaseGrandTotal( $quote->getBaseGrandTotal() );
+        $order->setGrandTotal( $quote->getGrandTotal() );
+
 
         $session = $this->_getSession();
 
@@ -135,6 +141,10 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
                 }
                 $session->setLastRecurringProfileIds($ids);
             }
+
+            //ensure the order amount due is 0
+            $order->setTotalDue(0);
+
 
             // save an order
             $order->save();
