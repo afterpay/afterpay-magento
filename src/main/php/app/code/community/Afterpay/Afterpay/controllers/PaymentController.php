@@ -188,6 +188,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
             $placeOrder = Mage::getModel('afterpay/order')->place($this->_quote);
 
             if ($placeOrder) {
+
                 // Debug log
                 $this->helper()->log(
                     $this->__(
@@ -439,8 +440,6 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
 
             // order payment is pending review -> send email and just redirect to success
             if (!$order->getEmailSent() && $paymentMethod->getConfigData('order_email')) {
-                $order->setEmailSent(true);
-                $order->save();
                 $order->sendNewOrderEmail();
             }
 
@@ -453,8 +452,6 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
 
             // order payment has been approved -> send email and redirect to success
             if (!$order->getEmailSent() && $paymentMethod->getConfigData('order_email')) {
-                $order->setEmailSent(true);
-                $order->save();
                 $order->sendNewOrderEmail();
             }
 

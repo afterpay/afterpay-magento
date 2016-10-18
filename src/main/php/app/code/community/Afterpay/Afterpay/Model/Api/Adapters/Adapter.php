@@ -141,35 +141,35 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapter
      * @throws Mage_Core_Exception
      * @throws Zend_Http_Client_Exception
      */
-    public function getPaymentAmounts($method, $tla)
-    {
-        $helper = Mage::helper('afterpay');
-        $client = new Varien_Http_Client($this->getPaymentUrl($method));
-        $client->setAuth(
-            trim(Mage::getStoreConfig('payment/' . $method . '/' . Afterpay_Afterpay_Model_Method_Base::API_USERNAME_CONFIG_FIELD)),
-            trim(Mage::getStoreConfig('payment/' . $method . '/' . Afterpay_Afterpay_Model_Method_Base::API_PASSWORD_CONFIG_FIELD))
-        );
+    // public function getPaymentAmounts($method, $tla)
+    // {
+    //     $helper = Mage::helper('afterpay');
+    //     $client = new Varien_Http_Client($this->getPaymentUrl($method));
+    //     $client->setAuth(
+    //         trim(Mage::getStoreConfig('payment/' . $method . '/' . Afterpay_Afterpay_Model_Method_Base::API_USERNAME_CONFIG_FIELD)),
+    //         trim(Mage::getStoreConfig('payment/' . $method . '/' . Afterpay_Afterpay_Model_Method_Base::API_PASSWORD_CONFIG_FIELD))
+    //     );
 
-        $client->setConfig(array(
-            'useragent' => 'AfterpayMagentoPlugin/' . $helper->getModuleVersion() . ' (Magento ' . Mage::getEdition() . ' ' . Mage::getVersion() . ')'
-        ));
+    //     $client->setConfig(array(
+    //         'useragent' => 'AfterpayMagentoPlugin/' . $helper->getModuleVersion() . ' (Magento ' . Mage::getEdition() . ' ' . Mage::getVersion() . ')'
+    //     ));
 
-        $response = $client->request();
+    //     $response = $client->request();
 
-        if ($response->isError()) {
-            throw Mage::exception('Afterpay_Afterpay', 'Afterpay API error: ' . $response->getMessage());
-        }
+    //     if ($response->isError()) {
+    //         throw Mage::exception('Afterpay_Afterpay', 'Afterpay API error: ' . $response->getMessage());
+    //     }
 
-        $data = Mage::helper('core')->jsonDecode($response->getBody());
+    //     $data = Mage::helper('core')->jsonDecode($response->getBody());
 
-        foreach ($data as $info) {
-            if ($info['type'] == $tla) {
-                return $info;
-            }
-        }
+    //     foreach ($data as $info) {
+    //         if ($info['type'] == $tla) {
+    //             return $info;
+    //         }
+    //     }
 
-        return false;
-    }
+    //     return false;
+    // }
 
     /**
      * Get the URL for Refunds API Ver 0

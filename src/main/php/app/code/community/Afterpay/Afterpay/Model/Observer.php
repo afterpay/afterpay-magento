@@ -717,6 +717,10 @@ class Afterpay_Afterpay_Model_Observer
 
             $values = $base->getPaymentAmounts($payment, $tla);
 
+            if( !$values ) {
+                continue;
+            }
+
             $path = 'payment/' . $payment . '/';
 
             if (isset($values['minimumAmount'])) {

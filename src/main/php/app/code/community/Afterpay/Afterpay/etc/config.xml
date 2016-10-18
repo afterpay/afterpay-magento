@@ -400,7 +400,7 @@ with&nbsp;
                 <invoice_create>1</invoice_create>
                 <invoice_email>1</invoice_email>
                 <model>afterpay/method_payovertime</model>
-                <payment_action>order</payment_action>
+                <payment_action>authorize_capture</payment_action>
                 <api_mode>sandbox</api_mode>
                 <api_password backend_model="adminhtml/system_config_backend_encrypted"/>
                 <installments_amount>4</installments_amount>
