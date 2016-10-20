@@ -4,15 +4,13 @@
 <p> Magento can be installed in any folder on your server however for the purposes of this document, [MAGENTO] will refer to the root folder where you have installed your version of Magento. </p>
 
 <ol>
-<li> The Afterpay Magento plugin will be provided to you as a zip file file </li>
+<li> The Aftepay Magneto plugin will be provided to you as a zip file or tar file </li>
 <li> Unzip the file and follow the instructions to copy across the files Code Directory </li>
-<li> Copy all files in <em>/app/code/community/Afterpay</em> folder from the unzipped plugin into [MAGENTO] <em>/app/code/community/Afterpay Design Directory</em> </li>
-<li> Copy all files in <em>/design/frontend/base/default/layout</em> to [MAGENTO] <em>/design/frontend/base/default/layout</em> </li>
-<li> Copy all files in <em>/design/frontend/base/default/template</em> to [MAGENTO] <em>/design/frontend/base/default/template</em> </li>
-<li> Copy all files in <em>/design/adminhtml/default/default/template</em> to [MAGENTO] <em>/design/adminhtml/default/default/template</em> Directory </li>
-<li> Copy all files in <em>/app/etc</em> to [MAGENTO] <em>/app/etc</em> Directory </li>
-<li> Copy all files in <em>/js</em> folder into [MAGENTO] <em>/js</em> </li>
-<li> Copy all files in <em>/skin/frontend/base/default</em> folder into [MAGENTO] <em>/skin/frontend/base/default</em> </li>
+<li> Copy all files in /app/code/community/Afterpay folder from the unzipped plugin into [MAGENTO]/app/code/community/Afterpay Design Directory </li>
+<li> Copy all files in /design/frontend/base/default/layout to [MAGENTO]design/frontend/base/default/layout </li>
+<li> Copy all files in /design/frontend/base/default/template to [MAGENTO]design/frontend/base/default/template </li>
+<li> Copy all files in /design/adminhtml/default/template to [MAGENTO]design/frontend/base/default/template JS Directory </li>
+<li> Copy all files in /js folder into [MAGENTO]/js </li>
 <li> Login to Magento admin and go to System > Cache Management </li>
 <li> Flush the Magento cache by selecting “Flush Magento Cache” </li>
 <li> Check that the correct Afterpay version has been installed and then complete the Configuration steps outlined in this document </li>

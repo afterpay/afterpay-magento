@@ -1,8 +1,0 @@
-src/app/code/local/Afterpay/Afterpay/ app/code/local/Afterpay/Afterpay/
-CHANGELOG.md app/code/local/Afterpay/Afterpay/CHANGELOG.md
-src/app/design/adminhtml/default/default/template/afterpay app/design/adminhtml/default/default/template/afterpay
-src/app/design/frontend/base/default/layout/afterpay.xml app/design/frontend/base/default/layout/afterpay.xml
-src/app/design/frontend/base/default/template/afterpay/ app/design/frontend/base/default/template/afterpay/
-src/app/etc/modules/Afterpay_Afterpay.xml app/etc/modules/Afterpay_Afterpay.xml
-src/js/Afterpay/ js/Afterpay/
-src/skin/frontend/base/default/afterpay/ skin/frontend/base/default/afterpay/
