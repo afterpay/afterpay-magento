@@ -39,7 +39,7 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
             'email'         => (string)$object->getCustomerEmail(),
             'givenNames'    => (string)$object->getCustomerFirstname(),
             'surname'       => (string)$object->getCustomerLastname(),
-            'phoneNumber'   => (string)$billingAddress->getTelephone()
+            'phoneNumber'   => substr( (string)$billingAddress->getTelephone(), 0, 32 )
         );
 
         $params['items'] = array();
@@ -47,7 +47,7 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
         //not sure what should go to priority, I guess it will say something in the description if it is Express
         foreach ($shippingMethods as $method) {
             $params['courier'] = array(
-                'name'          => $method->getMethodTitle() . " " . $method->getCarrierTitle(),
+                'name'          => substr($method->getMethodTitle() . " " . $method->getCarrierTitle(), 0, 128),
                 'priority'      => "STANDARD",
             );
         }
@@ -76,7 +76,7 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
                 }
 
                 $params['discounts'][] =  array(
-                    'displayName'   =>  $discount_name . ' - ' . (string)$item->getName(),
+                    'displayName'   =>  substr( $discount_name . ' - ' . (string)$item->getName(), 0, 128 ),
                     'amount'        =>  array(
                                             'amount'   => round((float)$item->getDiscountAmount(), $precision),
                                             'currency' => (string)$data['store_currency_code'] 
