@@ -345,7 +345,8 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
         $quoteCheckoutMethod = $this->_getQuote()->getCheckoutMethod();
 
         if( $quoteCheckoutMethod == Mage_Checkout_Model_Type_Onepage::METHOD_GUEST ) {
-            $this->_getQuote()->setCustomerIsGuest(1);
+            $quote->setCustomerIsGuest(1);
+            $quote->save();
         }
 
         if (!$quote->hasItems() || $quote->getHasError()) {
