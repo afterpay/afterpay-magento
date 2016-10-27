@@ -333,12 +333,21 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
         return $this->_quote;
     }
 
+
     /**
      * Perform to get the quote
      */
     protected function _initCheckout()
     {
         $quote = $this->_getQuote();
+        
+        //set up the guest / registered flag
+        $quoteCheckoutMethod = $this->_getQuote()->getCheckoutMethod();
+
+        if( $quoteCheckoutMethod == Mage_Checkout_Model_Type_Onepage::METHOD_GUEST ) {
+            $this->_getQuote()->setCustomerIsGuest(1);
+        }
+
         if (!$quote->hasItems() || $quote->getHasError()) {
             $this->getResponse()->setHeader('HTTP/1.1','403 Forbidden');
             Mage::throwException(Mage::helper('paypal')->__('Unable to initialize Afterpay Payment method.'));
