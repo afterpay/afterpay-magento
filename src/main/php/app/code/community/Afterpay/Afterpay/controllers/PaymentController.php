@@ -184,6 +184,18 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
                 Zend_Log::NOTICE
             );
 
+
+            $checkout_method = $this->_quote->getCheckoutMethod();
+            if( $checkout_method == Mage_Checkout_Model_Type_Onepage::METHOD_REGISTER ) {
+                $this->_prepareNewAfterpayCustomerQuote();
+            }
+            else if( $checkout_method == Mage_Checkout_Model_Type_Onepage::METHOD_GUEST ) {
+                $this->_prepareAfterpayGuestQuote();
+            }
+            else {
+                $this->_prepareAfterpayCustomerQuote();
+            }
+
             // Placing order using Afterpay
             $placeOrder = Mage::getModel('afterpay/order')->place($this->_quote);
 
@@ -220,6 +232,127 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
             // Afterpay redirect
             $this->_checkAndRedirect();
         }
+    }
+
+
+    /**
+     * Handles quote for guest checkout
+     *
+     */
+    protected function _prepareAfterpayGuestQuote()
+    {
+        $quote = $this->_quote;
+        $quote->setCustomerId(null)
+            ->setCustomerEmail($quote->getBillingAddress()->getEmail())
+            ->setCustomerIsGuest(true)
+            ->setCustomerGroupId(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID);
+    }
+
+    /**
+     * Handles quote for registered customer
+     *
+     */
+    protected function _prepareAfterpayCustomerQuote()
+    {
+        $quote      = $this->_quote;
+        $billing    = $quote->getBillingAddress();
+        $shipping   = $quote->isVirtual() ? null : $quote->getShippingAddress();
+
+        $customer = $quote->getCustomer();
+        if (!$billing->getCustomerId() || $billing->getSaveInAddressBook()) {
+            $customerBilling = $billing->exportCustomerAddress();
+            $customer->addAddress($customerBilling);
+            $billing->setCustomerAddress($customerBilling);
+        }
+        if ($shipping && ((!$shipping->getCustomerId() && !$shipping->getSameAsBilling())
+            || (!$shipping->getSameAsBilling() && $shipping->getSaveInAddressBook()))) {
+            $customerShipping = $shipping->exportCustomerAddress();
+            $customer->addAddress($customerShipping);
+            $shipping->setCustomerAddress($customerShipping);
+        }
+
+        if (isset($customerBilling) && !$customer->getDefaultBilling()) {
+            $customerBilling->setIsDefaultBilling(true);
+        }
+        if ($shipping && isset($customerBilling) && !$customer->getDefaultShipping() && $shipping->getSameAsBilling()) {
+            $customerBilling->setIsDefaultShipping(true);
+        } elseif ($shipping && isset($customerShipping) && !$customer->getDefaultShipping()) {
+            $customerShipping->setIsDefaultShipping(true);
+        }
+        $quote->setCustomer($customer);
+    }
+
+    /**
+     *
+     * Handles customer quote creation for registering customers 
+     *
+     */
+    protected function _prepareNewAfterpayCustomerQuote()
+    {
+        $quote      = $this->_quote;
+        $billing    = $quote->getBillingAddress();
+        $shipping   = $quote->isVirtual() ? null : $quote->getShippingAddress();
+
+        $customerId = $this->_lookupCustomerId();
+        if ($customerId) {
+            $quote->loginById($customerId);
+            return $this->_prepareAfterpayCustomerQuote();
+        }
+
+        $customer = $quote->getCustomer();
+        /** @var $customer Mage_Customer_Model_Customer */
+        $customerBilling = $billing->exportCustomerAddress();
+        $customer->addAddress($customerBilling);
+        $billing->setCustomerAddress($customerBilling);
+        $customerBilling->setIsDefaultBilling(true);
+        if ($shipping && !$shipping->getSameAsBilling()) {
+            $customerShipping = $shipping->exportCustomerAddress();
+            $customer->addAddress($customerShipping);
+            $shipping->setCustomerAddress($customerShipping);
+            $customerShipping->setIsDefaultShipping(true);
+        } elseif ($shipping) {
+            $customerBilling->setIsDefaultShipping(true);
+        }
+        /**
+         * @todo integration with dynamica attributes customer_dob, customer_taxvat, customer_gender
+         */
+        if ($quote->getCustomerDob() && !$billing->getCustomerDob()) {
+            $billing->setCustomerDob($quote->getCustomerDob());
+        }
+
+        if ($quote->getCustomerTaxvat() && !$billing->getCustomerTaxvat()) {
+            $billing->setCustomerTaxvat($quote->getCustomerTaxvat());
+        }
+
+        if ($quote->getCustomerGender() && !$billing->getCustomerGender()) {
+            $billing->setCustomerGender($quote->getCustomerGender());
+        }
+
+        Mage::helper('core')->copyFieldset('checkout_onepage_billing', 'to_customer', $billing, $customer);
+        $customer->setEmail($quote->getCustomerEmail());
+        $customer->setPrefix($quote->getCustomerPrefix());
+        $customer->setFirstname($quote->getCustomerFirstname());
+        $customer->setMiddlename($quote->getCustomerMiddlename());
+        $customer->setLastname($quote->getCustomerLastname());
+        $customer->setSuffix($quote->getCustomerSuffix());
+        $customer->setPassword($customer->decryptPassword($quote->getPasswordHash()));
+        $customer->setPasswordHash($customer->hashPassword($customer->getPassword()));
+        $customer->save();
+        $quote->setCustomer($customer);
+
+    }
+
+    /**
+     * Fins the customer ID
+     *
+     * @return int
+     */
+    protected function _lookupCustomerId()
+    {
+        return Mage::getModel('customer/customer')
+            ->setWebsiteId(Mage::app()->getWebsite()->getId())
+            ->loadByEmail($this->_quote->getCustomerEmail())
+            ->getId();
     }
 
     /**
@@ -343,11 +476,6 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
         
         //set up the guest / registered flag
         $quoteCheckoutMethod = $this->_getQuote()->getCheckoutMethod();
-
-        if( $quoteCheckoutMethod == Mage_Checkout_Model_Type_Onepage::METHOD_GUEST ) {
-            $quote->setCustomerIsGuest(1);
-            $quote->save();
-        }
 
         if (!$quote->hasItems() || $quote->getHasError()) {
             $this->getResponse()->setHeader('HTTP/1.1','403 Forbidden');
