@@ -5,7 +5,12 @@
  * @copyright Copyright (c) 2016 Afterpay (http://www.afterpay.com.au)
  */
 $installer = $this;
-
+/**
+ * Deleting app/code/community/Afterpay/Afterpay/sql/afterpay_setup/install-0.13.0.php
+ * It has same code as this file
+ * but it causes other setup script files not to run (because its an install of current version)
+ *
+ */
 $installer->startSetup();
 
 /**
