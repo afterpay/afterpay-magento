@@ -189,7 +189,7 @@ class Afterpay_Afterpay_Model_Observer
             try {
                 try {
                     $payment = $order->getPayment();
-                    $token == $payment->getData('afterpay_token');
+                    $token = $payment->getData('afterpay_token');
 
                     if ( !empty($token) ) { // try to fetch afterpay_order_id if order token is present
 

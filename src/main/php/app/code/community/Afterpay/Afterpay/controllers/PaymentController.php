@@ -53,7 +53,8 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
             }
 
             // Redirect if guest is not allowed and use guest
-            $quoteCheckoutMethod = $this->_getQuote()->getCheckoutMethod();
+            // $quoteCheckoutMethod = $this->_getQuote()->getCheckoutMethod();
+            $quoteCheckoutMethod = $this->getCheckoutMethod(); //Paypal Express Style
             if ($quoteCheckoutMethod == Mage_Checkout_Model_Type_Onepage::METHOD_GUEST &&
                 !Mage::helper('checkout')->isAllowedGuestCheckout(
                     $this->_getQuote(),
@@ -233,6 +234,27 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
             $this->_checkAndRedirect();
         }
     }
+
+    /**
+     * Get checkout method
+     *
+     * @return string
+     */
+    public function getCheckoutMethod()
+    {
+        if (Mage::getSingleton('customer/session')->isLoggedIn()) {
+            return Mage_Checkout_Model_Type_Onepage::METHOD_CUSTOMER;
+        }
+        if (!$this->_quote->getCheckoutMethod()) {
+            if (Mage::helper('checkout')->isAllowedGuestCheckout($this->_quote)) {
+                $this->_quote->setCheckoutMethod(Mage_Checkout_Model_Type_Onepage::METHOD_GUEST);
+            } else {
+                $this->_quote->setCheckoutMethod(Mage_Checkout_Model_Type_Onepage::METHOD_REGISTER);
+            }
+        }
+        return $this->_quote->getCheckoutMethod();
+    }
+
 
 
     /**
@@ -475,7 +497,8 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
         $quote = $this->_getQuote();
         
         //set up the guest / registered flag
-        $quoteCheckoutMethod = $this->_getQuote()->getCheckoutMethod();
+        // $quoteCheckoutMethod = $this->_getQuote()->getCheckoutMethod();
+        $quoteCheckoutMethod = $this->getCheckoutMethod(); //Paypal Express style overrides
 
         if (!$quote->hasItems() || $quote->getHasError()) {
             $this->getResponse()->setHeader('HTTP/1.1','403 Forbidden');
