@@ -317,9 +317,11 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
         $billing    = $quote->getBillingAddress();
         $shipping   = $quote->isVirtual() ? null : $quote->getShippingAddress();
 
-        $customerId = $this->_lookupCustomerId();
-        if ($customerId) {
-            $quote->loginById($customerId);
+        $customer = $this->_lookupCustomer();
+        if ($customer) {
+            // $quote->loginById($customerId);
+
+            $session = Mage::getSingleton('customer/session')->setCustomerAsLoggedIn($customer);
             return $this->_prepareAfterpayCustomerQuote();
         }
 
@@ -379,12 +381,11 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
      *
      * @return int
      */
-    protected function _lookupCustomerId()
+    protected function _lookupCustomer()
     {
         return Mage::getModel('customer/customer')
             ->setWebsiteId(Mage::app()->getWebsite()->getId())
-            ->loadByEmail($this->_quote->getCustomerEmail())
-            ->getId();
+            ->loadByEmail($this->_quote->getCustomerEmail());
     }
 
     /**
