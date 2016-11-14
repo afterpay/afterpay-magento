@@ -17,71 +17,85 @@
     //jQuery("#onestepcheckout-place-order").on("click", function() {
         if (payment.currentMethod == 'afterpaypayovertime' && window.Afterpay.paymentAction == 'authorize_capture') {
             // prepare params
-            var params = this.serialize(true);
+            var params = form.serialize(true);
 
-            // Ajax to start order token
-            var request = new Ajax.Request(
-                window.Afterpay.saveUrl, // use Afterpay controller
-                {
-                    method: 'post',
-                    parameters: params,
-                    onSuccess: function (transport) {
-                        var response = {};
+            var customer_password = jQuery('#billing\\:customer_password').val();
 
-                        // Parse the response - lifted from original method
-                        try {
-                            response = eval('(' + transport.responseText + ')');
-                        }
-                        catch (e) {
-                            response = {};
-                        }
+            if( typeof customer_password !== 'undefined' && customer_password.length ) {
+                params.create_account = 1;
+            }
 
-                        // if the order has been successfully placed
-                        if (response.success) {
+            // Registration handling
+            doAfterpayAPICall(window.Afterpay.saveUrl, params);
+            return false;
 
-                            //modified to suit API V1
-                            if( window.afterpayReturnUrl === false ) {
-                                AfterPay.init(); 
-                            }
-                            else {
-                                AfterPay.init({
-                                    relativeCallbackURL: window.afterpayReturnUrl
-                                });
-                            }
-
-                            switch (window.Afterpay.redirectMode) {
-                                case 'lightbox':
-                                    AfterPay.display({
-                                        token: response.token
-                                    });
-
-                                    break;
-
-                                case 'redirect':
-                                    AfterPay.redirect({
-                                        token: response.token
-                                    });
-
-                                    break;
-                            }
-                        } else {
-                            if (response.redirect) {
-                                this.isSuccess = false;
-                                location.href = response.redirect;
-                            } else {
-                                alert(response.message);
-                            }
-                        }
-
-                    }.bind(this),
-                    onFailure: function () {
-                        alert('Afterpay Gateway is not available.');
-                    }
-                }
-            );
         } else {
             original.apply(this, arguments);
         }
     //}); For the jQuery version
     };
 })();
+
+
+function doAfterpayAPICall( saveURL, params ) {
+    // Ajax to start order token
+    var request = new Ajax.Request(
+        saveURL, // use Afterpay controller
+        {
+            method: 'post',
+            parameters: params,
+            onSuccess: function (transport) {
+                var response = {};
+
+                // Parse the response - lifted from original method
+                try {
+                    response = eval('(' + transport.responseText + ')');
+                }
+                catch (e) {
+                    response = {};
+                }
+
+                // if the order has been successfully placed
+                if (response.success) {
+
+                    //modified to suit API V1
+                    if( window.afterpayReturnUrl === false ) {
+                        AfterPay.init(); 
+                    }
+                    else {
+                        AfterPay.init({
+                            relativeCallbackURL: window.afterpayReturnUrl
+                        });
+                    }
+
+                    switch (window.Afterpay.redirectMode) {
+                        case 'lightbox':
+                            AfterPay.display({
+                                token: response.token
+                            });
+
+                            break;
+
+                        case 'redirect':
+                            AfterPay.redirect({
+                                token: response.token
+                            });
+
+                            break;
+                    }
+                } else {
+                    if (response.redirect) {
+                        this.isSuccess = false;
+                        location.href = response.redirect;
+                    } else {
+                        alert(response.message);
+                    }
+                }
+
+            }.bind(this),
+            onFailure: function () {
+                alert('Afterpay Gateway is not available.');
+            }
+        }
+    );
+}

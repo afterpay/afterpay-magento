@@ -1,6 +1,26 @@
 # Afterpay magento extension changelog
 Copyright (c) 2016 AfterPay (http://afterpay.com.au/)
 
+
+### 0.13.1 - 2016-11-14
+[1] Added support for user identification - Guest and Registering users.
+Plugin now populates the following flags:
+- sales_flat_quote.customer_is_guest
+- sales_flat_order.customer_is_guest
+- customer_entity.group_id (e.g. link Guest to NOT_LOGGED_IN)
+- sales_flat_quote.customer_group_id
+- sales_flat_order.customer_group_id
+ 
+[2] Added support for Registering users with OneStepCheckout shopping cart extension.
+https://www.onestepcheckout.com
+Enhancements to allow user creation in Magento for Registering users in transaction with OneStepCheckout.
+
+
+[3] Added support for Magento new batch confirmation email sending
+Prior to Magento version Community 1.9.1 and Enterprise 1.14.1, emails were triggered on transaction completion.
+From Magento version Community 1.9.1 and Enterprise 1.14.1 onwards, emails are batched. 
+This release includes support for this batched email sending.
+
 ### 0.13.0 - 2016-08-12
  - Major changes to support API V1
  - Added ability to select API V0 or V1

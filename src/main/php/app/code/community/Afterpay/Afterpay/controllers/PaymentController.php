@@ -52,6 +52,8 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
                 Mage::throwException(Mage::helper('afterpay')->__('Afterpay payment is not supported to this checkout'));
             }
 
+            $this->userProcessing($this->_getQuote(), $this->getRequest() );
+
             // Redirect if guest is not allowed and use guest
             // $quoteCheckoutMethod = $this->_getQuote()->getCheckoutMethod();
             $quoteCheckoutMethod = $this->getCheckoutMethod(); //Paypal Express Style
@@ -351,17 +353,25 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
         }
 
         Mage::helper('core')->copyFieldset('checkout_onepage_billing', 'to_customer', $billing, $customer);
-        $customer->setEmail($quote->getCustomerEmail());
+
+        $email = $quote->getCustomerEmail();
+        $password = $customer->decryptPassword($quote->getPasswordHash());
+
+        $customer->setEmail($email);
         $customer->setPrefix($quote->getCustomerPrefix());
         $customer->setFirstname($quote->getCustomerFirstname());
         $customer->setMiddlename($quote->getCustomerMiddlename());
         $customer->setLastname($quote->getCustomerLastname());
         $customer->setSuffix($quote->getCustomerSuffix());
-        $customer->setPassword($customer->decryptPassword($quote->getPasswordHash()));
+        $customer->setPassword($password);
         $customer->setPasswordHash($customer->hashPassword($customer->getPassword()));
         $customer->save();
-        $quote->setCustomer($customer);
 
+        //force login
+        $session = Mage::getSingleton('customer/session')->setCustomerAsLoggedIn($customer);
+        $session->login($email, $password);
+
+        $quote->setCustomer($customer);
     }
 
     /**
@@ -495,10 +505,6 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
     protected function _initCheckout()
     {
         $quote = $this->_getQuote();
-        
-        //set up the guest / registered flag
-        // $quoteCheckoutMethod = $this->_getQuote()->getCheckoutMethod();
-        $quoteCheckoutMethod = $this->getCheckoutMethod(); //Paypal Express style overrides
 
         if (!$quote->hasItems() || $quote->getHasError()) {
             $this->getResponse()->setHeader('HTTP/1.1','403 Forbidden');
@@ -863,5 +869,37 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
             $this->_checkAndRedirect();
         }
 
+    }
+
+    /**
+     * Handle AJAX calls for Customer's Checkout Method setup
+     * This is to handle OneStepCheckouts that only set the Checkout Methods upon Order Place
+     *
+     */
+    public function userProcessing($quote, $request)
+    {
+        $logged_in = Mage::getSingleton('customer/session')->isLoggedIn();
+
+        try {
+            $create_account = $request->getParams("create_account");
+
+            if( $create_account ) {
+                $quote->setCheckoutMethod(Mage_Checkout_Model_Type_Onepage::METHOD_REGISTER);
+            }
+            else if( !$create_account && !$logged_in ) {
+                $quote->setCheckoutMethod(Mage_Checkout_Model_Type_Onepage::METHOD_GUEST);
+            }
+            else {
+                $quote->setCheckoutMethod(Mage_Checkout_Model_Type_Onepage::METHOD_CUSTOMER);
+            }
+
+            $quote->save();
+
+            // Mage::getSingleton('checkout/session')->setQuote($quote);
+        }
+        catch (Exception $e) {
+            // Add error message
+            $this->getSession()->addError($e->getMessage());
+        }
     }
 }
