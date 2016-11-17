@@ -208,7 +208,7 @@ class Afterpay_Afterpay_Model_Observer
                             $pendingPaymentTimeout,
                             $order->getIncrementId(),
                             $token,
-                            $paymentInfo
+                            json_encode($paymentInfo)
                         ));
 
                         // create order transaction and save data to database

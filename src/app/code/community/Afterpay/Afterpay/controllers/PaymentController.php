@@ -394,6 +394,13 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
      */
     public function cancelAction()
     {
+        // If we are using API version 1, an order won't have been created so we shouldn't attempt
+        // to cancel anything.
+        if ( Mage::getModel('afterpay/method_payovertime')->isAPIVersion1() ) {
+            $this->_redirect('checkout/cart');
+            return;
+        }
+
         $order = $this->getLastRealOrder();
 
         if ($order && $order->getId()) {
