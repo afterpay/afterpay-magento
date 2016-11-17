@@ -2,24 +2,35 @@
 Copyright (c) 2016 AfterPay (http://afterpay.com.au/)
 
 
-### 0.13.1 - 2016-11-14
+### 0.13.1 - 2016-11-17
 [1] Added support for user identification - Guest and Registering users.
 Plugin now populates the following flags:
-- sales_flat_quote.customer_is_guest
-- sales_flat_order.customer_is_guest
-- customer_entity.group_id (e.g. link Guest to NOT_LOGGED_IN)
-- sales_flat_quote.customer_group_id
-- sales_flat_order.customer_group_id
+·         sales_flat_quote.customer_is_guest
+·         sales_flat_order.customer_is_guest
+·         customer_entity.group_id (e.g. link Guest to NOT_LOGGED_IN)
+·         sales_flat_quote.customer_group_id
+·         sales_flat_order.customer_group_id
+
+
+[2] Additional handling has been added so that the Afterpay plugin explicitly sets the ‘customer_is_guest’ flag (to 0 or 1) for all quote-to-order conversion scenarios.  
+This is an overriding measure should the flag be set to an incorrect state by another actor.
+
+
+[3] Revised error message handling for the scenario when a user attempts to register with Afterpay using an email address that already exists on Magento. 
+Magento message now displayed in this scenario:
+“There was an error processing your order. There is already a customer registered using this email address. Please login using this email address or enter a different email address to register your account."
  
-[2] Added support for Registering users with OneStepCheckout shopping cart extension.
+ 
+[4] Added support for Registering users with OneStepCheckout shopping cart extension.
 https://www.onestepcheckout.com
 Enhancements to allow user creation in Magento for Registering users in transaction with OneStepCheckout.
 
 
-[3] Added support for Magento new batch confirmation email sending
+[5] Added support for Magento new batch confirmation email sending
 Prior to Magento version Community 1.9.1 and Enterprise 1.14.1, emails were triggered on transaction completion.
 From Magento version Community 1.9.1 and Enterprise 1.14.1 onwards, emails are batched. 
 This release includes support for this batched email sending.
+
 
 ### 0.13.0 - 2016-08-12
  - Major changes to support API V1

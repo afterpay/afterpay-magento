@@ -303,7 +303,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
         } elseif ($shipping && isset($customerShipping) && !$customer->getDefaultShipping()) {
             $customerShipping->setIsDefaultShipping(true);
         }
-        $quote->setCustomer($customer);
+        $quote->setCustomer($customer)->setCustomerIsGuest(false);
     }
 
     /**
@@ -318,7 +318,8 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
         $shipping   = $quote->isVirtual() ? null : $quote->getShippingAddress();
 
         $customer = $this->_lookupCustomer();
-        if ($customer) {
+
+        if ($customer->getData()) {
             // $quote->loginById($customerId);
 
             $session = Mage::getSingleton('customer/session')->setCustomerAsLoggedIn($customer);
@@ -373,7 +374,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
         $session = Mage::getSingleton('customer/session')->setCustomerAsLoggedIn($customer);
         $session->login($email, $password);
 
-        $quote->setCustomer($customer);
+        $quote->setCustomer($customer)->setCustomerIsGuest(false);
     }
 
     /**
@@ -882,7 +883,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
         $logged_in = Mage::getSingleton('customer/session')->isLoggedIn();
 
         try {
-            $create_account = $request->getParams("create_account");
+            $create_account = $request->getParam("create_account");
 
             if( $create_account ) {
                 $quote->setCheckoutMethod(Mage_Checkout_Model_Type_Onepage::METHOD_REGISTER);
