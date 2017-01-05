@@ -887,6 +887,9 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
      */
     public function userProcessing($quote, $request)
     {
+        if(!is_null($this->getCheckoutMethod())) {
+            return;
+        }
         $logged_in = Mage::getSingleton('customer/session')->isLoggedIn();
 
         try {
