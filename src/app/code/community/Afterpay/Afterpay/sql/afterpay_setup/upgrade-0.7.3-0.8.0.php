@@ -7,7 +7,6 @@
 
 /* @var $installer Mage_Sales_Model_Resource_Setup */
 
-try{
 	$installer = $this;
 
 	$installer->startSetup();
@@ -21,8 +20,4 @@ try{
 	      PRIMARY KEY  (`shipped_api_queue_id`)
 	    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 	");
-}
-catch( Exception $e ) {
-
-}
 $installer->endSetup();

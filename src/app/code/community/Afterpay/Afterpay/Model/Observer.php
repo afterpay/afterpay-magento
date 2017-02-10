@@ -2,8 +2,8 @@
 
 /**
  * @package   Afterpay_Afterpay
- * @author    VEN Development Team <info@ven.com>
- * @copyright Copyright (c) 2014 VEN Commerce Ltd (http://www.ven.com)
+ * @author    Afterpay <steven.gunarso@touchcorp.com>
+ * @copyright Copyright (c) 2016 Afterpay (http://www.afterpay.com.au/)
  */
 class Afterpay_Afterpay_Model_Observer
 {
@@ -775,7 +775,7 @@ class Afterpay_Afterpay_Model_Observer
      */
     public function addTokenToOrderResponse($observer)
     {
-	$order = Mage::getModel('sales/order')->loadByIncrementId(Mage::getSingleton('checkout/session')->getLastRealOrderId());
+	    $order = Mage::getModel('sales/order')->loadByIncrementId(Mage::getSingleton('checkout/session')->getLastRealOrderId());
         if ($order instanceof Mage_Sales_Model_Order) {
             $payment = $order->getPayment();
             if ($payment instanceof Mage_Payment_Model_Info && $payment->getMethodInstance() instanceof Afterpay_Afterpay_Model_Method_Base) {

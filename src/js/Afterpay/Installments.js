@@ -15,7 +15,7 @@
  *
  * @see app/design/frontend/base/default/template/afterpay/catalog/installments.phtml
  */
-;(function (Prototype, Element, Product, console) {
+(function (Prototype, Element, Product, console) {
 
     // window.console fallback
     if (!console) {
@@ -79,6 +79,7 @@
                 if (price
                     && (!this.config.minPriceLimit || price >= this.config.minPriceLimit)
                     && (!this.config.maxPriceLimit || price <= this.config.maxPriceLimit)
+                    && (this.config.afterpayEnabled)
                 ) {
 
                     var oldElement = priceBoxes[i].nextSibling;

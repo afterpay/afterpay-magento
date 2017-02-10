@@ -27,12 +27,12 @@ class Afterpay_Afterpay_Adminhtml_AfterpayController extends Mage_Adminhtml_Cont
     }
 
     public function fetchPendingPaymentOrdersInfoAction() {
-	try {
-        	$model = new Afterpay_Afterpay_Model_Observer();
+    	try {
+            $model = new Afterpay_Afterpay_Model_Observer();
         	$model->fetchPendingPaymentOrdersInfo(NULL);
-	} catch (Exception $e) {
+    	} catch (Exception $e) {
             $this->_getSession()->addError($e->getMessage());
         }
-       	$this->_redirectReferer();
+        $this->_redirectReferer();
     }
 }

@@ -2,9 +2,8 @@
 
 /**
  * @package   Afterpay_Afterpay
- * @author    VEN Development Team <info@ven.com>
- * @copyright Copyright (c) 2014 Alinga Web Media Design (http://www.alinga.com.au/)
- * @copyright Copyright (c) 2014 VEN Commerce Ltd (http://www.ven.com)
+ * @author    Afterpay <steven.gunarso@touchcorp.com>
+ * @copyright Copyright (c) 2016 Afterpay (http://www.afterpay.com.au/)
  */
 class Afterpay_Afterpay_Block_Form_Payovertime extends Afterpay_Afterpay_Block_Form_Abstract
 {

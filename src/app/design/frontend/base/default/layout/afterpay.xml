@@ -99,6 +99,7 @@
         </reference>
     </checkout_cart_index>
 
+    <!-- Default Checkout & MW OneStep Checkout Handlers -->
     <checkout_onepage_index>
         <reference name="before_body_end">
             <!-- Default Checkout & MW OneStep Checkout Handlers -->
@@ -114,7 +115,6 @@
     <!-- Aheadworks OneStepCheckout-->
     <aw_onestepcheckout_index_index>
         <reference name="head">
-            <action method="addJs"><name>Afterpay/checkout/aw_onestepcheckout.js</name></action>
             <action method="addJs"><script>Afterpay/checkout/payovertime.js</script></action>
             <block type="afterpay/config" name="afterpay.aw.config" template="afterpay/checkout/config.phtml" />
         </reference>

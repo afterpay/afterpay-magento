@@ -245,3 +245,7 @@ and (max-width : 480px) {
     width: 90px;
     height: 18px;
 }
+
+#payment_form_afterpaypayovertime li { 
+    float:none 
+}

@@ -381,6 +381,7 @@
                             <label>Payment Display</label>
                             <frontend_type>select</frontend_type>
                             <source_model>afterpay/system_config_source_redirectMode</source_model>
+                            <comment>When an unsupported checkout is being used only &lt;strong&gt;Redirect&lt;&#47;strong&gt; Mode would be usable. </comment>
                             <sort_order>50</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>

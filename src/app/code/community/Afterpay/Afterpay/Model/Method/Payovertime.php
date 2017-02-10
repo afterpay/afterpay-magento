@@ -63,17 +63,25 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
      */
     function capture(Varien_Object $payment, $amount)
     {
-        // Make sure the payment have afterpay order id against it
-        // if ($payment->getAfterpayOrderId()) {
+
             $session = Mage::getSingleton('checkout/session');
             $quote = $session->getQuote();
-
-            // Connect to API to check if the order exist
-            // $data = $this->retrievePaymentInfoByTxnId($payment->getAfterpayOrderId(), 'GetAfterpayPayment');
-
+            //$payment = $session->getQuote()->getPayment();
+         
             $orderToken = $payment->getAfterpayToken();
             $reserved_order_id = $quote->getReservedOrderId();
-            $data = Mage::getModel('afterpay/order')->directCapture( $orderToken, $reserved_order_id );
+
+            try {
+                $data = Mage::getModel('afterpay/order')->directCapture( $orderToken, $reserved_order_id, $quote );
+            }
+            catch( Exception $e ) {
+                $this->resetTransactionToken($quote);
+                $this->resetPayment($payment);
+              
+                Mage::throwException(
+                    Mage::helper('afterpay')->__( $e->getMessage() )
+                );
+            }
 
             $afterpayOrderId = $data->id;
 
@@ -88,6 +96,8 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
              */
             // Check the order token being use
             if ($payment->getAfterpayToken() != $data->token) {
+
+                $this->resetTransactionToken($quote);
                 Mage::throwException(
                     Mage::helper('afterpay')->__('Afterpay gateway has rejected request. Invalid token.')
                 );
@@ -103,6 +113,9 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
 
             // Check order id
             if ($quote->getReservedOrderId() != $data->merchantReference) {
+
+                $this->resetTransactionToken($quote);
+
                 Mage::throwException(
                     Mage::helper('afterpay')->__('Afterpay gateway has rejected request. Detected fraud.')
                 );
@@ -110,9 +123,12 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
 
             switch($data->status) {
                 case Afterpay_Afterpay_Model_Method_Base::RESPONSE_STATUS_APPROVED:
-                    $payment->setTransactionId($payment->getAfterpayOrderId());
+                    $payment->setTransactionId($payment->getAfterpayOrderId())->save();
                     break;
                 case Afterpay_Afterpay_Model_Method_Base::RESPONSE_STATUS_DECLINED:
+
+                    $this->resetTransactionToken($quote);
+
                     Mage::throwException(
                         Mage::helper('afterpay')->__('Afterpay payment has been declined. Please use other payment method.')
                     );
@@ -122,6 +138,9 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
                         ->setIsTransactionPending(true);
                     break;
                 default:
+
+                    $this->resetTransactionToken($quote);
+
                     Mage::throwException(
                         Mage::helper('afterpay')->__('Cannot find Afterpay payment. Please contact administrator.')
                     );
@@ -129,13 +148,6 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
             }
 
             return $this;
-        // } 
-        // else {
-        //     Mage::throwException(
-        //         Mage::helper('afterpay')->__('No Afterpay payment is associated into this order.')
-        //     );
-        // }
-
     }
 
     /**
@@ -146,5 +158,31 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
     public function getPaymentReviewStatus()
     {
         return $this->getConfigData('payment_review_status');
+    }
+
+
+    /**
+     * Resetting the token the session
+     *
+     * @return bool
+     */
+    public function resetTransactionToken($quote) {
+
+        Mage::getSingleton("checkout/session")->getQuote()->getPayment()->setAfterpayToken(NULL)->save();
+
+        return true;
+    }
+
+
+    /**
+     * Resetting the payment in the capture step
+     *
+     * @return bool
+     */
+    public function resetPayment($payment) {
+
+        $payment->setAfterpayToken(NULL)->save();
+
+        return true;
     }
 }

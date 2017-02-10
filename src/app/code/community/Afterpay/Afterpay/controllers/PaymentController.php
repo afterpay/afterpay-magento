@@ -22,6 +22,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
     const RETURN_STATUS_FAILURE   = "FAILURE";
 
     protected $_quote;
+    protected $_checkout_triggered;
 
     /**
      * Construct function
@@ -30,6 +31,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
     {
         parent::_construct();
         $this->_config = 'redirect';
+        $this->_checkout_triggered = false;
     }
 
     /**
@@ -37,6 +39,8 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
      */
     public function startAction()
     {
+        $this->_checkout_triggered = true;
+
         try {
             // Check with security updated on form key
             if (!$this->_validateFormKey()) {
@@ -48,19 +52,19 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
             $this->_initCheckout();
 
             // check if using multi shipping, not supported
-            if ($this->_getQuote()->getIsMultiShipping()) {
+            if ($this->_quote->getIsMultiShipping()) {
                 Mage::throwException(Mage::helper('afterpay')->__('Afterpay payment is not supported to this checkout'));
             }
 
-            $this->userProcessing($this->_getQuote(), $this->getRequest() );
+            $this->userProcessing($this->_quote, $this->getRequest() );
 
             // Redirect if guest is not allowed and use guest
-            // $quoteCheckoutMethod = $this->_getQuote()->getCheckoutMethod();
+            // $quoteCheckoutMethod = $this->_quote->getCheckoutMethod();
             $quoteCheckoutMethod = $this->getCheckoutMethod(); //Paypal Express Style
             if ($quoteCheckoutMethod == Mage_Checkout_Model_Type_Onepage::METHOD_GUEST &&
                 !Mage::helper('checkout')->isAllowedGuestCheckout(
-                    $this->_getQuote(),
-                    $this->_getQuote()->getStoreId()
+                    $this->_quote,
+                    $this->_quote->getStoreId()
                 )) {
                 Mage::getSingleton('core/session')->addNotice(
                     Mage::helper('afterpay')->__('To proceed to Checkout, please log in using your email address.')
@@ -70,6 +74,11 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
 
             // Perform starting the afterpay transaction
             $token = Mage::getModel('afterpay/order')->start($this->_quote);
+
+            // Utilise Magento Session to preserve Store Credit details
+    	    if( Mage::getEdition() == Mage::EDITION_ENTERPRISE ) {
+    	    	$this->helper()->storeCreditSessionSet($this->_quote);
+    	    }
 
             $response = array(
                 'success' => true,
@@ -203,6 +212,12 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
             $placeOrder = Mage::getModel('afterpay/order')->place($this->_quote);
 
             if ($placeOrder) {
+	    
+        	    //process the Store Credit on Orders
+                if( Mage::getEdition() == Mage::EDITION_ENTERPRISE ) {
+            		$this->helper()->storeCreditPlaceOrder();
+            	}
+
 
                 // Debug log
                 $this->helper()->log(
@@ -231,6 +246,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
                 Zend_Log::ERR
             );
             $this->getSession()->addError($e->getMessage());
+            $this->_quote->getPayment()->setAfterpayToken(NULL)->save();
 
             // Afterpay redirect
             $this->_checkAndRedirect();
@@ -394,9 +410,14 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
      */
     public function cancelAction()
     {
-        // If we are using API version 1, an order won't have been created so we shouldn't attempt
-        // to cancel anything.
+        // If we are using API version 1, an order won't have been created so we shouldn't attempt to cancel anything
+        // Unless it is Enterprise Edition, we need to make sure the Store Credit Session is unset
         if ( Mage::getModel('afterpay/method_payovertime')->isAPIVersion1() ) {
+
+            if( Mage::getEdition() == Mage::EDITION_ENTERPRISE ) {
+    	    	$this->helper()->storeCreditSessionUnset();
+    	    }
+	
             $this->_redirect('checkout/cart');
             return;
         }
@@ -506,7 +527,6 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
         }
         return $this->_quote;
     }
-
 
     /**
      * Perform to get the quote
@@ -814,6 +834,13 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
             // Magento finalise the current cart session
             $this->_initCheckout();
             $this->_quote->collectTotals();
+	    
+    	    if( Mage::getEdition() == Mage::EDITION_ENTERPRISE ) {
+    	    	$this->_quote = $this->helper()->storeCreditCapture($this->_quote); 
+		$this->helper()->log($this->__('Store Credit being used: ' . Mage::getSingleton('checkout/session')->getData('afterpayCustomerBalance') ));
+		$this->_quote->save();
+    	    }
+	    
 
             // Check status
             switch ($status) {
@@ -824,10 +851,13 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
                     $payment = $this->_quote->getPayment();
 
                     // validate = Check if order token return on the url same as order token has been use on session
-                    if ($this->_quote->getPayment()->getAfterpayToken() != $orderToken) {
+                    if ($this->_quote->getPayment()->getAfterpayToken() != $orderToken && $this->_checkout_triggered) {
                         $this->throwException(sprintf(
-                            'Order token doesn\'t match database data: orderId=%s receivedToken=%s savedToken=%s',
+                            'Warning: Order token doesn\'t match database data: orderId=%s receivedToken=%s savedToken=%s',
                             $this->_quote->getReservedOrderId(), $orderToken, $payment->getOrderToken()));
+                    }
+                    else if( !$this->_checkout_triggered ) {
+                        $this->_quote->getPayment()->setAfterpayToken($orderToken);
                     }
 
                     // Debug log
@@ -884,13 +914,19 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
      * Handle AJAX calls for Customer's Checkout Method setup
      * This is to handle OneStepCheckouts that only set the Checkout Methods upon Order Place
      *
+     * @param Mage_Sales_Model_Quote $quote
+     * @param Mage_Core_Controller_Request $request
      */
     public function userProcessing($quote, $request)
     {
         $logged_in = Mage::getSingleton('customer/session')->isLoggedIn();
+        $create_account = $request->getParam("create_account");
+	
+	if( !is_null($this->getCheckoutMethod()) && ( empty($create_account) ) ) {
+            return;
+        }
 
         try {
-            $create_account = $request->getParam("create_account");
 
             if( $create_account ) {
                 $quote->setCheckoutMethod(Mage_Checkout_Model_Type_Onepage::METHOD_REGISTER);
@@ -903,12 +939,46 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
             }
 
             $quote->save();
-
-            // Mage::getSingleton('checkout/session')->setQuote($quote);
+	      
         }
         catch (Exception $e) {
             // Add error message
             $this->getSession()->addError($e->getMessage());
+        }
+    }
+
+
+    /**
+     *
+     * The fallback functionality which creates a page that handle the creation of new token
+     * Then, force a redirect to Afterpay gateway to continue processing the order as normal
+     *
+     */
+    public function redirectFallbackAction() {
+
+        $this->_initCheckout();
+
+        $token = Mage::getModel('afterpay/order')->start($this->_quote);
+
+        $payment = $this->_quote->getPayment();
+        $payment->setData('afterpay_token', $token);
+        $payment->save();
+
+        $this->_quote->setPayment($payment);
+        $this->_quote->save();
+
+        // Mage::getSingleton("checkout/session")->setQuote($quote);
+        $target_url = Mage::getModel('afterpay/order')->getApiAdapter()->getApiRouter()->getGatewayApiUrl($token);
+
+        if ($this->getRequest()->isXmlHttpRequest()) {
+            $result['redirect'] = $target_url;
+            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($result));
+        }
+        else {
+                    
+            $this->getResponse()->setRedirect($target_url);
+            $this->getResponse()->sendResponse();
+            exit;
         }
     }
 }

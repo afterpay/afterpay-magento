@@ -14,7 +14,12 @@
 abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Method_Abstract
 {
     /* Configuration fields */
+    const API_ENABLED_FIELD = 'active';
+
     const API_MODE_CONFIG_FIELD = 'api_mode';
+
+    const API_MIN_ORDER_TOTAL_FIELD = 'min_order_total';
+    const API_MAX_ORDER_TOTAL_FIELD = 'max_order_total';
 
     const API_URL_CONFIG_PATH_PATTERN = 'afterpay/api/{prefix}_api_url';
     const WEB_URL_CONFIG_PATH_PATTERN = 'afterpay/api/{prefix}_web_url';
@@ -108,7 +113,7 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
     /**
      * @return Afterpay_Afterpay_Model_Api_Adapter
      */
-    protected function getApiAdapter()
+    public function getApiAdapter()
     {   
         if ( $this->isAPIVersion1() ) {
             return Mage::getModel('afterpay/api_adapters_adapterv1');
@@ -508,8 +513,8 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
      */
     protected function getAuthorizationHeader()
     {
-        $merchantId     = trim($this->getConfigData(self::API_USERNAME_CONFIG_FIELD));
-        $merchantSecret = trim($this->getConfigData(self::API_PASSWORD_CONFIG_FIELD));
+        $merchantId     = trim($this->_cleanup_string($this->getConfigData(self::API_USERNAME_CONFIG_FIELD)));
+        $merchantSecret = trim($this->_cleanup_string($this->getConfigData(self::API_PASSWORD_CONFIG_FIELD)));
 
         return 'Authorization: Basic ' . base64_encode($merchantId . ':' . $merchantSecret);
     }
@@ -723,8 +728,8 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
         $coreHelper = Mage::helper('core');
 
         $client->setAuth(
-            trim($this->getConfigData(self::API_USERNAME_CONFIG_FIELD)),
-            trim($this->getConfigData(self::API_PASSWORD_CONFIG_FIELD))
+            trim($this->_cleanup_string($this->getConfigData(self::API_USERNAME_CONFIG_FIELD))),
+            trim($this->_cleanup_string($this->getConfigData(self::API_PASSWORD_CONFIG_FIELD)))
         );
 
         $client->setConfig(array(
@@ -771,8 +776,8 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
         $helper = Mage::helper('afterpay');
         $client = new Varien_Http_Client($this->getApiAdapter()->getApiRouter()->getPaymentUrl($method));
         $client->setAuth(
-            trim(Mage::getStoreConfig('payment/' . $method . '/' . Afterpay_Afterpay_Model_Method_Base::API_USERNAME_CONFIG_FIELD)),
-            trim(Mage::getStoreConfig('payment/' . $method . '/' . Afterpay_Afterpay_Model_Method_Base::API_PASSWORD_CONFIG_FIELD))
+            trim($this->_cleanup_string(Mage::getStoreConfig('payment/' . $method . '/' . Afterpay_Afterpay_Model_Method_Base::API_USERNAME_CONFIG_FIELD))),
+            trim($this->_cleanup_string(Mage::getStoreConfig('payment/' . $method . '/' . Afterpay_Afterpay_Model_Method_Base::API_PASSWORD_CONFIG_FIELD)))
         );
 
         $client->setConfig(array(
@@ -784,7 +789,6 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
         if ($response->isError()) {
             throw Mage::exception('Afterpay_Afterpay', 'Afterpay API error: ' . $response->getMessage());
         }
-
         $data = Mage::helper('core')->jsonDecode($response->getBody());
 
         foreach ($data as $info) {
@@ -794,5 +798,18 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
         }
 
         return false;
+    }
+
+
+
+    /**
+     * Filters the String for screcret keys
+     *
+     * @return string Authorization code 
+     * @since 1.0.0
+     */
+    private function _cleanup_string($string) {
+        $result = preg_replace("/[^a-zA-Z0-9]+/", "", $string);
+        return $result;
     }
 }

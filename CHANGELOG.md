@@ -1,6 +1,50 @@
 # Afterpay magento extension changelog
 Copyright (c) 2016 AfterPay (http://afterpay.com.au/)
 
+Release version: 2.0.0
+Release date: 10.02.2017
+ 
+Platform: Magento 1
+Supported Editions and Versions:
+- Magento Community  Edition (CE)              version 1.7 and later
+- Magento Enterprise Edition (EE)              version 1.13 and later
+ 
+Highlights
+- Version 2.0.0 of the Afterpay-Magento1 plugin delivers:
+- Enhanced checkout extension support and front-end improvements for Magento 1 Community Edition and Enterprise Edition
+- Support for native store credit functionality for Magento 1 Enterprise Edition
+ 
+Community & Enterprise Edition enhancements
+ 
+Checkout support
+- A default handling has been introduced to accommodate checkout extensions that sit outside of the supported list.
+- The handling also reduces instances of JS conflict between Afterpay plugin and site-specific customization.
+- The current supported checkout list includes the below, and remains unchanged from previous release:
+		- Magento Native Checkout
+		- OneStepCheckout by OneStepCheckout
+		- One Step Checkout by Magestore
+		- One Step Checkout by Aheadworks
+		- LightCheckout by GoMage
+		- FireCheckout by Template Masters
+ 
+Product-level Configuration enhancements
+- Merchant’s Afterpay transaction limits are now applied at the Product-level as well as at the Checkout-level.
+- Magento Admin Afterpay plugin Enabled / Disabled dropdown now removes Product-level assets when set to ‘Disabled’.
+ 
+Miscellaneous
+- Plugin version number convention now aligns for Composer support.
+- Validation of merchant credentials (Merchant ID and Merchant Key) extended to exclude non-alphanumeric characters.
+- Installation process improvement to allow Magento to handle install error.
+ 
+Enterprise Edition only enhancements
+ 
+Magento Store credit support
+- Afterpay plugin now supports transactions that utilise Magento’s native store credit functionality.
+- Plugin supports detection and deduction Magento store credit when used in conjunction with the Afterpay payment method.
+- A transaction decline or cancellation during the Afterpay payment process will not result in a store credit deduction.
+- Optional refund support for return of store credit from Magento Admin.
+
+
 
 ### 0.13.1 - 2016-11-17
 [1] Added support for user identification - Guest and Registering users.

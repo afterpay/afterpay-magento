@@ -126,4 +126,25 @@ class Afterpay_Afterpay_Model_Api_Routers_Routerv1
 
         return $settings[Afterpay_Afterpay_Model_System_Config_Source_ApiMode::KEY_API_URL] . 'v1/payments/capture/';  
     }
+
+
+    /**
+     * Function for gateway URL doing Get Payment Update Version 1
+     *
+     * @return string|null
+     */
+    public function getGatewayApiUrl( $token = NULL )
+    {
+        $apiMode      = Mage::getStoreConfig('payment/afterpaypayovertime/' . Afterpay_Afterpay_Model_Method_Base::API_MODE_CONFIG_FIELD);
+        $settings     = Afterpay_Afterpay_Model_System_Config_Source_ApiMode::getEnvironmentSettings($apiMode);
+
+        //make sure we are using the same version of API for consistency purpose
+        $gatewayUrl = $settings[Afterpay_Afterpay_Model_System_Config_Source_ApiMode::KEY_WEB_URL] . 'checkout';
+        
+        if( !empty($token) ) {
+            $url = (substr($gatewayUrl, -1) == '/' ? $gatewayUrl : $gatewayUrl . '/') . '?token=' . urlencode($token) . '&redirected=1&relativeCallbackUrl='; 
+        }   
+        
+        return $url;
+    }
 }

@@ -55,6 +55,16 @@ class Afterpay_Afterpay_Block_Catalog_Installments extends Mage_Core_Block_Templ
         }
     }
 
+    public function getStoreConfigEnabled()
+    {
+        if (Mage::getStoreConfig('payment/afterpaypayovertime/' . Afterpay_Afterpay_Model_Method_Base::API_ENABLED_FIELD)) {
+            // plugin enabled / disabled
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
     public function getInstallmentsAmount()
     {
         return (int)Mage::getStoreConfig('payment/afterpaypayovertime/installments_amount');
@@ -69,6 +79,7 @@ class Afterpay_Afterpay_Block_Catalog_Installments extends Mage_Core_Block_Templ
             'minPriceLimit'      => $this->getMinPriceLimit(),
             'maxPriceLimit'      => $this->getMaxPriceLimit(),
             'installmentsAmount' => $this->getInstallmentsAmount(),
+            'afterpayEnabled'    => $this->getStoreConfigEnabled(),
             'priceFormat'        => Mage::app()->getLocale()->getJsPriceFormat(),
             'className'          => 'afterpay-installments-amount'
         );

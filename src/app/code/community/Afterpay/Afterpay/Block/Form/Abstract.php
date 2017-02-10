@@ -1,16 +1,15 @@
 <?php
 
 /**
- * Abstract class for all payment form blocks.
- *
+ * 
  * @package   Afterpay_Afterpay
- * @author    VEN Development Team <info@ven.com>
- * @copyright Copyright (c) 2014 VEN Commerce Ltd (http://www.ven.com)
+ * @author    Afterpay <steven.gunarso@touchcorp.com>
+ * @copyright Copyright (c) 2016 Afterpay (http://www.afterpay.com.au/)
  */
 
 /**
  * Class Afterpay_Afterpay_Block_Form_Abstract
- *
+ * Abstract class for all payment form blocks.
  * @method void setRedirectMessage(string $message);
  */
 abstract class Afterpay_Afterpay_Block_Form_Abstract extends Mage_Payment_Block_Form

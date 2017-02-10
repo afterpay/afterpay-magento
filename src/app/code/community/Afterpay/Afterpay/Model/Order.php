@@ -81,11 +81,26 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
 
             return $orderToken;
         }
+    
     }
 
-    public function directCapture( $orderToken, $merchantOrderId ) {
+    /**
+     * Start creating order for Afterpay
+     *
+     * @param string                    $token
+     * @param string                    $merchantOrderId
+     * @param Mage_Sales_Model_Quote    $quote
+     *
+     * @return mixed
+     * @throws Afterpay_Afterpay_Exception
+     */
+    public function directCapture( $orderToken, $merchantOrderId, $quote ) {
 
         //need to do a check for stock levels here
+        if( empty($orderToken) ) {
+            // Perform the fallback in case of Unsupported checkout
+            $this->fallbackMechanism('token_missing');
+        }
 
         $postData = $this->getApiAdapter()->buildDirectCaptureRequest($orderToken,$merchantOrderId);
 
@@ -97,6 +112,10 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
 
         // Check if token is NOT in response
         if( !empty($resultObject->errorCode) || !empty($resultObject->errorId) ) {
+
+            // Perform the fallback in case of Unsupported checkut
+            $this->fallbackMechanism($resultObject->errorCode);
+
             throw Mage::exception('Afterpay_Afterpay', $resultObject->message);
         }
         else if ( empty($resultObject->id) && empty($resultObject->id) ) {
@@ -104,6 +123,47 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
         } 
         else {
             return $resultObject;
+        }
+    }
+
+    /**
+     * Fallback Mechanism hwen Capture is failing
+     *
+     * @param string    $error_code
+     *
+     * @return void
+     * @throws Afterpay_Afterpay_Exception
+     */
+    private function fallbackMechanism($error_code) {
+
+        // Perform the fallback in case of Unsupported checkut
+        try {
+
+            //Unsupported checkout with unattached payovertime.js
+            //Or checkout with payovertime.js attached, but no checkout specific JS codes
+            $error_array = array(
+                'invalid_object'
+                , 'invalid_order_transaction_status'
+                , 'token_missing'
+                , 'invalid_token'
+            );
+
+            if( in_array($error_code, $error_array) ) {
+
+                Mage::helper('afterpay')->log(
+                    sprintf('Unsupported Checkout detected, starting fallback mechanism: ' . $error_code ),
+                    Zend_Log::NOTICE
+                );
+
+                $fallback_url = "/afterpay/payment/redirectFallback";
+                        
+                Mage::app()->getResponse()->setRedirect($fallback_url);
+                Mage::app()->getResponse()->sendResponse();
+                exit;
+            }
+        }
+        catch( Exception $e ) {
+            throw Mage::exception('Afterpay_Afterpay', $e->getMessage());
         }
     }
 
@@ -147,9 +207,16 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
 
             $payment        = $order->getPayment();
             $paymentMethod  = $payment->getMethodInstance();
-	    
+
+            //set the Afterpay Order ID to be sure
+            // $payment->setData('afterpay_order_id', $quote->getAfterpayOrderId());
+            // $payment->setAfterpayOrderId($quote->getAfterpayOrderId());
+	        // $payment->save();
+
             // save an order
+            $order->setAfterpayOrderId($quote->getAfterpayOrderId());
             $order->save();
+
                         
             if (!$order->getEmailSent() && $paymentMethod->getConfigData('order_email')) {
                 $order->sendNewOrderEmail();
@@ -203,7 +270,7 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
             }
 
             if (array_key_exists('error', $result) && $result['error'] == 1) {
-                Mage::throwException(Mage::helper('afterpay')->__('%s is not valid.', ucwords($type)));
+                Mage::throwException(Mage::helper('afterpay')->__('%s', $result['message']));
             }
         }
     }

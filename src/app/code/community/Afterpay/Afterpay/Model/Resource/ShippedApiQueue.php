@@ -1,8 +1,8 @@
 <?php
 /**
  * @package   Afterpay_Afterpay
- * @author    VEN Development Team <info@ven.com>
- * @copyright Copyright (c) 2015 VEN Commerce Ltd (http://www.ven.com)
+ * @author    Afterpay <steven.gunarso@touchcorp.com>
+ * @copyright Copyright (c) 2016 Afterpay (http://www.afterpay.com.au/)
  */
 
 class Afterpay_Afterpay_Model_Resource_ShippedApiQueue extends Mage_Core_Model_Resource_Db_Abstract
