@@ -4,8 +4,8 @@
  * Default Afterpay helper class
  *
  * @package   Afterpay_Afterpay
- * @author    VEN Development Team <info@ven.com>
- * @copyright Copyright (c) 2014 VEN Commerce Ltd (http://www.ven.com)
+ * @author    Afterpay <steven.gunarso@touchcorp.com>
+ * @copyright Copyright (c) 2017 Afterpay (http://www.afterpay.com.au/)
  */
 class Afterpay_Afterpay_Helper_Data extends Mage_Core_Helper_Abstract
 {
@@ -109,11 +109,111 @@ class Afterpay_Afterpay_Helper_Data extends Mage_Core_Helper_Abstract
     {
         return (string) Mage::getConfig()->getModuleConfig('Afterpay_Afterpay')->version;
     }
-
+    
+    /**
+     * Calculate The Instalments
+     *
+     * @return string
+     */
     public function calculateInstalment()
     {
         $total = Mage::getSingleton('checkout/session')->getQuote()->getGrandTotal();
         $installment = ceil($total / 4 * 100) / 100;
         return Mage::app()->getStore()->formatPrice($installment, false);
+    }
+
+    
+    /**
+     * Calculate The Total Amount
+     *
+     * @return string
+     */
+    public function calculateTotal()
+    {
+        $total = Mage::getSingleton('checkout/session')->getQuote()->getGrandTotal();
+        return $total;
+    }
+    
+    
+    //Enterprise Edition Only 
+    
+    /**
+     * Store Credit Manipulations
+     *
+     * @return bool
+     */
+    public function storeCreditPlaceOrder()
+    {
+        //process the Credit Memo on Orders
+        if( Mage::getSingleton('checkout/session')->getData('afterpayCustomerBalance') ) {
+            $orderId = Mage::getSingleton('checkout/session')->getLastRealOrderId();
+            $order = Mage::getSingleton('sales/order')->loadByIncrementId($orderId);
+
+            $order->setCustomerBalanceAmount( Mage::getSingleton('checkout/session')->getData('afterpayCustomerBalance') );
+            $order->setCustomerBalanceInvoiced( Mage::getSingleton('checkout/session')->getData('afterpayCustomerBalance') );
+   	    
+	    $order->setTotalPaid($order->getGrandTotal());  
+	    
+            $order->save();
+                    
+            Mage::getSingleton('checkout/session')->unsetData('afterpayCustomerBalance');
+        }
+
+        // probably we are using the default checkout
+        return true;
+    }
+
+    /**
+     * Store Credit Session Set
+     *
+     * @return void
+     */
+    public function storeCreditSessionSet($quote) {
+        // Utilise Magento Session to preserve Store Credit details
+        if( $quote->getCustomerBalanceAmountUsed() ) {
+            Mage::getSingleton('checkout/session')->setData('afterpayCustomerBalance', $quote->getCustomerBalanceAmountUsed());
+        }
+	   
+    }
+    
+    /**
+     * Store Credit Session Unset
+     *
+     * @return void
+     */
+    public function storeCreditSessionUnset() {
+        if( Mage::getSingleton('checkout/session')->getData('afterpayCustomerBalance') ) {
+            Mage::getSingleton('checkout/session')->unsetData('afterpayCustomerBalance');
+        }
+    }
+
+
+    
+    /**
+     * Store Credit Session Handler for Capture Payment Phase
+     *
+     * @return void
+     */
+    public function storeCreditCapture($quote) {
+        if( Mage::getSingleton('checkout/session')->getData('afterpayCustomerBalance') ) {
+            
+	    $grand_total = $quote->getGrandTotal();
+	    $balance = Mage::getSingleton('checkout/session')->getData('afterpayCustomerBalance');
+	    
+	    $quote->setUseCustomerBalance(1);
+            
+	    $quote->setCustomerBalanceAmountUsed( $balance );
+            //$quote->setBaseCustomerBalanceAmountUsed( $balance );
+            
+	    if( $grand_total > $balance ) {
+	    	$quote->setGrandTotal( $grand_total - $balance );
+	    }
+	    
+	    //$this->getSession()->unsetData('afterpayCustomerBalance');
+
+            return $quote;
+        }
+
+        return $quote;
     }
 }
