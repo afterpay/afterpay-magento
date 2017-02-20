@@ -87,7 +87,7 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
     /**
      * Start creating order for Afterpay
      *
-     * @param string                    $token
+     * @param string                    $orderToken
      * @param string                    $merchantOrderId
      * @param Mage_Sales_Model_Quote    $quote
      *
@@ -124,6 +124,25 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
         else {
             return $resultObject;
         }
+    }
+
+    /**
+     * Check Afterpay order details using the token
+     *
+     * @param string                    $orderToken
+     * @param Mage_Sales_Model_Quote    $quote
+     *
+     * @return mixed
+     * @throws Afterpay_Afterpay_Exception
+     */
+    public function getOrderByToken( $orderToken ) {
+        $gatewayUrl = $this->getApiAdapter()->getApiRouter()->getOrdersApiUrl( $orderToken, 'token' );
+
+        // Request order token to API
+        $result = $this->_sendRequest($gatewayUrl, false, Varien_Http_Client::GET, 'Get order by token ' . $orderToken);
+        $resultObject = json_decode($result->getBody());
+
+        return $resultObject;
     }
 
     /**

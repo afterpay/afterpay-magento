@@ -140,6 +140,9 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
             'redirectCancelUrl'     => $this->getApiRouter()->getCancelOrderUrl(),
         );
 
+        if( !empty($object) && $object->getReservedOrderId() ) {
+            $params['merchantReference'] = (string)$object->getReservedOrderId();
+        }
 
         return $params;
     }

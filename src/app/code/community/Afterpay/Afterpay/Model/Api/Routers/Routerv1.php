@@ -68,6 +68,9 @@ class Afterpay_Afterpay_Model_Api_Routers_Routerv1
         else if( !empty($type) && $type == 'courier') {
             $url = (substr($gatewayUrl, -1) == '/' ? $gatewayUrl : $gatewayUrl . '/') . $search_target . "/courier/";
         }   
+        else if( !empty($type) && $type == 'token' ) {
+            $url = $settings[Afterpay_Afterpay_Model_System_Config_Source_ApiMode::KEY_API_URL] . 'v1/orders/' . $search_target; 
+        }  
         else {
             $url = $settings[Afterpay_Afterpay_Model_System_Config_Source_ApiMode::KEY_API_URL] . 'v1/orders/'; 
         }    

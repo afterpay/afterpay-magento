@@ -71,6 +71,40 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
             $orderToken = $payment->getAfterpayToken();
             $reserved_order_id = $quote->getReservedOrderId();
 
+            // Check total amount
+            if ( !empty($orderToken) && $this->getConfigPaymentAction() == self::ACTION_AUTHORIZE_CAPTURE ) {
+
+                $data = Mage::getModel('afterpay/order')->getOrderByToken( $orderToken );
+
+                /**
+                 * Validation to check between session and post request
+                 */
+                if( !$data ) {
+
+                    // Check the order token being use
+                    $this->resetTransactionToken($quote);
+                    Mage::throwException(
+                        Mage::helper('afterpay')->__('Afterpay gateway has rejected request. Invalid token.')
+                    );
+                }
+                else if( $reserved_order_id != $data->merchantReference ) {
+                    
+                    // Check order id
+                    $this->resetTransactionToken($quote);
+                    Mage::throwException(
+                        Mage::helper('afterpay')->__('Afterpay gateway has rejected request. Incorrect merchant reference.')
+                    );
+                }
+                else if( $quote->getGrandTotal() != $data->totalAmount->amount ) {
+
+                    // Check the order amount
+                    $this->resetTransactionToken($quote);
+                    Mage::throwException(
+                        Mage::helper('afterpay')->__('Afterpay gateway has rejected request. Invalid amount.')
+                    );
+                }
+            }
+
             try {
                 $data = Mage::getModel('afterpay/order')->directCapture( $orderToken, $reserved_order_id, $quote );
             }
@@ -91,35 +125,6 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
                 $quote->setAfterpayOrderId($afterpayOrderId)->save();
             }
 
-            /**
-             * Validation to check between session and post request
-             */
-            // Check the order token being use
-            if ($payment->getAfterpayToken() != $data->token) {
-
-                $this->resetTransactionToken($quote);
-                Mage::throwException(
-                    Mage::helper('afterpay')->__('Afterpay gateway has rejected request. Invalid token.')
-                );
-            }
-
-            // Check total amount
-            // $amount = round((float)$data->totalAmount->amount, 2); // convert to original value
-            // if (ceil($quote->getGrandTotal()) != ceil($amount)) {
-            //     Mage::throwException(
-            //         Mage::helper('afterpay')->__('Afterpay gateway has rejected request. Invalid amount.')
-            //     );
-            // }
-
-            // Check order id
-            if ($quote->getReservedOrderId() != $data->merchantReference) {
-
-                $this->resetTransactionToken($quote);
-
-                Mage::throwException(
-                    Mage::helper('afterpay')->__('Afterpay gateway has rejected request. Detected fraud.')
-                );
-            }
 
             switch($data->status) {
                 case Afterpay_Afterpay_Model_Method_Base::RESPONSE_STATUS_APPROVED:
@@ -128,7 +133,6 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
                 case Afterpay_Afterpay_Model_Method_Base::RESPONSE_STATUS_DECLINED:
 
                     $this->resetTransactionToken($quote);
-
                     Mage::throwException(
                         Mage::helper('afterpay')->__('Afterpay payment has been declined. Please use other payment method.')
                     );
@@ -140,7 +144,6 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
                 default:
 
                     $this->resetTransactionToken($quote);
-
                     Mage::throwException(
                         Mage::helper('afterpay')->__('Cannot find Afterpay payment. Please contact administrator.')
                     );
