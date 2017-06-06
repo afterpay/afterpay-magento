@@ -1,6 +1,91 @@
 # Afterpay magento extension changelog
 Copyright (c) 2016 AfterPay (http://afterpay.com.au/)
 
+Release version: 2.0.1
+Release date: 20.02.2017
+ 
+Platform: Magento 1
+Supported Editions and Versions:
+- 	Magento Community  Edition (CE)              version 1.7 and later
+- 	Magento Enterprise Edition (EE)              version 1.13 and later
+ 
+Highlights
+Version 2.0.1 of the Afterpay-Magento1 plugin delivers:
+- 	Enhanced order and payment capture processing for Magento 1 Community Edition and Enterprise Edition via Afterpay Merchant API V1
+- 	Verification of transaction integrity
+- 	Enhanced checkout extension support and front-end improvements for Magento 1 Community Edition and Enterprise Edition
+- 	Support for native store credit functionality for Magento 1 Enterprise Edition
+ 
+Community & Enterprise Edition enhancements
+
+Security
+-	To verify the integrity of each transaction, an additional API call has been implemented.
+-	This call verifies the transaction integrity by comparing the original value at time of checkout against the value present prior to payment capture, of the following:
+		- 	Afterpay token ID
+		- 	Magento Quote reserved order ID
+		- 	Magento Quote total amount
+-	In the instance of a discrepancy between these values, the transaction is cancelled and no payment capture attempts will be made. 
+
+Checkout support
+- 	A default handling has been introduced to accommodate checkout extensions that sit outside of the supported list.
+- 	The handling also reduces instances of JS conflict between Afterpay plugin and site-specific customization.
+- 	The current supported checkout list includes the below, and remains unchanged from previous release:
+		- 	Magento Native Checkout
+		- 	OneStepCheckout by OneStepCheckout
+		- 	One Step Checkout by Magestore
+		- 	One Step Checkout by Aheadworks
+		- 	LightCheckout by GoMage
+		- 	FireCheckout by Template Masters
+ 
+Product-level Configuration enhancements
+- 	Merchant’s Afterpay transaction limits are now applied at the Product-level as well as at the Checkout-level.
+- 	Magento Admin Afterpay plugin Enabled / Disabled dropdown now removes Product-level assets when set to ‘Disabled’.
+ 
+Miscellaneous
+- 	Plugin version number convention now aligns for Composer support.
+- 	Validation of merchant credentials (Merchant ID and Merchant Key) extended to exclude non-alphanumeric characters.
+- 	Installation process improvement to allow Magento to handle install error.
+ 
+Enterprise Edition only enhancements
+ 
+Magento Store credit support
+- 	Afterpay plugin now supports transactions that utilise Magento’s native store credit functionality.
+- 	Plugin supports detection and deduction Magento store credit when used in conjunction with the Afterpay payment method.
+- 	A transaction decline or cancellation during the Afterpay payment process will not result in a store credit deduction.
+- 	Optional refund support for return of store credit from Magento Admin.
+
+
+
+### 0.13.1 - 2016-11-17
+[1] Added support for user identification - Guest and Registering users.
+Plugin now populates the following flags:
+·         sales_flat_quote.customer_is_guest
+·         sales_flat_order.customer_is_guest
+·         customer_entity.group_id (e.g. link Guest to NOT_LOGGED_IN)
+·         sales_flat_quote.customer_group_id
+·         sales_flat_order.customer_group_id
+
+
+[2] Additional handling has been added so that the Afterpay plugin explicitly sets the ‘customer_is_guest’ flag (to 0 or 1) for all quote-to-order conversion scenarios.  
+This is an overriding measure should the flag be set to an incorrect state by another actor.
+
+
+[3] Revised error message handling for the scenario when a user attempts to register with Afterpay using an email address that already exists on Magento. 
+Magento message now displayed in this scenario:
+“There was an error processing your order. There is already a customer registered using this email address. Please login using this email address or enter a different email address to register your account."
+ 
+ 
+[4] Added support for Registering users with OneStepCheckout shopping cart extension.
+https://www.onestepcheckout.com
+Enhancements to allow user creation in Magento for Registering users in transaction with OneStepCheckout.
+
+
+[5] Added support for Magento new batch confirmation email sending
+Prior to Magento version Community 1.9.1 and Enterprise 1.14.1, emails were triggered on transaction completion.
+From Magento version Community 1.9.1 and Enterprise 1.14.1 onwards, emails are batched. 
+This release includes support for this batched email sending.
+
+
 ### 0.13.0 - 2016-08-12
  - Major changes to support API V1
  - Added ability to select API V0 or V1
