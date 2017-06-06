@@ -1,7 +1,7 @@
 {
     "name": "afterpay/afterpay",
     "description": "Afterpay payments integration for Magento",
-    "homepage": "https://github.com/afterpay/afterpay-magento",
+    "homepage": "https://bitbucket.org/vencom/module-afterpay",
     "type": "magento-module",
     "authors": [
         {

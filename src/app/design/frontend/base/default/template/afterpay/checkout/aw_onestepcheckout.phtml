@@ -1,0 +1,5 @@
+<script src="<?php echo $this->getRedirectJsUrl() ?>"></script>
+<script>
+    var afterpayReturnUrl = <?php echo Mage::helper('core')->jsonEncode($this->getReturnUrl()) ?>;
+</script>
+<script src="<?php echo $this->getJsUrl('Afterpay/checkout/aw_onestepcheckout.js') ?>"></script>
