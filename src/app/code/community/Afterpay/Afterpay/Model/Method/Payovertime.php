@@ -83,6 +83,12 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
 
                     // Check the order token being use
                     $this->resetTransactionToken($quote);
+            
+                    Mage::helper('afterpay')->log( 
+                        'Afterpay gateway has rejected request. Invalid token. ' .
+                        ' Token Value: ' . $orderToken
+                    );
+
                     Mage::throwException(
                         Mage::helper('afterpay')->__('Afterpay gateway has rejected request. Invalid token.')
                     );
@@ -91,14 +97,28 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
                     
                     // Check order id
                     $this->resetTransactionToken($quote);
+            
+                    Mage::helper('afterpay')->log( 
+                        'Afterpay gateway has rejected request. Incorrect merchant reference. ' .
+                        ' Quote Value: ' . $reserved_order_id . 
+                        ' Afterpay API: ' . $data->merchantReference
+                    );
+
                     Mage::throwException(
                         Mage::helper('afterpay')->__('Afterpay gateway has rejected request. Incorrect merchant reference.')
                     );
                 }
-                else if( $quote->getGrandTotal() != $data->totalAmount->amount ) {
+                else if( round($quote->getGrandTotal(), 2) != round($data->totalAmount->amount, 2) ) {
 
                     // Check the order amount
                     $this->resetTransactionToken($quote);
+		    
+                    Mage::helper('afterpay')->log( 
+                        'Afterpay gateway has rejected request. Invalid amount. ' .
+                        ' Quote Amount: ' . round($quote->getGrandTotal(), 2) . 
+                        ' Afterpay API: ' . round($data->totalAmount->amount, 2)
+                    );
+
                     Mage::throwException(
                         Mage::helper('afterpay')->__('Afterpay gateway has rejected request. Invalid amount.')
                     );
@@ -111,18 +131,23 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
             catch( Exception $e ) {
                 $this->resetTransactionToken($quote);
                 $this->resetPayment($payment);
+                
+                Mage::helper('afterpay')->log( 'Direct Capture Failed: ' . $e->getMessage() );
               
                 Mage::throwException(
                     Mage::helper('afterpay')->__( $e->getMessage() )
                 );
             }
 
-            $afterpayOrderId = $data->id;
 
-            // save orderid to payment
-            if ($payment) {
-                $payment->setAfterpayOrderId($afterpayOrderId)->save();
-                $quote->setAfterpayOrderId($afterpayOrderId)->save();
+            if( !empty($data) && !empty($data->id) ) {
+                $afterpayOrderId = $data->id;
+
+                // save orderid to payment
+                if ($payment) {
+                    $payment->setAfterpayOrderId($afterpayOrderId)->save();
+                    $quote->setAfterpayOrderId($afterpayOrderId)->save();
+                }  
             }
 
 
@@ -133,6 +158,7 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
                 case Afterpay_Afterpay_Model_Method_Base::RESPONSE_STATUS_DECLINED:
 
                     $this->resetTransactionToken($quote);
+
                     Mage::throwException(
                         Mage::helper('afterpay')->__('Afterpay payment has been declined. Please use other payment method.')
                     );
@@ -172,6 +198,11 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
     public function resetTransactionToken($quote) {
 
         Mage::getSingleton("checkout/session")->getQuote()->getPayment()->setAfterpayToken(NULL)->save();
+
+        if( Mage::getEdition() == Mage::EDITION_ENTERPRISE ) {
+            Mage::helper('afterpay')->storeCreditSessionUnset();
+            Mage::helper('afterpay')->giftCardsSessionUnset();
+        }
 
         return true;
     }

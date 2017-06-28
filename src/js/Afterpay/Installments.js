@@ -15,7 +15,7 @@
  *
  * @see app/design/frontend/base/default/template/afterpay/catalog/installments.phtml
  */
-(function (Prototype, Element, Product, console) {
+;(function (Prototype, Element, Product, console) {
 
     // window.console fallback
     if (!console) {
@@ -48,9 +48,9 @@
         }
 
         // create OptionsPrice object - we'll use if for price formatting in JS
-        var productOptionsPrice = new Product.OptionsPrice({
-            priceFormat: this.config.priceFormat
-        });
+        // var productOptionsPrice = new Product.OptionsPrice({
+        //     priceFormat: this.config.priceFormat
+        // });
 
         // find all price-box elements (according to configured selectors)
         var priceBoxes = Prototype.Selector.select(this.config.selectors.join(','), document);
@@ -89,13 +89,24 @@
                         oldElement.parentNode.removeChild(oldElement);
                     }
 
+                    var individualInstalment = price / this.config.installmentsAmount;
+
                     Element.insert(priceBoxes[i], {
                         after: this.config.template.replace(this.config.priceSubstitution,
-                            productOptionsPrice.formatPrice(price / this.config.installmentsAmount)
+                            // productOptionsPrice.formatPrice(price / this.config.installmentsAmount)
+                            this.config.currencySymbol + individualInstalment.toFixed(2)
                         )
                     });
 
                     Element.addClassName(priceBoxes[i].nextSibling, this.config.className);
+                }
+                else {
+                    var oldElement = priceBoxes[i].nextSibling;
+                    if (oldElement && oldElement instanceof Element
+                        && Element.hasClassName(oldElement, this.config.className)) {
+
+                        oldElement.parentNode.removeChild(oldElement);
+                    }
                 }
 
             } catch (e) {

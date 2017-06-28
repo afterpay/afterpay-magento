@@ -81,6 +81,7 @@ class Afterpay_Afterpay_Block_Catalog_Installments extends Mage_Core_Block_Templ
             'installmentsAmount' => $this->getInstallmentsAmount(),
             'afterpayEnabled'    => $this->getStoreConfigEnabled(),
             'priceFormat'        => Mage::app()->getLocale()->getJsPriceFormat(),
+            'currencySymbol'     => Mage::app()->getLocale()->currency(Mage::app()->getStore()->getCurrentCurrencyCode())->getSymbol(),
             'className'          => 'afterpay-installments-amount'
         );
     }

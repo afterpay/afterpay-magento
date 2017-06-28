@@ -1,65 +1,75 @@
 <h2> 1.1 New Afterpay Installation </h2>
-<p>This section outlines the steps to install the Afterpay plugin for the first time.</p>
+<p> This section outlines the steps to install the Afterpay plugin on your Magento instance for the first time. </p>
 
-<p> Magento can be installed in any folder on your server however for the purposes of this document, [MAGENTO] will refer to the root folder where you have installed your version of Magento. </p>
+<p> Magento can be installed in any folder on the merchant’s server however for the purposes of this document, [MAGENTO] will refer to the root folder where Magento is installed. </p>
 
 <ol>
-<li> The Afterpay Magento plugin will be provided to you as a zip file file </li>
-<li> Unzip the file and follow the instructions to copy across the files Code Directory </li>
-<li> Copy all files in <em>/app/code/community/Afterpay</em> folder from the unzipped plugin into [MAGENTO] <em>/app/code/community/Afterpay Design Directory</em> </li>
-<li> Copy all files in <em>/design/frontend/base/default/layout</em> to [MAGENTO] <em>/design/frontend/base/default/layout</em> </li>
-<li> Copy all files in <em>/design/frontend/base/default/template</em> to [MAGENTO] <em>/design/frontend/base/default/template</em> </li>
-<li> Copy all files in <em>/design/adminhtml/default/default/template</em> to [MAGENTO] <em>/design/adminhtml/default/default/template</em> Directory </li>
-<li> Copy all files in <em>/app/etc</em> to [MAGENTO] <em>/app/etc</em> Directory </li>
-<li> Copy all files in <em>/js</em> folder into [MAGENTO] <em>/js</em> </li>
-<li> Copy all files in <em>/skin/frontend/base/default</em> folder into [MAGENTO] <em>/skin/frontend/base/default</em> </li>
-<li> Login to Magento admin and go to System > Cache Management </li>
-<li> Flush the Magento cache by selecting “Flush Magento Cache” </li>
-<li> Check that the correct Afterpay version has been installed and then complete the Configuration steps outlined in this document </li>
+	<li> The Magento-Afterpay plugin is available as a .zip or tar.gz file from the Afterpay GitHub directory.</li>
+	<li> Unzip the file and follow the following instructions to copy the files to the Magento website directory. </li>
+	<li> Copy all files in: <br/><em>/app/code/community/</em> <br/> to: <br/> <em>[MAGENTO]/app/code/community</em> </li>
+	<li> Copy all files in: <br/><em>/app/design/frontend/base/default/layout</em> <br/> to: <br/> <em>[MAGENTO]/design/frontend/base/default/layout</em> </li>
+	<li> Copy all files in: <br/><em>/app/design/frontend/base/default/template</em> <br/> to: <br/> <em>[MAGENTO]/app/design/frontend/base/default/template</em> </li>
+	<li> Copy all files in: <br/><em>/design/adminhtml/default/default/template</em> <br/> to: <br/> <em>[MAGENTO] /design/adminhtml/default/default/template</em> </li>
+	<li> Copy all files in: <br/><em>/app/etc</em> <br/> to: <br/> <em>[MAGENTO]/app/etc</em> </li>
+	<li> Copy all files in: <br/><em>/js</em> <br/> to: <br/> <em>[MAGENTO]/js</em> </li>
+	<li> Copy all files in: <br/><em>/skin/frontend/base/default</em> <br/> to: <br/> <em>[MAGENTO]/skin/frontend/base/default</em> </li>
+	<li> Login to Magento Admin and navigate to System/Cache Management </li>
+	<li> Flush the cache storage by selecting <em>Flush Cache Storage</em> </li>
 </ol>
 
-<h2> 1.2	Afterpay Configuration </h2>
-<p> This configuration steps for the plugin are described in the remainder of this document. </p>
+<h2> 1.2	Website Configuration </h2>
+<p> Afterpay operates under a list of assumptions based on Magento configurations. To align with these assumptions, the Magento configurations must reflect the below. </p>
 
 <ol>
-<li> Check the version of the plugin that has been installed </li>
-<li> Obtain a Merchant ID and Secret Key from Afterpay </li>
-<li> Configure the Afterpay payment methods Pay Over Time </li>
-<li> Configure the display of the Pay Over Time installments details to be displayed on Product and Category pages </li>
-<li> Place an order on your site using the test details provided </li>
+	<li> <p><strong>Website Currency must be set to AUD</strong></p> Navigate to <em>Magento Admin/System/Configuration/Currency Setup</em> Set the base, display and allowed currency to AUD.</li>
+	<li> <p><strong>Postcode must be mandatory</strong></p> Navigate to <em>Magento Admin/System/Configuration/General Deselect</em>. Australia from <em>Postal Code is Optional for the following countries</em>.</li>
+	<li> <p><strong>State must be mandatory</strong></p> Navigate to <em>Magento Admin/System/Configuration/General</em>. Set <em>Australia</em> as one of the <em>State is required for</em> values.</li>
 </ol>
 
-<h2> 1.3	Upgrade Of Afterpay Installation </h2>
-<p> This section outlines the steps to REMOVE the existing plugin before the upgrade.
-Remove the Afterpay plugin by manually deleting the following Afterpay folders and Afterpay files. </p>
-
-<Magento Installation Folder> <br/>
-| <br/>
-├── app <br/>
-│   ├── code <br/>
-│   │   └── local <br/>
-│   │       └── Afterpay (folder) <br/>
-│   ├── design <br/>
-│   │   └── frontend <br/>
-│   │       └── base <br/>
-│   │           └── default <br/>
-│   │               ├── layout <br/>
-│   │               │   └── afterpay.xml <br/>
-│   │               └── template <br/>
-│   │                   └── afterpay (folder) <br/>
-│   └── etc <br/>
-│       └── modules <br/>
-│           └── Afterpay_Afterpay.xml <br/>
-├── js <br/>
-│   └── Afterpay (folder) <br/>
-└── skin <br/>
-    └── frontend <br/>
-        └── base <br/>
-            └── default <br/>
-                └── afterpay (folder) <br/>
+<h2> 1.3	Afterpay Merchant Setup </h2>
+<p> To configure the merchant’s Afterpay Merchant Credentials in Magento Admin complete the below steps. Prerequisite for this section is to obtain an Afterpay Merchant ID and Secret Key from Afterpay. </p>
 
 <ol>
-<li> Login to Magento admin and go to System > Cache Management </li>
-<li> Flush the Magento cache by selecting "Flush Magento Cache" </li> 
-<li> Check that the correct Afterpay version has been installed </li>
+	<li> Navigate to <em>Magento Admin/System/Configuration/Sales/Payment Methods/Afterpay</em> </li>
+	<li> Enter the Merchant ID and Merchant Key (provided by Afterpay)  </li>
+	<li> Enable Afterpay plugin using the <em>Enabled</em> checkbox. </li>
+	<li> Configure the Afterpay API Mode (<em>Sandbox Mode</em> for testing on a staging instance and <em>Production Mode</em> for a live website and legitimate transactions). </li>
+	<li> Save the configuration. </li>
+	<li> Click the <em>Update Payment Limits</em> button to retrieve the Minimum and Maximum Afterpay Order values.  </li>
+</ol>
+
+<h2> 1.4	Afterpay Display Configuration </h2>
+
+<ol>
+	<li> Navigate to <em>System/Configuration/Sales/Afterpay</em> </li>
+	<li> Enable <em>Debug Mode</em> to log transactions and ensure additional valuable data  </li>
+	<li> Configure the display of the Afterpay instalments details on <em>Product Pages</em> (individual product display pages) and <em>Category Pages</em> (the listing of products, which would also include Search Pages). </li>
+	<li> Login to Magento Admin and navigate to <em>System/Cache Management</em>. </li>
+	<li> Flush the cache storage by selecting <em>Flush Cache Storage</em> </li>
+</ol>
+
+<h2> 1.5	Upgrade Of Afterpay Installation </h2>
+<p> This section outlines the steps to upgrade the currently installed Magento-Afterpay plugin version.</p>
+<p> The process of upgrading the Magento-Afterpay plugin involves the complete removal of Magento-Afterpay plugin files, followed by copying the new files.</p>
+<p> [MAGENTO] will refer to the root folder where you have installed your version of Magento. </p>
+
+<ol>
+	<li> The Magento-Afterpay plugin is available as a .zip or tar.gz file from the Afterpay GitHub directory. </li>
+	<li> Unzip the file and follow the following instructions to copy the files to the Magento website directory. </li>
+	<li> Remove all files in: <br/> <em>[MAGENTO]/app/code/community/Afterpay</em></li>
+	<li> Copy new files to: <br/> <em>[MAGENTO]/app/code/community/Afterpay</em></li>
+	<li> Remove all files in: <br/> <em>[MAGENTO]/app/design/frontend/base/default/layout/afterpay.xml</em></li>
+	<li> Copy new files to: <br/> <em>[MAGENTO]/design/frontend/base/default/layout/afterpay.xml</em></li>
+	<li> Remove all files in: <br/> <em>[MAGENTO]/app/design/frontend/base/default/template/afterpay</em></li>
+	<li> Copy new files to: <br/> <em>[MAGENTO]/app/design/frontend/base/default/template/afterpay</em></li>
+	<li> Remove all files in: <br/> <em>[MAGENTO]/design/adminhtml/default/default/template/Afterpay</em></li>
+	<li> Copy new files to: <br/> em>[MAGENTO]/design/adminhtml/default/default/template/Afterpay</em></li>
+	<li> Remove all files in: <br/> <em>[MAGENTO]/app/etc/modules/Afterpay_Afterpay.xml</em></li>
+	<li> Copy new files to: <br/> <em>[MAGENTO]/app/etc/modules/Afterpay_Afterpay.xml</em></li>
+	<li> Remove all files in: <br/> <em>[MAGENTO]/js/Afterpay</em></li>
+	<li> Copy new files to: <br/> <em>[MAGENTO]/js/Afterpay</em></li>
+	<li> Remove all files in: <br/> <em>[MAGENTO]/skin/frontend/base/default/afterpay</em></li>
+	<li> Copy new files to: <br/> <em>[MAGENTO]/skin/frontend/base/default/afterpay</em></li>
+	<li> Login to Magento Admin and navigate to <em>System/Cache Management</em> </li>
+	<li> Flush the cache storage by selecting <em>Flush Cache Storage</em> </li>
 </ol>

@@ -27,6 +27,8 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
         // TODO: Add warning log in case if rounding changes amount, because it's potential problem
         $precision = 2;
 
+        $this->_validateData($object);
+
         $data = $object->getData();
 
         $billingAddress  = $object->getBillingAddress();
@@ -56,7 +58,7 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
             /** @var Mage_Sales_Model_Order_Item $orderItem */
             $params['items'][] = array(
                 'name'     => (string)$item->getName(),
-                'sku'      => $this->truncate_string( (string)$item->getSku() ),
+                'sku'      => $this->_truncateString( (string)$item->getSku() ),
                 'quantity' => (int)$item->getQty(),
                 'price'    => array(
                     'amount'   => round((float)$item->getPriceInclTax(), $precision),
@@ -108,16 +110,19 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
         //     'currency' => (string)$data['store_currency_code'],
         // );
 
-        $params['shipping'] = array(
-            'name'          => (string)$shippingAddress->getFirstname() . ' ' . $shippingAddress->getLastname(),
-            'line1'         => (string)$shippingAddress->getStreet1(),
-            'line2'         => (string)$shippingAddress->getStreet2(),
-            'suburb'        => (string)$shippingAddress->getCity(),
-            'postcode'      => (string)$shippingAddress->getPostcode(),
-            'state'         => (string)$shippingAddress->getRegion(),
-            'phoneNumber'   => (string)$shippingAddress->getTelephone(),
-            'countryCode'   => 'AU',
-        );
+        if( !empty($params['shipping']) ) {
+            $params['shipping'] = array(
+                'name'          => (string)$shippingAddress->getFirstname() . ' ' . $shippingAddress->getLastname(),
+                'line1'         => (string)$shippingAddress->getStreet1(),
+                'line2'         => (string)$shippingAddress->getStreet2(),
+                'suburb'        => (string)$shippingAddress->getCity(),
+                'postcode'      => (string)$shippingAddress->getPostcode(),
+                'state'         => (string)$shippingAddress->getRegion(),
+                'phoneNumber'   => (string)$shippingAddress->getTelephone(),
+                // 'countryCode'   => 'AU',
+                'countryCode'   => (string)$shippingAddress->getCountryCode(),
+            );
+        }
 
         $params['billing'] = array(
             'name'          => (string)$billingAddress->getFirstname() . ' ' . $billingAddress->getLastname(),
@@ -127,7 +132,8 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
             'postcode'      => (string)$billingAddress->getPostcode(),
             'state'         => (string)$billingAddress->getRegion(),
             'phoneNumber'   => (string)$billingAddress->getTelephone(),
-            'countryCode'   => 'AU',
+            // 'countryCode'   => 'AU',
+            'countryCode'   => (string)$billingAddress->getCountryCode(),
         );
 
         $params['totalAmount'] = array(
@@ -202,12 +208,69 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
      * @param string $appendStr    string to be appended after truncate
      * @return string
      */
-    private function truncate_string($string, $length = 64, $appendStr = "") {
+    private function _truncateString($string, $length = 64, $appendStr = "") {
         $truncated_str = "";
         $useAppendStr = (strlen($string) > intval($length))? true:false;
         $truncated_str = substr($string,0,$length);
         $truncated_str .= ($useAppendStr)? $appendStr:"";
         return $truncated_str;
     }
-}
 
+    private function _validateData( $object ) {
+
+        $errors = array();
+
+        $billingAddress = $object->getBillingAddress();
+        $shippingAddress = $object->getShippingAddress();
+
+    	$billing_postcode = $billingAddress->getPostcode();
+    	$billing_state = $billingAddress->getRegion();
+    	$billing_telephone = $billingAddress->getTelephone();
+    	$billing_city = $billingAddress->getCity();
+    	$billing_street = $billingAddress->getStreet1();
+
+        if( empty($billing_postcode) ) {
+            $errors[] = "Billing Postcode is required";
+        }
+        if( empty($billing_state) ) {
+            $errors[] = "Billing State is required";
+        }
+        if( empty($billing_telephone) ) {
+            $errors[] = "Billing Phone is required";
+        }
+        if( empty($billing_city) ) {
+            $errors[] = "Billing City/Suburb is required";
+        }
+        if( empty($billing_street) ) {
+            $errors[] = "Billing Address is required";
+        }
+
+        if( !empty($shippingAddress) ) {
+        	$shipping_postcode = $shippingAddress->getPostcode();
+        	$shipping_state = $shippingAddress->getRegion();
+        	$shipping_telephone = $shippingAddress->getTelephone();
+        	$shipping_city = $shippingAddress->getCity();
+        	$shipping_street = $shippingAddress->getStreet1();
+
+            if( empty($shipping_postcode) ) {
+                $errors[] = "Shipping Postcode is required";
+            }
+            if( empty($shipping_state) ) {
+                $errors[] = "Shipping State is required";
+            }
+            if( empty($shipping_telephone) ) {
+                $errors[] = "Shipping Phone is required";
+            }
+            if( empty($shipping_city) ) {
+                $errors[] = "Shipping City/Suburb is required";
+            }
+            if( empty($shipping_street) ) {
+                $errors[] = "Shipping Address is required";
+            }
+        }
+
+        if( !empty($errors) && count($errors) ) {
+            throw new InvalidArgumentException( "<br/>" . implode($errors, '<br/>') );
+        }
+    }
+}

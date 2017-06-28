@@ -2,21 +2,26 @@
 <config>
     <modules>
         <Afterpay_Afterpay>
-            <version>2.0.1</version>
+            <version>2.0.2</version>
         </Afterpay_Afterpay>
     </modules>
     <afterpay>
         <environments>
             <qa>
                 <name>QA Test</name>
-                <api_url>https://api-qa.secure-afterpay.com.au/</api_url>
-                <web_url>https://www-qa.secure-afterpay.com.au/</web_url>
+                <api_url>https://api-qa.paylater.touchcorp.net/</api_url>
+                <web_url>https://portal-qa.paylater.touchcorp.net/</web_url>
             </qa>
             <threepi>
                 <name>3PI Test</name>
                 <api_url>https://api-3pi.secure-afterpay.com.au/</api_url>
                 <web_url>https://www-3pi.secure-afterpay.com.au/</web_url>
             </threepi>
+            <stage>
+                <name>Stage Test</name>
+                <api_url>https://api-stg.secure-afterpay.com.au/</api_url>
+                <web_url>https://www-stg.secure-afterpay.com.au/</web_url>
+            </stage>
             <sandbox>
                 <name>Sandbox Test</name>
                 <api_url>https://api-sandbox.secure-afterpay.com.au/</api_url>
@@ -221,6 +226,7 @@
             </Afterpay_fetchPendingPaymentOrdersInfo>
 
             <!-- Cron job to check payment status of Payment Review orders -->
+	    <!--
             <Afterpay_fetchPaymentReviewPaymentStatus>
                 <schedule>
                     <cron_expr>*/30 * * * *</cron_expr>
@@ -229,8 +235,10 @@
                     <model>afterpay/observer::fetchPaymentReviewPaymentStatus</model>
                 </run>
             </Afterpay_fetchPaymentReviewPaymentStatus>
+	    -->
 
             <!-- Cron job to re-check payment status of Processing orders (needed for pre-approved orders) -->
+            <!--
             <Afterpay_checkPreApprovedOrdersPaymentStatus>
                 <schedule>
                     <cron_expr>*/15 * * * *</cron_expr>
@@ -239,8 +247,10 @@
                     <model>afterpay/observer::checkPreApprovedOrdersPaymentStatus</model>
                 </run>
             </Afterpay_checkPreApprovedOrdersPaymentStatus>
+            -->
 
             <!-- Cron job which sends shipped orders info to Afterpay API -->
+	    <!--
             <Afterpay_sendShippedAPIRequests>
                 <schedule>
                     <cron_expr>*/10 * * * *</cron_expr>
@@ -249,6 +259,7 @@
                     <model>afterpay/observer::sendQueuedSetShippedApiRequests</model>
                 </run>
             </Afterpay_sendShippedAPIRequests>
+	    -->
 
             <!-- Cron job to fetch current order total limits with Afterpay API -->
             <Afterpay_updateOrderLimits>
@@ -264,8 +275,11 @@
     <default>
         <afterpay>
             <api>
-                <setshipped_api_enabled>1</setshipped_api_enabled>
+                <setshipped_api_enabled>0</setshipped_api_enabled>
             </api>
+            <general>
+                <debug>1</debug>
+            </general>
             <cron>
                 <!-- Payment Review orders payment status checking interval (1h by default) -->
                 <fetch_payment_info_interval>3600</fetch_payment_info_interval>
@@ -281,7 +295,7 @@
                 <banner_block_selector><![CDATA[.header-container]]></banner_block_selector>
             </banner>
             <payovertime_installments>
-                <enable_product_page>0</enable_product_page>
+                <enable_product_page>1</enable_product_page>
                 <product_page_price_block_selectors><![CDATA[.product-shop .price-box
 .product-essential .price-box]]></product_page_price_block_selectors>
                 <product_page_html_template><![CDATA[<div style="
@@ -318,7 +332,7 @@ with&nbsp;
 -->
 
 
-                <enable_product_list>0</enable_product_list>
+                <enable_product_list>1</enable_product_list>
                 <product_list_price_block_selectors><![CDATA[.products-grid .item .price-box
 .products-list .item .price-box]]></product_list_price_block_selectors>
                 <product_list_html_template><![CDATA[<div style="
@@ -387,6 +401,9 @@ with&nbsp;
                 </checkout_details_html_template>
                 <checkout_mode>lightbox</checkout_mode>
             </payovertime_checkout>
+            <payovertime_cart>
+                <show_onetouch>1</show_onetouch>
+            </payovertime_cart>
         </afterpay>
         <payment>
             <afterpaypayovertime>
@@ -404,7 +421,6 @@ with&nbsp;
                 <api_mode>sandbox</api_mode>
                 <api_password backend_model="adminhtml/system_config_backend_encrypted"/>
                 <installments_amount>4</installments_amount>
-                <show_onetouch>1</show_onetouch>
             </afterpaypayovertime>
         </payment>
     </default>

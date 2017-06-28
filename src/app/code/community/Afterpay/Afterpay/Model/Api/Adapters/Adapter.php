@@ -31,6 +31,8 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapter
             throw new InvalidArgumentException('Payment type code cannot be empty');
         }
 
+        $this->_validateData($object);
+
         $params = array(
             'paymentType' => $afterPayPaymentTypeCode
         );
@@ -38,7 +40,11 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapter
         $data = $object->getData();
 
         $billingAddress  = $object->getBillingAddress();
+
         $shippingAddress = $object->getShippingAddress();
+        if( empty($shippingAddress) ) {
+            $shippingAddress = $object->getBillingAddress();
+        }
 
         $params['consumer'] = array(
             'email'      => (string)$object->getCustomerEmail(),
@@ -58,7 +64,7 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapter
             /** @var Mage_Sales_Model_Order_Item $orderItem */
             $params['orderDetail']['items'][] = array(
                 'name'     => (string)$item->getName(),
-                'sku'      => $this->truncate_string( (string)$item->getSku() ),
+                'sku'      => $this->_truncateString( (string)$item->getSku() ),
                 'quantity' => (int)$item->getQty(),
                 'price'    => array(
                     'amount'   => round((float)$item->getPriceInclTax(), $precision),
@@ -99,6 +105,7 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapter
             'address2' => (string)$shippingAddress->getStreet2(),
             'suburb'   => (string)$shippingAddress->getCity(),
             'postcode' => (string)$shippingAddress->getPostcode(),
+            'state'    => (string)$shippingAddress->getRegion(),
         );
 
         $params['orderDetail']['billingAddress'] = array(
@@ -106,6 +113,7 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapter
             'address1' => (string)$billingAddress->getStreet1(),
             'address2' => (string)$billingAddress->getStreet2(),
             'suburb'   => (string)$billingAddress->getCity(),
+            'state'    => (string)$billingAddress->getRegion(),
             'postcode' => (string)$billingAddress->getPostcode()
         );
 
@@ -163,12 +171,69 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapter
      * @param string $appendStr    string to be appended after truncate
      * @return string
      */
-    private function truncate_string($string, $length = 64, $appendStr = "") {
+    private function _truncateString($string, $length = 64, $appendStr = "") {
         $truncated_str = "";
         $useAppendStr = (strlen($string) > intval($length))? true:false;
         $truncated_str = substr($string,0,$length);
         $truncated_str .= ($useAppendStr)? $appendStr:"";
         return $truncated_str;
     }
-}
 
+    private function _validateData( $object ) {
+
+        $errors = array();
+
+        $billingAddress = $object->getBillingAddress();
+        $shippingAddress = $object->getShippingAddress();
+
+    	$billing_postcode = $billingAddress->getPostcode();
+    	$billing_state = $billingAddress->getRegion();
+    	$billing_telephone = $billingAddress->getTelephone();
+    	$billing_city = $billingAddress->getCity();
+    	$billing_street = $billingAddress->getStreet1();
+
+        if( empty($billing_postcode) ) {
+            $errors[] = "Billing Postcode is required";
+        }
+        if( empty($billing_state) ) {
+            $errors[] = "Billing State is required";
+        }
+        if( empty($billing_telephone) ) {
+            $errors[] = "Billing Phone is required";
+        }
+        if( empty($billing_city) ) {
+            $errors[] = "Billing City/Suburb is required";
+        }
+        if( empty($billing_street) ) {
+            $errors[] = "Billing Address is required";
+        }
+
+        if( !empty($shippingAddress) ) {
+        	$shipping_postcode = $shippingAddress->getPostcode();
+        	$shipping_state = $shippingAddress->getRegion();
+        	$shipping_telephone = $shippingAddress->getTelephone();
+        	$shipping_city = $shippingAddress->getCity();
+        	$shipping_street = $shippingAddress->getStreet1();
+
+            if( empty($shipping_postcode) ) {
+                $errors[] = "Shipping Postcode is required";
+            }
+            if( empty($shipping_state) ) {
+                $errors[] = "Shipping State is required";
+            }
+            if( empty($shipping_telephone) ) {
+                $errors[] = "Shipping Phone is required";
+            }
+            if( empty($shipping_city) ) {
+                $errors[] = "Shipping City/Suburb is required";
+            }
+            if( empty($shipping_street) ) {
+                $errors[] = "Shipping Address is required";
+            }
+        }
+
+        if( !empty($errors) && count($errors) ) {
+            throw new InvalidArgumentException( "<br/>" . implode($errors, '<br/>') );
+        }
+    }
+}

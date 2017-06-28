@@ -25,15 +25,6 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
      */
     public function start($quote)
     {
-        /**
-         * In some checkout extension the post data used rather than cart session
-         *
-         * Adding post data to put in cart session
-         */
-        $params = Mage::app()->getRequest()->getParams();
-        if ($params) {
-            $this->_saveCart($params);
-        }
 
         // Magento calculate the totals
         $quote->collectTotals();
@@ -174,7 +165,7 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
                     Zend_Log::NOTICE
                 );
 
-                $fallback_url = "/afterpay/payment/redirectFallback";
+                $fallback_url = Mage::getBaseUrl() . "afterpay/payment/redirectFallback";
                         
                 Mage::app()->getResponse()->setRedirect($fallback_url);
                 Mage::app()->getResponse()->sendResponse();
@@ -257,40 +248,5 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
         }
 
         return false;
-    }
-
-    /**
-     * Save Cart data from post request
-     *
-     * @param $array
-     */
-    protected function _saveCart($array)
-    {
-        $skipShipping = false;
-        $request = Mage::app()->getRequest();
-        foreach ($array as $type => $data) {
-            $result = array();
-            switch ($type) {
-                case 'billing':
-                    $result = Mage::getModel('checkout/type_onepage')->saveBilling($data, $request->getPost('billing_address_id', false));
-                    $skipShipping = array_key_exists('use_for_shipping', $data) && $data['use_for_shipping'] ? true : false;
-                    break;
-                case 'shipping':
-                    if (!$skipShipping) {
-                        $result = Mage::getModel('checkout/type_onepage')->saveShipping($data, $request->getPost('shipping_address_id', false));
-                    }
-                    break;
-                case 'shipping_method':
-                    $result = Mage::getModel('checkout/type_onepage')->saveShippingMethod($data);
-                    break;
-                case 'payment':
-                    $result = Mage::getModel('checkout/type_onepage')->savePayment(array('method' => Afterpay_Afterpay_Model_Method_Payovertime::CODE));
-                    break;
-            }
-
-            if (array_key_exists('error', $result) && $result['error'] == 1) {
-                Mage::throwException(Mage::helper('afterpay')->__('%s', $result['message']));
-            }
-        }
     }
 }

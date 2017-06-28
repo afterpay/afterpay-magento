@@ -9,7 +9,7 @@ class Afterpay_Afterpay_Block_Onetouch extends Mage_Core_Block_Template
      */
     protected function _toHtml()
     {
-        if  ( Mage::getStoreConfigFlag('payment/afterpaypayovertime/show_onetouch')
+        if  ( Mage::getStoreConfigFlag('afterpay/payovertime_cart/show_onetouch')
                 && Mage::getStoreConfig('payment/afterpaypayovertime/' . Afterpay_Afterpay_Model_Method_Base::API_ENABLED_FIELD)
                 && $this->getTotalAmount() >= Mage::getStoreConfig('payment/afterpaypayovertime/' . Afterpay_Afterpay_Model_Method_Base::API_MIN_ORDER_TOTAL_FIELD)
                 && $this->getTotalAmount() <= Mage::getStoreConfig('payment/afterpaypayovertime/' . Afterpay_Afterpay_Model_Method_Base::API_MAX_ORDER_TOTAL_FIELD)

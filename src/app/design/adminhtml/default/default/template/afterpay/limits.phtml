@@ -1,4 +1,23 @@
-<button onclick="javascript:setLocation('<?php echo $this->getUrl('adminhtml/afterpay/update') ?>')" class="scalable" type="button">
+<?php
+if (strlen($code = Mage::getSingleton('adminhtml/config_data')->getWebsite())) {
+    $website_code = Mage::getSingleton('adminhtml/config_data')->getWebsite();
+    $website_id = Mage::getModel('core/website')->load($website_code)->getId();
+
+    $overrides = array('website_id' => $website_id);
+
+    $target = array('website', $website_id);
+}
+else {
+    $target_id = 0;
+    $level = 'default';
+
+    $target = array();
+}
+
+$target = implode($target, "/");
+?>
+
+<button onclick="javascript:setLocation('<?php echo $this->getUrl('adminhtml/afterpay/update/' . $target  ) ?>')" class="scalable" type="button">
     <span>
         <span><?php echo $this->__('Update Limits') ?></span>
     </span>

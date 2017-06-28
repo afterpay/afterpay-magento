@@ -42,6 +42,16 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
         $this->_checkout_triggered = true;
 
         try {
+	     /**
+	      * In some checkout extension the post data used rather than cart session
+	      *
+	      * Adding post data to put in cart session
+	      */
+	     $params = Mage::app()->getRequest()->getParams();
+	     if ($params) {
+	     	$this->_saveCart($params);
+	     }
+		
             // Check with security updated on form key
             if (!$this->_validateFormKey()) {
                 Mage::throwException(Mage::helper('afterpay')->__('Detected fraud'));
@@ -72,14 +82,14 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
                 $this->redirectLogin();
             }
 
-            // Perform starting the afterpay transaction
-            $token = Mage::getModel('afterpay/order')->start($this->_quote);
-
             // Utilise Magento Session to preserve Store Credit details
     	    if( Mage::getEdition() == Mage::EDITION_ENTERPRISE ) {
-    	    	$this->helper()->storeCreditSessionSet($this->_quote);
+    	    	$this->_quote = $this->helper()->storeCreditSessionSet($this->_quote);
+    	    	$this->_quote = $this->helper()->giftCardsSessionSet($this->_quote);
     	    }
 
+            // Perform starting the afterpay transaction
+            $token = Mage::getModel('afterpay/order')->start($this->_quote);
             $response = array(
                 'success' => true,
                 'token'  => $token,
@@ -87,8 +97,13 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
 
         } catch (Exception $e) {
             // Debug log
-            $this->helper()->log($this->__('Error occur during process. %s. QuoteID=%s', $e->getMessage(), $this->_quote->getId()), Zend_Log::ERR);
-
+            if( empty($this->_quote) ) {
+                $this->helper()->log($this->__('Error occur during process, Quote not found. %s.', $e->getMessage(), Zend_Log::ERR));
+            }
+            else {
+                $this->helper()->log($this->__('Error occur during process. %s. QuoteID=%s', $e->getMessage(), $this->_quote->getId()), Zend_Log::ERR);
+            }
+            
             // Adding error for redirect and JSON
             $message = Mage::helper('afterpay')->__('There was an error processing your order. %s', $e->getMessage());
 
@@ -216,6 +231,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
         	    //process the Store Credit on Orders
                 if( Mage::getEdition() == Mage::EDITION_ENTERPRISE ) {
             		$this->helper()->storeCreditPlaceOrder();
+            		$this->helper()->giftCardsPlaceOrder();
             	}
 
 
@@ -237,11 +253,12 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
             // Debug log
             $this->helper()->log(
                 $this->__(
-                    'Order creation failed. %s. AfterpayOrderId=%s QuoteID=%s ReservedOrderID=%s',
+                    'Order creation failed. %s. AfterpayOrderId=%s QuoteID=%s ReservedOrderID=%s Stack Trace=%s',
                     $e->getMessage(),
                     $this->_quote->getAfterpayOrderId(),
                     $this->_quote->getId(),
-                    $this->_quote->getReservedOrderId()
+                    $this->_quote->getReservedOrderId(),
+		    $e->getTraceAsString()
                 ),
                 Zend_Log::ERR
             );
@@ -296,7 +313,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
     {
         $quote      = $this->_quote;
         $billing    = $quote->getBillingAddress();
-        $shipping   = $quote->isVirtual() ? null : $quote->getShippingAddress();
+        $shipping   = $quote->isVirtual() ? $quote->getBillingAddress() : $quote->getShippingAddress();
 
         $customer = $quote->getCustomer();
         if (!$billing->getCustomerId() || $billing->getSaveInAddressBook()) {
@@ -331,7 +348,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
     {
         $quote      = $this->_quote;
         $billing    = $quote->getBillingAddress();
-        $shipping   = $quote->isVirtual() ? null : $quote->getShippingAddress();
+        $shipping   = $quote->isVirtual() ? $quote->getBillingAddress() : $quote->getShippingAddress();
 
         $customer = $this->_lookupCustomer();
 
@@ -416,7 +433,10 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
 
             if( Mage::getEdition() == Mage::EDITION_ENTERPRISE ) {
     	    	$this->helper()->storeCreditSessionUnset();
+    	    	$this->helper()->giftCardsSessionUnset();
     	    }
+
+            $this->_getQuote()->getPayment()->setAfterpayToken(NULL)->save();
 	
             $this->_redirect('checkout/cart');
             return;
@@ -448,7 +468,15 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
         $lastOrderId = $session->getLastOrderId();
 
         if (!$lastQuoteId || !$lastOrderId) {
+
+            if( Mage::getEdition() == Mage::EDITION_ENTERPRISE ) {
+                $this->helper()->storeCreditSessionUnset();
+                $this->helper()->giftCardsSessionUnset();
+            }
+
             $this->_redirect('checkout/cart');
+            $this->_getQuote()->getPayment()->setAfterpayToken(NULL)->save();
+
             return;
         }
 
@@ -537,7 +565,23 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
 
         if (!$quote->hasItems() || $quote->getHasError()) {
             $this->getResponse()->setHeader('HTTP/1.1','403 Forbidden');
-            Mage::throwException(Mage::helper('paypal')->__('Unable to initialize Afterpay Payment method.'));
+
+            if( !$quote->hasItems() ) {
+                $message = 'Missing items from Quote';
+                $this->helper()->log(
+                    $message,
+                    Zend_Log::DEBUG
+                );
+            }
+            else if( $quote->getHasError() ) {
+                $message = 'Quote Error Detected: ' . $quote->getMessage();
+                $this->helper()->log(
+                    $message,
+                    Zend_Log::DEBUG
+                );
+            }
+
+            Mage::throwException(Mage::helper('afterpay')->__('Unable to initialize Afterpay Payment method: ' . $message));
         }
     }
 
@@ -837,8 +881,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
 	    
     	    if( Mage::getEdition() == Mage::EDITION_ENTERPRISE ) {
     	    	$this->_quote = $this->helper()->storeCreditCapture($this->_quote); 
-		$this->helper()->log($this->__('Store Credit being used: ' . Mage::getSingleton('checkout/session')->getData('afterpayCustomerBalance') ));
-		$this->_quote->save();
+		        $this->_quote->save();
     	    }
 	    
 
@@ -848,6 +891,14 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
                     /**
                      * SUCCESS => validate, save orderid, create order
                      */
+    	    	     
+        	     //Gift Card handling needs to be here to avoid the reversal problems 
+        	     if( Mage::getEdition() == Mage::EDITION_ENTERPRISE ) {
+        	     	$this->_quote = $this->helper()->giftCardsCapture($this->_quote); 
+                        $this->_quote->save();
+        	     }
+		
+		
                     $payment = $this->_quote->getPayment();
 
                     // validate = Check if order token return on the url same as order token has been use on session
@@ -874,6 +925,8 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
                     // Debug log
                     $this->helper()->log($this->__('Payment failed. Redirecting customer back to checkout. QuoteID=%s ReservedOrderID=%s', $this->_quote->getId(), $this->_quote->getReservedOrderId()), Zend_Log::NOTICE);
 
+                    $this->_quote->getPayment()->setAfterpayToken(NULL)->save();
+
                     // Set error to be shown on browser
                     Mage::throwException(Mage::helper('afterpay')->__('Your Afterpay payment was declined. Please select an alternative payment method.'));
                     break;
@@ -884,6 +937,8 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
                      */
                     // Debug log
                     $this->helper()->log($this->__('Afterpay status is cancelled. Redirecting customer back to checkout. QuoteID=%s ReservedOrderID=%s', $this->_quote->getId(), $this->_quote->getReservedOrderId()), Zend_Log::NOTICE);
+
+                    $this->_quote->getPayment()->setAfterpayToken(NULL)->save();
 
                     // Set error to be shown on browser
                     Mage::throwException(Mage::helper('afterpay')->__('You have cancelled your Afterpay payment. Please select an alternative payment method.'));
@@ -896,6 +951,8 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
                     // Debug log
                     $this->helper()->log($this->__('Order has been cancelled. Redirecting customer to checkout. QuoteID=%s ReservedOrderID=%s', $this->_quote->getId(), $this->_quote->getReservedOrderId()), Zend_Log::NOTICE);
 
+                    $this->_quote->getPayment()->setAfterpayToken(NULL)->save();
+
                     // Set error to be shown on browser
                     Mage::throwException(Mage::helper('afterpay')->__('There was an error processing your order.'));
                     break;
@@ -903,6 +960,8 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
         } catch (Exception $e) {
             // Add error message
             $this->getSession()->addError($e->getMessage());
+
+            $this->helper()->log($this->__('Exception during order creation. %s', $e->getMessage()), Zend_Log::ERR);
 
             // Afterpay redirect
             $this->_checkAndRedirect();
@@ -979,6 +1038,43 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
             $this->getResponse()->setRedirect($target_url);
             $this->getResponse()->sendResponse();
             exit;
+        }
+    }
+    
+    
+
+    /**
+     * Save Cart data from post request
+     *
+     * @param $array
+     */
+    protected function _saveCart($array)
+    {
+        $skipShipping = false;
+        $request = Mage::app()->getRequest();
+        foreach ($array as $type => $data) {
+            $result = array();
+            switch ($type) {
+                case 'billing':
+                    $result = Mage::getModel('checkout/type_onepage')->saveBilling($data, $request->getPost('billing_address_id', false));
+                    $skipShipping = array_key_exists('use_for_shipping', $data) && $data['use_for_shipping'] ? true : false;
+                    break;
+                case 'shipping':
+                    if (!$skipShipping) {
+                        $result = Mage::getModel('checkout/type_onepage')->saveShipping($data, $request->getPost('shipping_address_id', false));
+                    }
+                    break;
+                case 'shipping_method':
+                    $result = Mage::getModel('checkout/type_onepage')->saveShippingMethod($data);
+                    break;
+                case 'payment':
+                    $result = Mage::getModel('checkout/type_onepage')->savePayment(array('method' => Afterpay_Afterpay_Model_Method_Payovertime::CODE));
+                    break;
+            }
+
+            if (array_key_exists('error', $result) && $result['error'] == 1) {
+                Mage::throwException(Mage::helper('afterpay')->__('%s', json_encode($result['message'])));
+            }
         }
     }
 }
