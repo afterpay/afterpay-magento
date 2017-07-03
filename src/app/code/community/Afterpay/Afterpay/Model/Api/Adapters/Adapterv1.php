@@ -120,7 +120,7 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
                 'state'         => (string)$shippingAddress->getRegion(),
                 'phoneNumber'   => (string)$shippingAddress->getTelephone(),
                 // 'countryCode'   => 'AU',
-                'countryCode'   => (string)$shippingAddress->getCountryCode(),
+                'countryCode'   => (string)$shippingAddress->getCountry(),
             );
         }
 
@@ -133,7 +133,7 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
             'state'         => (string)$billingAddress->getRegion(),
             'phoneNumber'   => (string)$billingAddress->getTelephone(),
             // 'countryCode'   => 'AU',
-            'countryCode'   => (string)$billingAddress->getCountryCode(),
+            'countryCode'   => (string)$billingAddress->getCountry(),
         );
 
         $params['totalAmount'] = array(
