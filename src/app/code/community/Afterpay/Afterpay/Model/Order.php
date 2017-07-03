@@ -165,7 +165,7 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
                     Zend_Log::NOTICE
                 );
 
-                $fallback_url = Mage::getBaseUrl() . "afterpay/payment/redirectFallback";
+                $fallback_url = Mage::getUrl( 'afterpay/payment/redirectFallback', array('_secure' => true) );
                         
                 Mage::app()->getResponse()->setRedirect($fallback_url);
                 Mage::app()->getResponse()->sendResponse();
