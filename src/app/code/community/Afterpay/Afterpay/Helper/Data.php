@@ -206,7 +206,7 @@ class Afterpay_Afterpay_Helper_Data extends Mage_Core_Helper_Abstract
         if( Mage::getSingleton('customer/session')->isLoggedIn() && $quote->getCustomerBalanceAmountUsed() ) {
             Mage::getSingleton('checkout/session')->setData('afterpayCustomerBalance', $quote->getCustomerBalanceAmountUsed());
         }
-	else if( Mage::getSingleton('customer/session')->isLoggedIn() && !empty($params) && !empty($params["payment"]) && $params["payment"]["use_customer_balance"] ) {
+	else if( Mage::getSingleton('customer/session')->isLoggedIn() && !empty($params) && !empty($params["payment"]) && isset($params["payment"]["use_customer_balance"]) && $params["payment"]["use_customer_balance"] ) {
 	
 	    // Handler for Default One Page Checkout
 	    $customerId = Mage::getSingleton('customer/session')->getId();
