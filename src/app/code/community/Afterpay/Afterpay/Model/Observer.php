@@ -852,7 +852,7 @@ class Afterpay_Afterpay_Model_Observer
             $data = array(
                 'label'     => 'Afterpay Transaction Update',
                 'class'     => 'afterpay-transaction',
-                'onclick'   => 'setLocation(\' '  . Mage::helper('adminhtml')->getUrl('adminhtml/afterpay/fetchPendingPaymentOrdersInfo') . '\')',
+                'onclick'   => 'setLocation(\''  . Mage::helper('adminhtml')->getUrl('adminhtml/afterpay/fetchPendingPaymentOrdersInfo') . '\')',
             );
             $container->addButton('my_button_identifier', $data);
         }
