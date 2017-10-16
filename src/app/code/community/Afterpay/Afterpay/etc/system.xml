@@ -193,6 +193,7 @@
                         </debug>
                     </fields>
                 </general>
+                <!--
                 <banner>
                     <label>Banner Display Settings</label>
                     <frontend_type>text</frontend_type>
@@ -225,6 +226,7 @@
                         </banner_block_selector>
                     </fields>
                 </banner>
+                -->
                 <payovertime_installments translate="label">
                     <label>Installment Amount Display Settings</label>
                     <frontend_type>text</frontend_type>

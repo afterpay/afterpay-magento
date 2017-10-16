@@ -518,7 +518,7 @@ class Afterpay_Afterpay_Model_Observer
                     $method = $payment->getMethodInstance();
                     $method->setStore($order->getStore());
                     $method->sendShippedApiRequest(
-                        $payment->getAfterpayOrderId(),
+                        $payment->getData('afterpay_order_id'),
                         $queueItem->getTrackingNumber(),
                         $queueItem->getCourier()
                     );
@@ -832,7 +832,9 @@ class Afterpay_Afterpay_Model_Observer
                 $response = Mage::app()->getResponse();
                 $helper = Mage::helper('core');
                 $responseBody = $helper->jsonDecode($response->getBody());
-                $afterpayToken = $payment->getAfterpayToken();
+                
+                $afterpayToken = $payment->getData('afterpay_token');
+
                 $responseBody['afterpayToken'] = $afterpayToken;
                 $response->setBody($helper->jsonEncode($responseBody));
 

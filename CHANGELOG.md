@@ -1,5 +1,55 @@
 # Afterpay magento extension changelog
 
+Release version: 2.0.3
+Release date: 17.10.2017
+
+Platform: Magento 1
+Supported Editions and Versions:
+- Magento Community Edition (CE) version 1.7 and later.
+- Magento Enterprise Edition (EE) version 1.13 and later.
+- Afterpay-Magento1 plugin v2.0.3 has been verified against a new instance of Magento CE v1.9.3.3: https://magento.com/tech-resources/download#download2015
+
+Highlights
+Version 2.0.3 of the Afterpay-Magento plugin includes:
+- Single and Multi-Market Afterpay transaction processing. 
+- Extended support for Magento default OnePageCheckout.
+- Implemented Magento default Mini-Cart clearing.
+- Improved Payment Limits API call.
+
+Community & Enterprise Edition enhancements
+
+Single and Multi-market Afterpay transaction processing
+- Adapted the API payload to support New Zealand merchants and Afterpay transactions.
+- Utilised Magento "State Required" functionality to validate the API payloads based on country requirements.
+- Implemented Website Base Currency detection to ensure correct currency is sent to Afterpay API.
+- Extends Single-Market use to New Zealand and supports Multi-Market use in Australia and New Zealand.
+
+Extended support for Magento Default OnePageCheckout.
+- Increased coverage for Magento Default OnePageCheckout, in the event of the Fifth (Review) step being customised or removed.
+- Should the Fifth (Review) step be customised or removed from the checkout, the Afterpay onepage.js will be triggered at the Fourth (Payment) step.
+- Support for default five steps remain unchanged.
+
+Implemented Magento default Mini-Cart clearing.
+- Implemented programmatic removal of the Shopping Cart (Mini-Cart) contents when Afterpay transaction is successful.
+	- Previously upon a successful Afterpay transaction, the Mini-Cart presented as retaining the contents of the order despite the Shopping Cart contents being cleared.
+
+Improved Payment Limits API call
+- Updated the Payment Limits API call to target Afterpay API V1 Payment Limits Endpoint.
+	- Previously the Payment Limits API call targeted Afterpay API V0.
+- Added logging on Payment Limits query to monitor incorrect Merchant ID and Key combinations.
+	- Following a Payment Limits API call, an entry is created on the afterpay.log file with the Merchant ID and masked Secret Key.
+	- The log entry includes both the Payment Limits API request and response.
+ 
+Miscellaneous
+- Implemented coding structure improvements to transition from utilising Magento’s auto-generated Getter and Setter functions to direct database field reading.
+- Implemented logging to identify Session initialisation error.
+- Implemented Afterpay Token variable removal from Magento Checkout Session following a cancelled or declined Afterpay transaction. 
+- Set default configuration for Afterpay asset display on Product and Cart pages to enabled.
+	- Previously set to disabled by default, requiring manual configuration changes.
+
+
+--------------------------------------------------------------------------------------------------------------------------
+
 Release version: 2.0.2
 Release date: 28.06.2017
  

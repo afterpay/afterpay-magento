@@ -165,6 +165,7 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
                     Zend_Log::NOTICE
                 );
 
+                // $fallback_url = "afterpay/payment/redirectFallback";
                 $fallback_url = Mage::getUrl( 'afterpay/payment/redirectFallback', array('_secure' => true) );
                         
                 Mage::app()->getResponse()->setRedirect($fallback_url);
@@ -186,17 +187,23 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
      */
     public function place(Mage_Sales_Model_Quote $quote)
     {
-    	
+
         // Converting quote to order
         $service = Mage::getModel('sales/service_quote', $quote);
 
         $service->submitAll();
-        $quote->save();
         $order = $service->getOrder();
 	
-	//ensure that Grand Total is not doubled
+        //ensure that Grand Total is not doubled
         $order->setBaseGrandTotal( $quote->getBaseGrandTotal() );
         $order->setGrandTotal( $quote->getGrandTotal() );
+
+
+        //adjust the Quote currency to prevent the default currency being stuck
+        $order->setBaseCurrencyCode(Mage::app()->getStore()->getCurrentCurrencyCode());
+        $order->setQuoteCurrencyCode(Mage::app()->getStore()->getCurrentCurrencyCode());
+        $order->setOrderCurrencyCode(Mage::app()->getStore()->getCurrentCurrencyCode());
+        $order->save();
 
 
         $session = $this->_getSession();
@@ -218,13 +225,9 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
             $payment        = $order->getPayment();
             $paymentMethod  = $payment->getMethodInstance();
 
-            //set the Afterpay Order ID to be sure
-            // $payment->setData('afterpay_order_id', $quote->getAfterpayOrderId());
-            // $payment->setAfterpayOrderId($quote->getAfterpayOrderId());
-	        // $payment->save();
 
             // save an order
-            $order->setAfterpayOrderId($quote->getAfterpayOrderId());
+            $order->setData('afterpay_order_id', $quote->getData('afterpay_order_id'));
             $order->save();
 
                         
@@ -243,6 +246,9 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
             // an order may be created
             $session->setLastOrderId($order->getId())
                 ->setLastRealOrderId($order->getIncrementId());
+
+            //clear the checkout session
+            $session->getQuote()->setIsActive(0)->save();
 
             return true;
         }

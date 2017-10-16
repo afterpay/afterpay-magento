@@ -42,19 +42,25 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
         $this->_checkout_triggered = true;
 
         try {
-	     /**
-	      * In some checkout extension the post data used rather than cart session
-	      *
-	      * Adding post data to put in cart session
-	      */
-	     $params = Mage::app()->getRequest()->getParams();
-	     if ($params) {
-	     	$this->_saveCart($params);
-	     }
-		
+	       /**
+	       * In some checkout extension the post data used rather than cart session
+	       *
+	       * Adding post data to put in cart session
+	       */
+            $params = Mage::app()->getRequest()->getParams();
+            if ($params) {
+                $this->_saveCart($params);
+            }
+            
             // Check with security updated on form key
             if (!$this->_validateFormKey()) {
-                Mage::throwException(Mage::helper('afterpay')->__('Detected fraud'));
+
+                $frontend_form_key  =   Mage::app()->getRequest()->getParam('form_key');
+                $session_form_key   =   Mage::getSingleton('core/session')->getFormKey();
+
+                $this->helper()->log('Detected fraud. Front-End Key:' . $frontend_form_key . ' Session Key:' . $session_form_key, Zend_Log::ERR);
+
+                Mage::throwException(Mage::helper('afterpay')->__('Detected fraud.'));
                 return;
             }
 
@@ -204,7 +210,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
             $this->helper()->log(
                 $this->__(
                     'Creating order in Magento. AfterpayOrderId=%s QuoteID=%s ReservedOrderID=%s',
-                    $this->_quote->getAfterpayOrderId(),
+                    $this->_quote->getData('afterpay_order_id'),
                     $this->_quote->getId(),
                     $this->_quote->getReservedOrderId()
                 ),
@@ -239,7 +245,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
                 $this->helper()->log(
                     $this->__(
                         'Order successfully created. Redirecting to success page. AfterpayOrderId=%s QuoteID=%s ReservedOrderID=%s',
-                        $this->_quote->getAfterpayOrderId(),
+                        $this->_quote->getData('afterpay_order_id'),
                         $this->_quote->getId(),
                         $this->_quote->getReservedOrderId()
                     ),
@@ -255,7 +261,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
                 $this->__(
                     'Order creation failed. %s. AfterpayOrderId=%s QuoteID=%s ReservedOrderID=%s Stack Trace=%s',
                     $e->getMessage(),
-                    $this->_quote->getAfterpayOrderId(),
+                    $this->_quote->getData('afterpay_order_id'),
                     $this->_quote->getId(),
                     $this->_quote->getReservedOrderId(),
 		    $e->getTraceAsString()
@@ -263,7 +269,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
                 Zend_Log::ERR
             );
             $this->getSession()->addError($e->getMessage());
-            $this->_quote->getPayment()->setAfterpayToken(NULL)->save();
+            $this->_quote->getPayment()->setData('afterpay_token', NULL)->save();
 
             // Afterpay redirect
             $this->_checkAndRedirect();
@@ -436,7 +442,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
     	    	$this->helper()->giftCardsSessionUnset();
     	    }
 
-            $this->_getQuote()->getPayment()->setAfterpayToken(NULL)->save();
+            $this->_getQuote()->getPayment()->setData('afterpay_token', NULL)->save();
 	
             $this->_redirect('checkout/cart');
             return;
@@ -475,7 +481,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
             }
 
             $this->_redirect('checkout/cart');
-            $this->_getQuote()->getPayment()->setAfterpayToken(NULL)->save();
+            $this->_getQuote()->getPayment()->setData('afterpay_token', NULL)->save();
 
             return;
         }
@@ -639,7 +645,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
     protected function _checkAndRedirect()
     {
         // Default redirect to checkout if Session afterpay redirect is not exist
-        if (!Mage::getSingleton('core/session')->getAfterpayErrorRedirect()) {
+        if (!Mage::getSingleton('core/session')->getData('afterpay_error_redirect')) {
             // Redirect to checkout
             $this->_redirectUrl(Mage::helper('checkout/url')->getCheckoutUrl());
         } else {
@@ -902,13 +908,13 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
                     $payment = $this->_quote->getPayment();
 
                     // validate = Check if order token return on the url same as order token has been use on session
-                    if ($this->_quote->getPayment()->getAfterpayToken() != $orderToken && $this->_checkout_triggered) {
+                    if ($this->_quote->getPayment()->getData('afterpay_token') != $orderToken && $this->_checkout_triggered) {
                         $this->throwException(sprintf(
                             'Warning: Order token doesn\'t match database data: orderId=%s receivedToken=%s savedToken=%s',
                             $this->_quote->getReservedOrderId(), $orderToken, $payment->getOrderToken()));
                     }
                     else if( !$this->_checkout_triggered ) {
-                        $this->_quote->getPayment()->setAfterpayToken($orderToken);
+                        $this->_quote->getPayment()->setData('afterpay_token', $orderToken);
                     }
 
                     // Debug log
@@ -925,7 +931,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
                     // Debug log
                     $this->helper()->log($this->__('Payment failed. Redirecting customer back to checkout. QuoteID=%s ReservedOrderID=%s', $this->_quote->getId(), $this->_quote->getReservedOrderId()), Zend_Log::NOTICE);
 
-                    $this->_quote->getPayment()->setAfterpayToken(NULL)->save();
+                    $this->_quote->getPayment()->setData('afterpay_token', NULL)->save();
 
                     // Set error to be shown on browser
                     Mage::throwException(Mage::helper('afterpay')->__('Your Afterpay payment was declined. Please select an alternative payment method.'));
@@ -938,7 +944,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
                     // Debug log
                     $this->helper()->log($this->__('Afterpay status is cancelled. Redirecting customer back to checkout. QuoteID=%s ReservedOrderID=%s', $this->_quote->getId(), $this->_quote->getReservedOrderId()), Zend_Log::NOTICE);
 
-                    $this->_quote->getPayment()->setAfterpayToken(NULL)->save();
+                    $this->_quote->getPayment()->setData('afterpay_token', NULL)->save();
 
                     // Set error to be shown on browser
                     Mage::throwException(Mage::helper('afterpay')->__('You have cancelled your Afterpay payment. Please select an alternative payment method.'));
@@ -951,7 +957,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
                     // Debug log
                     $this->helper()->log($this->__('Order has been cancelled. Redirecting customer to checkout. QuoteID=%s ReservedOrderID=%s', $this->_quote->getId(), $this->_quote->getReservedOrderId()), Zend_Log::NOTICE);
 
-                    $this->_quote->getPayment()->setAfterpayToken(NULL)->save();
+                    $this->_quote->getPayment()->setData('afterpay_token', NULL)->save();
 
                     // Set error to be shown on browser
                     Mage::throwException(Mage::helper('afterpay')->__('There was an error processing your order.'));
@@ -981,7 +987,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
         $logged_in = Mage::getSingleton('customer/session')->isLoggedIn();
         $create_account = $request->getParam("create_account");
 	
-	if( !is_null($this->getCheckoutMethod()) && ( empty($create_account) ) ) {
+	    if( !is_null($this->getCheckoutMethod()) && ( empty($create_account) ) ) {
             return;
         }
 

@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Afterpay_Afterpay>
-            <version>2.0.2</version>
+            <version>2.0.3</version>
         </Afterpay_Afterpay>
     </modules>
     <afterpay>
@@ -24,13 +24,13 @@
             </stage>
             <sandbox>
                 <name>Sandbox Test</name>
-                <api_url>https://api-sandbox.secure-afterpay.com.au/</api_url>
-                <web_url>https://www-sandbox.secure-afterpay.com.au/</web_url>
+                <api_url>https://api-sandbox.afterpay.com/</api_url>
+                <web_url>https://portal-sandbox.afterpay.com/</web_url>
             </sandbox>
             <production>
                 <name>Production</name>
-                <api_url>https://api.secure-afterpay.com.au/</api_url>
-                <web_url>https://www.secure-afterpay.com.au/</web_url>
+                <api_url>https://api.afterpay.com/</api_url>
+                <web_url>https://portal.afterpay.com/</web_url>
             </production>
         </environments>
     </afterpay>
@@ -290,10 +290,12 @@
                 <!-- Payment status checked during next N hours for Processing orders (24h by default) -->
                 <check_preapproved_orders_timeout>86400</check_preapproved_orders_timeout>
             </cron>
+            <!--
             <banner>
                 <enabled>0</enabled>
                 <banner_block_selector><![CDATA[.header-container]]></banner_block_selector>
             </banner>
+            -->
             <payovertime_installments>
                 <enable_product_page>1</enable_product_page>
                 <product_page_price_block_selectors><![CDATA[.product-shop .price-box
@@ -393,7 +395,7 @@ with&nbsp;
         </div>
         <div class="instalment-footer">
             <p>You'll be redirected to the Afterpay website when you proceed to checkout.</p>
-            <a href="http://www.afterpay.com.au/terms/" target="_blank">Terms & Conditions</a>
+            <a href="http://www.afterpay.com/terms/" target="_blank">Terms & Conditions</a>
         </div>
     </li>
 </ul>

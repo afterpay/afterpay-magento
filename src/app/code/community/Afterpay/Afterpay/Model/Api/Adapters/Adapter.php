@@ -65,7 +65,7 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapter
             $params['orderDetail']['items'][] = array(
                 'name'     => (string)$item->getName(),
                 'sku'      => $this->_truncateString( (string)$item->getSku() ),
-                'quantity' => (int)$item->getQty(),
+                'quantity' => (int)$item->getQtyOrdered(),
                 'price'    => array(
                     'amount'   => round((float)$item->getPriceInclTax(), $precision),
                     'currency' => (string)$data['store_currency_code']
@@ -152,8 +152,8 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapter
     public function buildRefundRequest($amount, $payment)
     {
         $params['amount'] = array(
-                                'amount'    => abs($amount) * -1, // Afterpay API requires a negative amount
-                                'currency'  => $payment->getOrder()->getGlobalCurrencyCode(),
+                                'amount'    => abs( round($amount, 2) ) * -1, // Afterpay API requires a negative amount
+                                'currency'  => $payment->getOrder()->getOrderCurrencyCode(),
                             );
 
         $params['merchantRefundId'] = NULL;

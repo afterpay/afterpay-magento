@@ -155,8 +155,7 @@ class Afterpay_Afterpay_Helper_Data extends Mage_Core_Helper_Abstract
             $order->setBaseCustomerBalanceAmount( $balanceUsed );
             $order->setCustomerBalanceInvoiced( $balanceUsed );
             $order->setBaseCustomerBalanceInvoiced( $balanceUsed );
-	    $order->setTotalPaid($order->getGrandTotal());  
-	    
+            $order->setTotalPaid($order->getGrandTotal());  
 	    
             $order->save();
 
@@ -201,36 +200,36 @@ class Afterpay_Afterpay_Helper_Data extends Mage_Core_Helper_Abstract
     public function storeCreditSessionSet($quote) {
         // Utilise Magento Session to preserve Store Credit details
 	
-	$params = Mage::app()->getRequest()->getParams();
-	
+    	$params = Mage::app()->getRequest()->getParams();
+    	
         if( Mage::getSingleton('customer/session')->isLoggedIn() && $quote->getCustomerBalanceAmountUsed() ) {
             Mage::getSingleton('checkout/session')->setData('afterpayCustomerBalance', $quote->getCustomerBalanceAmountUsed());
         }
-	else if( Mage::getSingleton('customer/session')->isLoggedIn() && !empty($params) && !empty($params["payment"]) && $params["payment"]["use_customer_balance"] ) {
-	
-	    // Handler for Default One Page Checkout
-	    $customerId = Mage::getSingleton('customer/session')->getId();
-	    $website_id = Mage::app()->getStore()->getWebsiteId(); 
+    	else if( Mage::getSingleton('customer/session')->isLoggedIn() && !empty($params) && !empty($params["payment"]) && isset($params["payment"]["use_customer_balance"]) && $params["payment"]["use_customer_balance"] ) {
+    	
+    	    // Handler for Default One Page Checkout
+    	    $customerId = Mage::getSingleton('customer/session')->getId();
+    	    $website_id = Mage::app()->getStore()->getWebsiteId(); 
 
-	    $balance = Mage::getModel('enterprise_customerbalance/balance')
-                ->setCustomerId($customerId)
-                ->setWebsiteId($website_id)
-                ->loadByCustomer();
-		
-	    $quote->setUseCustomerBalance(1);
-	    $quote->setCustomerBalanceAmountUsed( $balance->getAmount() );
-	    
-	    $grand_total = $quote->getGrandTotal();
-	    $quote->setGrandTotal( $grand_total - $balance->getAmount() );
-	    
-	    $quote->save();
-	
-	    Mage::getSingleton('checkout/session')->setData('afterpayCustomerBalance', $balance->getAmount());
-	    
-	}  
-	Mage::getSingleton('checkout/session')->setData('afterpayGrandTotal', $quote->getGrandTotal());
-	Mage::getSingleton('checkout/session')->setData('afterpaySubtotal', $quote->getSubtotal());
-	return $quote;
+    	    $balance = Mage::getModel('enterprise_customerbalance/balance')
+                    ->setCustomerId($customerId)
+                    ->setWebsiteId($website_id)
+                    ->loadByCustomer();
+    		
+    	    $quote->setUseCustomerBalance(1);
+    	    $quote->setCustomerBalanceAmountUsed( $balance->getAmount() );
+    	    
+    	    $grand_total = $quote->getGrandTotal();
+    	    $quote->setGrandTotal( $grand_total - $balance->getAmount() );
+    	    
+    	    $quote->save();
+    	
+    	    Mage::getSingleton('checkout/session')->setData('afterpayCustomerBalance', $balance->getAmount());
+    	    
+    	}
+    	Mage::getSingleton('checkout/session')->setData('afterpayGrandTotal', $quote->getGrandTotal());
+    	Mage::getSingleton('checkout/session')->setData('afterpaySubtotal', $quote->getSubtotal());
+    	return $quote;
     }
     
     /**
@@ -324,8 +323,8 @@ class Afterpay_Afterpay_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function giftCardsCapture($quote) {
     	
-	$balance = Mage::getSingleton('checkout/session')->getData('afterpayGiftCardsAmount');
-	$gift_cards = Mage::getSingleton('checkout/session')->getData('afterpayGiftCards');
+    	$balance = Mage::getSingleton('checkout/session')->getData('afterpayGiftCardsAmount');
+    	$gift_cards = Mage::getSingleton('checkout/session')->getData('afterpayGiftCards');
 	    
         if( !empty($balance) && $balance > 0 ) {
             
@@ -388,8 +387,7 @@ class Afterpay_Afterpay_Helper_Data extends Mage_Core_Helper_Abstract
             $order = Mage::getSingleton('sales/order')->loadByIncrementId($orderId);
 
             $gift_cards = Mage::getSingleton('checkout/session')->getData('afterpayGiftCards');
-	    $balance_used = Mage::getSingleton('checkout/session')->getData('afterpayGiftCardsAmount');
-	    
+            $balance_used = Mage::getSingleton('checkout/session')->getData('afterpayGiftCardsAmount');
 
             $order->setGiftCards( $gift_cards );
             $order->setGiftCardsAmount( $balance_used );

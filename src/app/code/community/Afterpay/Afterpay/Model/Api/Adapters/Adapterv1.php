@@ -62,7 +62,7 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
                 'quantity' => (int)$item->getQty(),
                 'price'    => array(
                     'amount'   => round((float)$item->getPriceInclTax(), $precision),
-                    'currency' => (string)$data['store_currency_code']
+                    'currency' => (string)Mage::app()->getStore()->getCurrentCurrencyCode()
                 )
             );
 
@@ -81,7 +81,7 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
                     'displayName'   =>  substr( $discount_name . ' - ' . (string)$item->getName(), 0, 128 ),
                     'amount'        =>  array(
                                             'amount'   => round((float)$item->getDiscountAmount(), $precision),
-                                            'currency' => (string)$data['store_currency_code'] 
+                                            'currency' => (string)Mage::app()->getStore()->getCurrentCurrencyCode() 
                                         ),
                 );
             }
@@ -93,7 +93,7 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
         if ($shippingAddress->getShippingInclTax()) {
             $params['shippingAmount'] = array(
                 'amount'   => round((float)$shippingAddress->getShippingInclTax(), $precision), // with tax
-                'currency' => (string)$data['store_currency_code']
+                'currency' => (string)Mage::app()->getStore()->getCurrentCurrencyCode()
             );
         }
 
@@ -101,13 +101,13 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
         if( isset($taxTotal) && round((float)$taxTotal, $precision) > 0 ) {
             $params['taxAmount'] = array(
                 'amount'   => isset($taxTotal) ? round((float)$taxTotal, $precision) : 0,
-                'currency' => (string)$data['store_currency_code']
+                'currency' => (string)Mage::app()->getStore()->getCurrentCurrencyCode()
             );
         }
 
         // $params['orderDetail']['subTotal'] = array(
         //     'amount'   => round((float)$data['subtotal'], $precision),
-        //     'currency' => (string)$data['store_currency_code'],
+        //     'currency' => (string)Mage::app()->getStore()->getCurrentCurrencyCode(),
         // );
 
         if( !empty($params['shipping']) ) {
@@ -138,7 +138,7 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
 
         $params['totalAmount'] = array(
             'amount'   => round((float)$object->getGrandTotal(), $precision),
-            'currency' => (string)$data['store_currency_code'],
+            'currency' => (string)Mage::app()->getStore()->getCurrentCurrencyCode(),
         );
 
         $params['merchant'] = array(
@@ -189,8 +189,8 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
     public function buildRefundRequest($amount, $payment)
     {
         $params['amount'] = array(
-                                'amount'    => abs($amount), // Afterpay API Ver 1 requires a positive amount
-                                'currency'  => $payment->getOrder()->getGlobalCurrencyCode(),
+                                'amount'    => abs( round($amount, 2) ), // Afterpay API Ver 1 requires a positive amount
+                                'currency'  => $payment->getOrder()->getOrderCurrencyCode(),
                             );
 
         $params['merchantReference'] = NULL;
@@ -216,9 +216,37 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
         return $truncated_str;
     }
 
+
+    private function _handleState( $object ) {
+
+        $billing_country = $object->getBillingAddress()->getCountry();
+        $shipping_country = $object->getShippingAddress()->getCountry();
+
+        if( !empty($billing_country) ) {
+
+            $list_state_required = $this->_getStateRequired();
+
+            //if the country doesn't require state, make Suburb goes to State Field
+            if( !in_array( $billing_country, $list_state_required ) ) {
+                $object->getBillingAddress()->setRegion( $object->getBillingAddress()->getCity() )->save(); 
+                $object->getShippingAddress()->setRegion( $object->getShippingAddress()->getCity() )->save(); 
+            }
+        }
+    }
+
+    private function _getStateRequired() {
+        $destinations = (string)Mage::getStoreConfig('general/region/state_required');
+
+        $state_required = !empty($destinations) ? explode(',', $destinations) : [];
+
+        return $state_required; 
+    }
+
     private function _validateData( $object ) {
 
         $errors = array();
+
+        $this->_handleState( $object );
 
         $billingAddress = $object->getBillingAddress();
         $shippingAddress = $object->getShippingAddress();

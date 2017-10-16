@@ -1,13 +1,23 @@
 (function() {
     if (typeof window.Review !== "undefined") {
+        var target = window.Review;
+    }
+    else if (typeof window.Payment !== "undefined") {
+        var target = window.Payment;
+    }
+    else {
+        var target = false;
+    }
+
+    if (target) {
 
         // Authorized capture
         if (window.Afterpay.paymentAction == 'authorize_capture') {
             /**
              * Function to new function authorized_capture
              */
-            var reviewSave = window.Review.prototype.save;
-            window.Review.prototype.save = function() {
+            var reviewSave = target.prototype.save;
+            target.prototype.save = function() {
                 // check payment method
                 if (payment.currentMethod == 'afterpaypayovertime') {
                     this.saveUrl = window.Afterpay.saveUrl;
@@ -84,8 +94,8 @@
              *
              * @type {Review.nextStep}
              */
-            var reviewNextStep = window.Review.prototype.nextStep;
-            window.Review.prototype.nextStep = function (transport) {
+            var reviewNextStep = target.prototype.nextStep;
+            target.prototype.nextStep = function (transport) {
                 // if we have paid with the afterpay pay over time method
                 if (payment.currentMethod == 'afterpaypayovertime') {
                     var response = {};

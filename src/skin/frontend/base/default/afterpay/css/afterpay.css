@@ -249,3 +249,11 @@ and (max-width : 480px) {
 #payment_form_afterpaypayovertime li { 
     float:none 
 }
+
+/* Hide the doubled Afterpay Assets */
+.product-view .afterpay-installments-amount {
+    display:none;
+}
+.product-view .afterpay-installments-amount:last-of-type {
+    display:inline;
+}

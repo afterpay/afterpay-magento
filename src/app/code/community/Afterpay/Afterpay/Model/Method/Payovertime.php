@@ -67,8 +67,8 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
             $session = Mage::getSingleton('checkout/session');
             $quote = $session->getQuote();
             //$payment = $session->getQuote()->getPayment();
-         
-            $orderToken = $payment->getAfterpayToken();
+            
+            $orderToken = $payment->getData('afterpay_token');
             $reserved_order_id = $quote->getReservedOrderId();
 
             // Check total amount
@@ -145,15 +145,15 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
 
                 // save orderid to payment
                 if ($payment) {
-                    $payment->setAfterpayOrderId($afterpayOrderId)->save();
-                    $quote->setAfterpayOrderId($afterpayOrderId)->save();
+                    $payment->setData('afterpay_order_id', $afterpayOrderId)->save();
+                    $quote->setData('afterpay_order_id', $afterpayOrderId)->save();
                 }  
             }
 
 
             switch($data->status) {
                 case Afterpay_Afterpay_Model_Method_Base::RESPONSE_STATUS_APPROVED:
-                    $payment->setTransactionId($payment->getAfterpayOrderId())->save();
+                    $payment->setTransactionId($payment->getData('afterpay_order_id'))->save();
                     break;
                 case Afterpay_Afterpay_Model_Method_Base::RESPONSE_STATUS_DECLINED:
 
@@ -164,7 +164,7 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
                     );
                     break;
                 case Afterpay_Afterpay_Model_Method_Base::RESPONSE_STATUS_PENDING:
-                    $payment->setTransactionId($payment->getAfterpayOrderId())
+                    $payment->setTransactionId($payment->getData('afterpay_order_id'))
                         ->setIsTransactionPending(true);
                     break;
                 default:
@@ -197,7 +197,7 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
      */
     public function resetTransactionToken($quote) {
 
-        Mage::getSingleton("checkout/session")->getQuote()->getPayment()->setAfterpayToken(NULL)->save();
+        Mage::getSingleton("checkout/session")->getQuote()->getPayment()->setData('afterpay_token', NULL)->save();
 
         if( Mage::getEdition() == Mage::EDITION_ENTERPRISE ) {
             Mage::helper('afterpay')->storeCreditSessionUnset();
@@ -215,7 +215,7 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
      */
     public function resetPayment($payment) {
 
-        $payment->setAfterpayToken(NULL)->save();
+        $payment->setData('afterpay_token', NULL)->save();
 
         return true;
     }

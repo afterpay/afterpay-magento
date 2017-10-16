@@ -84,7 +84,14 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
     public function canUseForCurrency($currencyCode)
     {
         // TODO: Move list of supported currencies to config.xml
-        return strtoupper($currencyCode) === "AUD";
+
+        if( strtoupper($currencyCode) === "AUD" ) {
+            return true;
+        }
+        else if( strtoupper($currencyCode) === "NZD" ) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -689,7 +696,7 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
 
     public function refund(Varien_Object $payment, $amount)
     {
-        $url = $this->getApiAdapter()->getApiRouter()->getRefundUrl($payment->getAfterpayOrderId());
+        $url = $this->getApiAdapter()->getApiRouter()->getRefundUrl($payment->getData('afterpay_order_id'));
         $helper = $this->helper();
         $coreHelper = Mage::helper('core');
 
