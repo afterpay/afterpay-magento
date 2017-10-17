@@ -20,6 +20,7 @@ class Afterpay_Afterpay_Adminhtml_AfterpayController extends Mage_Adminhtml_Cont
             $model->updateOrderLimits();
             $this->_getSession()->addSuccess(Mage::helper('afterpay')->__('Successfully updated limits'));
         } catch (Exception $e) {
+            Mage::logException($e);
             $this->_getSession()->addError($e->getMessage());
         }
 
@@ -35,4 +36,10 @@ class Afterpay_Afterpay_Adminhtml_AfterpayController extends Mage_Adminhtml_Cont
         }
         $this->_redirectReferer();
     }
+
+    protected function _isAllowed()
+    {
+        return Mage::getSingleton('admin/session')->isAllowed('system/config/payment');
+    }
+
 }
