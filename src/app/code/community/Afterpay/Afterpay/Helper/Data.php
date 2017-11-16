@@ -117,7 +117,7 @@ class Afterpay_Afterpay_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function calculateInstalment()
     {
-        $total = Mage::getSingleton('checkout/session')->getQuote()->getGrandTotal();
+        $total = round( Mage::getSingleton('checkout/session')->getQuote()->getGrandTotal(), 2);
         $installment = ceil($total / 4 * 100) / 100;
         return Mage::app()->getStore()->formatPrice($installment, false);
     }
