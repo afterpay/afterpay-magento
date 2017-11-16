@@ -17,7 +17,7 @@
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_store>0</show_in_store>
                         </active>
                         <title translate="label">
                             <label>Title</label>
@@ -25,7 +25,7 @@
                             <sort_order>20</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_store>0</show_in_store>
                         </title>
                         <api_mode translate="label">
                             <label>API Mode</label>
@@ -34,7 +34,7 @@
                             <sort_order>40</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_store>0</show_in_store>
                         </api_mode>
                         <api_username translate="label">
                             <label>Merchant ID</label>
@@ -42,7 +42,7 @@
                             <sort_order>41</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_store>0</show_in_store>
                         </api_username>
                         <api_password translate="label">
                             <label>Merchant Secret Key</label>
@@ -51,7 +51,7 @@
                             <sort_order>42</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_store>0</show_in_store>
                         </api_password>
                         <payment_action translate="label">
                             <label>Payment Action</label>
@@ -70,7 +70,7 @@
                             <sort_order>50</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_store>0</show_in_store>
                         </payment_review_status>
                         <order_email translate="label">
                             <label>Send Order Email</label>
@@ -79,7 +79,7 @@
                             <sort_order>120</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_store>0</show_in_store>
                         </order_email>
                         <invoice_create translate="label">
                             <label>Create Invoice</label>
@@ -88,7 +88,7 @@
                             <sort_order>130</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_store>0</show_in_store>
                         </invoice_create>
                         <invoice_email translate="label">
                             <label>Send Invoice Email</label>
@@ -97,7 +97,7 @@
                             <sort_order>140</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_store>0</show_in_store>
                         </invoice_email>
                         <allowspecific translate="label">
                             <label>Payment from Applicable Countries</label>
@@ -106,7 +106,7 @@
                             <source_model>adminhtml/system_config_source_payment_allspecificcountries</source_model>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_store>0</show_in_store>
                         </allowspecific>
                         <specificcountry translate="label">
                             <label>Payment from Specific Countries</label>
@@ -115,7 +115,7 @@
                             <source_model>adminhtml/system_config_source_country</source_model>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_store>0</show_in_store>
                         </specificcountry>
                         <min_order_total translate="label">
                             <label>Minimum Order Total</label>
@@ -123,7 +123,7 @@
                             <sort_order>180</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_store>0</show_in_store>
                         </min_order_total>
                         <max_order_total translate="label">
                             <label>Maximum Order Total</label>
@@ -131,7 +131,7 @@
                             <sort_order>190</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_store>0</show_in_store>
                         </max_order_total>
                         <update_order_limits>
                             <label/>
@@ -139,24 +139,15 @@
                             <sort_order>200</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_store>0</show_in_store>
                         </update_order_limits>
-                        <show_onetouch>
-                            <label>Show Onetouch Method on cart?</label>
-                            <frontend_type>select</frontend_type>
-                            <sort_order>210</sort_order>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </show_onetouch>
                         <sort_order translate="label">
                             <label>Sort Order</label>
                             <frontend_type>text</frontend_type>
                             <sort_order>220</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_store>0</show_in_store>
                             <frontend_class>validate-number</frontend_class>
                         </sort_order>
                     </fields>
@@ -169,16 +160,16 @@
             <frontend_type>text</frontend_type>
             <sort_order>1000</sort_order>
             <show_in_default>1</show_in_default>
-            <show_in_website>0</show_in_website>
-            <show_in_store>0</show_in_store>
+            <show_in_website>1</show_in_website>
+            <show_in_store>1</show_in_store>
             <groups>
                 <general translate="label">
                     <label>General</label>
                     <frontend_type>text</frontend_type>
                     <sort_order>10</sort_order>
                     <show_in_default>1</show_in_default>
-                    <show_in_website>0</show_in_website>
-                    <show_in_store>0</show_in_store>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
                     <expanded>1</expanded>
                     <fields>
                         <module_version>
@@ -197,18 +188,19 @@
                             <source_model>adminhtml/system_config_source_yesno</source_model>
                             <sort_order>100</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
                         </debug>
                     </fields>
                 </general>
+                <!--
                 <banner>
-                    <label>Banner</label>
+                    <label>Banner Display Settings</label>
                     <frontend_type>text</frontend_type>
                     <sort_order>20</sort_order>
                     <show_in_default>1</show_in_default>
-                    <show_in_website>0</show_in_website>
-                    <show_in_store>0</show_in_store>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
                     <expanded>1</expanded>
                     <fields>
                         <enabled translate="label">
@@ -218,8 +210,8 @@
                             <source_model>adminhtml/system_config_source_yesno</source_model>
                             <sort_order>0</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
                         </enabled>
                         <banner_block_selector>
                             <label>Display banner after selector</label>
@@ -234,13 +226,14 @@
                         </banner_block_selector>
                     </fields>
                 </banner>
+                -->
                 <payovertime_installments translate="label">
-                    <label>Pay Over Time - Display Installments Amount</label>
+                    <label>Installment Amount Display Settings</label>
                     <frontend_type>text</frontend_type>
                     <sort_order>30</sort_order>
                     <show_in_default>1</show_in_default>
-                    <show_in_website>0</show_in_website>
-                    <show_in_store>0</show_in_store>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
                     <fields>
                         <enable_product_page translate="label">
                             <label>Show installments amount on product pages</label>
@@ -336,15 +329,15 @@
                     </fields>
                 </payovertime_installments>
                 <payovertime_checkout>
-                    <label>Pay Over Time - Checkout Page Settings</label>
+                    <label>Checkout Display Settings</label>
                     <frontend_type>text</frontend_type>
-                    <sort_order>40</sort_order>
+                    <sort_order>50</sort_order>
                     <show_in_default>1</show_in_default>
-                    <show_in_website>0</show_in_website>
-                    <show_in_store>0</show_in_store>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
                     <fields>
                         <checkout_headline_html_template>
-                            <label>Checkout option headline displayed in the checkout page</label>
+                            <label>Payment Method Display</label>
                             <comment>
                                 To display instalment amount include {instalment_amount} including "{}"
                             </comment>
@@ -355,7 +348,7 @@
                             <show_in_store>1</show_in_store>
                         </checkout_headline_html_template>
                         <show_checkout_details>
-                            <label>Show option details on checkout?</label>
+                            <label>Show Installments Amounts</label>
                             <frontend_type>select</frontend_type>
                             <sort_order>39</sort_order>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
@@ -364,7 +357,7 @@
                             <show_in_store>1</show_in_store>
                         </show_checkout_details>
                         <checkout_details_html_template>
-                            <label>Checkout option details displayed in the checkout page</label>
+                            <label>Installment Amounts Display</label>
                             <comment>
                                 To modify Afterpay checkout edit the details above
                             </comment>
@@ -378,7 +371,7 @@
                             </depends>
                         </checkout_details_html_template>
                         <checkout_mode>
-                            <label>Payment Display</label>
+                            <label>Payment Display Method</label>
                             <frontend_type>select</frontend_type>
                             <source_model>afterpay/system_config_source_redirectMode</source_model>
                             <comment>When an unsupported checkout is being used only &lt;strong&gt;Redirect&lt;&#47;strong&gt; Mode would be usable. </comment>
@@ -389,11 +382,30 @@
                         </checkout_mode>
                     </fields>
                 </payovertime_checkout>
+                <payovertime_cart translate="label">
+                    <label>Cart Display Settings</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>49</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <show_onetouch>
+                            <label>Show Afterpay on Cart Page</label>
+                            <frontend_type>select</frontend_type>
+                            <sort_order>210</sort_order>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </show_onetouch>
+                    </fields>
+                </payovertime_cart>
                 <api translate="label">
                     <label>API Settings</label>
                     <frontend_type>text</frontend_type>
-                    <sort_order>50</sort_order>
-                    <show_in_default>1</show_in_default>
+                    <sort_order>51</sort_order>
+                    <show_in_default>0</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
                     <fields>
@@ -403,8 +415,8 @@
                             <source_model>adminhtml/system_config_source_yesno</source_model>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
                         </setshipped_api_enabled>
                     </fields>
                 </api>

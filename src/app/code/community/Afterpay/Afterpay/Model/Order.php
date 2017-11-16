@@ -25,15 +25,6 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
      */
     public function start($quote)
     {
-        /**
-         * In some checkout extension the post data used rather than cart session
-         *
-         * Adding post data to put in cart session
-         */
-        $params = Mage::app()->getRequest()->getParams();
-        if ($params) {
-            $this->_saveCart($params);
-        }
 
         // Magento calculate the totals
         $quote->collectTotals();
@@ -174,7 +165,8 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
                     Zend_Log::NOTICE
                 );
 
-                $fallback_url = "/afterpay/payment/redirectFallback";
+                // $fallback_url = "afterpay/payment/redirectFallback";
+                $fallback_url = Mage::getUrl( 'afterpay/payment/redirectFallback', array('_secure' => true) );
                         
                 Mage::app()->getResponse()->setRedirect($fallback_url);
                 Mage::app()->getResponse()->sendResponse();
@@ -195,17 +187,23 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
      */
     public function place(Mage_Sales_Model_Quote $quote)
     {
-    	
+
         // Converting quote to order
         $service = Mage::getModel('sales/service_quote', $quote);
 
         $service->submitAll();
-        $quote->save();
         $order = $service->getOrder();
 	
-	//ensure that Grand Total is not doubled
+        //ensure that Grand Total is not doubled
         $order->setBaseGrandTotal( $quote->getBaseGrandTotal() );
         $order->setGrandTotal( $quote->getGrandTotal() );
+
+
+        //adjust the Quote currency to prevent the default currency being stuck
+        $order->setBaseCurrencyCode(Mage::app()->getStore()->getCurrentCurrencyCode());
+        $order->setQuoteCurrencyCode(Mage::app()->getStore()->getCurrentCurrencyCode());
+        $order->setOrderCurrencyCode(Mage::app()->getStore()->getCurrentCurrencyCode());
+        $order->save();
 
 
         $session = $this->_getSession();
@@ -227,13 +225,9 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
             $payment        = $order->getPayment();
             $paymentMethod  = $payment->getMethodInstance();
 
-            //set the Afterpay Order ID to be sure
-            // $payment->setData('afterpay_order_id', $quote->getAfterpayOrderId());
-            // $payment->setAfterpayOrderId($quote->getAfterpayOrderId());
-	        // $payment->save();
 
             // save an order
-            $order->setAfterpayOrderId($quote->getAfterpayOrderId());
+            $order->setData('afterpay_order_id', $quote->getData('afterpay_order_id'));
             $order->save();
 
                         
@@ -253,44 +247,12 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
             $session->setLastOrderId($order->getId())
                 ->setLastRealOrderId($order->getIncrementId());
 
+            //clear the checkout session
+            $session->getQuote()->setIsActive(0)->save();
+
             return true;
         }
 
         return false;
-    }
-
-    /**
-     * Save Cart data from post request
-     *
-     * @param $array
-     */
-    protected function _saveCart($array)
-    {
-        $skipShipping = false;
-        $request = Mage::app()->getRequest();
-        foreach ($array as $type => $data) {
-            $result = array();
-            switch ($type) {
-                case 'billing':
-                    $result = Mage::getModel('checkout/type_onepage')->saveBilling($data, $request->getPost('billing_address_id', false));
-                    $skipShipping = array_key_exists('use_for_shipping', $data) && $data['use_for_shipping'] ? true : false;
-                    break;
-                case 'shipping':
-                    if (!$skipShipping) {
-                        $result = Mage::getModel('checkout/type_onepage')->saveShipping($data, $request->getPost('shipping_address_id', false));
-                    }
-                    break;
-                case 'shipping_method':
-                    $result = Mage::getModel('checkout/type_onepage')->saveShippingMethod($data);
-                    break;
-                case 'payment':
-                    $result = Mage::getModel('checkout/type_onepage')->savePayment(array('method' => Afterpay_Afterpay_Model_Method_Payovertime::CODE));
-                    break;
-            }
-
-            if (array_key_exists('error', $result) && $result['error'] == 1) {
-                Mage::throwException(Mage::helper('afterpay')->__('%s', $result['message']));
-            }
-        }
     }
 }

@@ -72,6 +72,7 @@ class Afterpay_Afterpay_Model_Observer
      *
      * @param Mage_Cron_Model_Schedule $schedule
      */
+    /*
     public function checkPreApprovedOrdersPaymentStatus(Mage_Cron_Model_Schedule $schedule)
     {
         //TODO: Add ability to disable this feature
@@ -136,6 +137,7 @@ class Afterpay_Afterpay_Model_Observer
             $payment->save();
         }
     }
+    */
 
     /**
      * Cron job which looks for Pending Payment orders and does following:
@@ -322,9 +324,10 @@ class Afterpay_Afterpay_Model_Observer
      *
      * @return Mage_Sales_Model_Order[]|Mage_Sales_Model_Resource_Order_Collection
      */
+    /*
     protected function getPreApprovedOrderCollection()
     {
-        /** @var Mage_Sales_Model_Resource_Order_Collection|Mage_Sales_Model_Order[] $collection */
+        // @var Mage_Sales_Model_Resource_Order_Collection|Mage_Sales_Model_Order[] $collection
         $collection = Mage::getResourceModel('sales/order_collection');
 
         //join payment method table
@@ -371,21 +374,23 @@ class Afterpay_Afterpay_Model_Observer
 
         return $collection;
     }
+    */
 
     /**
      * get installments prices for products-list
      *
      * @param Varien_Event_Observer $observer
      */
+    /*
     public function categoryProductListLoad(Varien_Event_Observer $observer)
     {
 
-        /** @var Afterpay_Afterpay_Helper_Installments $helper */
+        // @var Afterpay_Afterpay_Helper_Installments $helper
         $helper = Mage::helper('afterpay/installments');
 
         if ($helper->isProductListInstallmentsEnabled()) {
 
-            /** @var Mage_Catalog_Model_Resource_Product_Collection $productCollection */
+            // @var Mage_Catalog_Model_Resource_Product_Collection $productCollection
             $productCollection = $observer->getCollection();
 
             $productPricesArray = array();
@@ -417,8 +422,8 @@ class Afterpay_Afterpay_Model_Observer
             }
 
         }
-
     }
+    */
 
     /**
      * The function is called after Order Shipment saved
@@ -513,7 +518,7 @@ class Afterpay_Afterpay_Model_Observer
                     $method = $payment->getMethodInstance();
                     $method->setStore($order->getStore());
                     $method->sendShippedApiRequest(
-                        $payment->getAfterpayOrderId(),
+                        $payment->getData('afterpay_order_id'),
                         $queueItem->getTrackingNumber(),
                         $queueItem->getCourier()
                     );
@@ -708,36 +713,81 @@ class Afterpay_Afterpay_Model_Observer
             // 'PAD'                   => 'afterpaybeforeyoupay',
         );
 
-        $base = new Afterpay_Afterpay_Model_Method_Payovertime();
+        $website_param = Mage::app()->getRequest()->getParam('website');
 
         foreach ($configs as $tla => $payment) {
-            if (!Mage::getStoreConfigFlag('payment/' . $payment . '/active')) {
-                continue;
+
+            $base = new Afterpay_Afterpay_Model_Method_Payovertime();
+
+            if (strlen($code = Mage::getSingleton('adminhtml/config_data')->getWebsite())) // website level
+            {
+
+                $website_code = Mage::getSingleton('adminhtml/config_data')->getWebsite();
+                $website_id = Mage::getModel('core/website')->load($website_code)->getId();
+            
+                if (!Mage::getStoreConfigFlag('payment/' . $payment . '/active', $website_id)) {
+                    continue;
+                }
+
+                $overrides = array('website_id' => $website_id);
+                $level = 'websites';
+                $target_id = $website_id;
+            }
+            else if( !empty( $website_param ) ) {
+
+                $website_id = $website_param;
+            
+                if (!Mage::getStoreConfigFlag('payment/' . $payment . '/active', $website_id)) {
+                    continue;
+                }
+
+                $overrides = array('website_id' => $website_id);
+                $level = 'websites';
+                $target_id = $website_id;
+            }
+            else // default level
+            {
+                $target_id = 0;
+                $level = 'default';
+            
+                if (!Mage::getStoreConfigFlag('payment/' . $payment . '/active')) {
+                    continue;
+                }
+
+                $website_code = Mage::getSingleton('adminhtml/config_data')->getWebsite();
+                $overrides = array();
             }
 
-            $values = $base->getPaymentAmounts($payment, $tla);
-
+            $values = $base->getPaymentAmounts($payment, $tla, $overrides);
+        
+            //skip if there is no values
             if( !$values ) {
                 continue;
             }
 
-            $path = 'payment/' . $payment . '/';
-
-            if (isset($values['minimumAmount'])) {
-                $this->_setConfigData($path . 'min_order_total', $values['minimumAmount']['amount']);
-            } else {
-                $this->_deleteConfigData($path . 'min_order_total');
-            }
-
-            if (isset($values['maximumAmount'])) {
-                $this->_setConfigData($path . 'max_order_total', $values['maximumAmount']['amount']);
-            } else {
-                $this->_deleteConfigData($path . 'max_order_total');
-            }
+            $this->_doPaymentLimitUpdate($payment, $values, $level, $target_id);            
         }
 
         // after changing system configuration, we need to clear the config cache
         Mage::app()->cleanCache(array(Mage_Core_Model_Config::CACHE_TAG));
+    }
+
+    private function _doPaymentLimitUpdate($payment, $values, $level, $target_id) {
+
+        $path = 'payment/' . $payment . '/';
+
+        if (isset($values['minimumAmount'])) {
+            $website = Mage::app()->getRequest()->getParam('website');
+            $this->_setConfigData($path . 'min_order_total', $values['minimumAmount']['amount'], $level, $target_id);
+        } else {
+            // $this->_deleteConfigData($path . 'min_order_total');
+        }
+
+        if (isset($values['maximumAmount'])) {
+            $this->_setConfigData($path . 'max_order_total', $values['maximumAmount']['amount'], $level, $target_id);
+        } else {
+            // $this->_deleteConfigData($path . 'max_order_total');
+        }
     }
 
     /**
@@ -782,7 +832,9 @@ class Afterpay_Afterpay_Model_Observer
                 $response = Mage::app()->getResponse();
                 $helper = Mage::helper('core');
                 $responseBody = $helper->jsonDecode($response->getBody());
-                $afterpayToken = $payment->getAfterpayToken();
+                
+                $afterpayToken = $payment->getData('afterpay_token');
+
                 $responseBody['afterpayToken'] = $afterpayToken;
                 $response->setBody($helper->jsonEncode($responseBody));
 
@@ -820,7 +872,7 @@ class Afterpay_Afterpay_Model_Observer
 
         // Apply order status for specific order
         if ($order->getState() == Mage_Sales_Model_Order::STATE_PAYMENT_REVIEW &&        // Order State is Payment Review
-            $payment->getMethod() == Afterpay_Afterpay_Model_Method_Payovertime::CODE && // Payment using Mony Payments
+            $payment->getMethod() == Afterpay_Afterpay_Model_Method_Payovertime::CODE && // Payment using Afterpay Payments
             $order->getStatus() != $status                                               // Order status is not the same
         ) {
             // Set status to be selected payment review status from admin

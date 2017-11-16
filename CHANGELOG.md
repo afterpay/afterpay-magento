@@ -1,5 +1,107 @@
 # Afterpay magento extension changelog
-Copyright (c) 2016 AfterPay (http://afterpay.com.au/)
+
+### Release version: 2.0.3
+### Release date: 17.10.2017
+### Platform: Magento 1
+
+### Supported Editions and Versions:
+- Magento Community Edition (CE) version 1.7 and later.
+- Magento Enterprise Edition (EE) version 1.13 and later.
+- Afterpay-Magento1 plugin v2.0.3 has been verified against a new instance of Magento CE v1.9.3.3: https://magento.com/tech-resources/download#download2015
+
+### Highlights
+Version 2.0.3 of the Afterpay-Magento plugin includes:
+- Single and Multi-Market Afterpay transaction processing. 
+- Extended support for Magento default OnePageCheckout.
+- Implemented Magento default Mini-Cart clearing.
+- Improved Payment Limits API call.
+
+### Community & Enterprise Edition enhancements
+
+#### Single and Multi-market Afterpay transaction processing
+- Adapted the API payload to support New Zealand merchants and Afterpay transactions.
+- Utilised Magento "State Required" functionality to validate the API payloads based on country requirements.
+- Implemented Website Base Currency detection to ensure correct currency is sent to Afterpay API.
+- Extends Single-Market use to New Zealand and supports Multi-Market use in Australia and New Zealand.
+
+#### Extended support for Magento Default OnePageCheckout.
+- Increased coverage for Magento Default OnePageCheckout, in the event of the Fifth (Review) step being customised or removed.
+- Should the Fifth (Review) step be customised or removed from the checkout, the Afterpay onepage.js will be triggered at the Fourth (Payment) step.
+- Support for default five steps remain unchanged.
+
+#### Implemented Magento default Mini-Cart clearing.
+- Implemented programmatic removal of the Shopping Cart (Mini-Cart) contents when Afterpay transaction is successful.
+	- Previously upon a successful Afterpay transaction, the Mini-Cart presented as retaining the contents of the order despite the Shopping Cart contents being cleared.
+
+#### Improved Payment Limits API call
+- Updated the Payment Limits API call to target Afterpay API V1 Payment Limits Endpoint.
+	- Previously the Payment Limits API call targeted Afterpay API V0.
+- Added logging on Payment Limits query to monitor incorrect Merchant ID and Key combinations.
+	- Following a Payment Limits API call, an entry is created on the afterpay.log file with the Merchant ID and masked Secret Key.
+	- The log entry includes both the Payment Limits API request and response.
+ 
+#### Miscellaneous
+- Implemented coding structure improvements to transition from utilising Magento’s auto-generated Getter and Setter functions to direct database field reading.
+- Implemented logging to identify Session initialisation error.
+- Implemented Afterpay Token variable removal from Magento Checkout Session following a cancelled or declined Afterpay transaction. 
+- Set default configuration for Afterpay asset display on Product and Cart pages to enabled.
+	- Previously set to disabled by default, requiring manual configuration changes.
+
+
+--------------------------------------------------------------------------------------------------------------------------
+
+Release version: 2.0.2
+Release date: 28.06.2017
+ 
+Platform: Magento 1
+Supported Editions and Versions:
+- Magento Community  Edition (CE) version 1.7 and later
+- Magento Enterprise Edition (EE) version 1.13 and later
+ 
+Highlights
+- Version 2.0.2 of the Afterpay - Magento1 plugin has been tested on a clean installation of Magento Community Edition (Version 1.9.3.3).
+- Version 2.0.2 of the Afterpay - Magento1 plugin delivers:
+	- Magento Admin - Afterpay Configuration Updates
+	- Improved Afterpay Logging
+	- Improved JavaScript handling on Magento Product, Cart and Checkout Pages
+	- Enhanced Store Credit support (Magento 1 Enterprise Only)
+	- Addition of Gift Card support (Magento 1 Enterprise Only)
+ 
+Community & Enterprise Edition enhancements
+ 
+Magento Admin - Afterpay Configuration Updates
+- Afterpay front-end display can now be configured at both a Website and View (Store) level.
+- Additional Magento Admin error reporting on entry of invalid Afterpay Merchant Credentials.
+- Shipping Courier settings removed from Afterpay Configuration.
+- Magento Admin configuration labels and section naming revised.
+ 
+Improved Afterpay Logging
+- Afterpay logging to 'afterpay.log' enhanced to capture additional events and logging detail around Transaction Integrity and Payment Capture.
+- Afterpay logging to 'afterpay.log' updated to capture Billing Address details.
+
+Improved JavaScript handling on Magento Product, Cart and Checkout Pages
+- Front-end validation added to Billing Address on checkout to align with Afterpay API validation and reduce error messages.
+- Additional validation for Configurable Product types where variation falls outside of Afterpay Merchant Payment Limits.
+- Revised the default redirection target to '/default/onepage/checkout' on Magento Cart.
+ 
+Miscellaneous
+- Added 'Get Config' mechanism to support multi-site implementations with varying Afterpay Payment Limits.
+- Eliminated 'Pending' status check and 'Shipping Courier' check from the cron job, reducing redundant calls to the API.
+ 
+Enterprise Edition enhancements
+ 
+Enhanced Store Credit Handling
+- Enhanced Customer Balance (Store Credit) deduction processing. Transactions now include an additional end-of-transaction Store Credit balance check.
+- Native Magento Store Credit support for the following checkout extensions:
+	- Default Magento Checkout
+	- OneStepCheckout by OneStepCheckout
+ 
+Implemented Gift Card Handling
+- Native Magento Gift Card support for the following checkout extensions:
+	- Default Magento Checkout
+	- OneStepCheckout by OneStepCheckout
+
+--------------------------------------------------------------------------------------------------------------------------
 
 Release version: 2.0.1
 Release date: 20.02.2017
@@ -38,8 +140,8 @@ Checkout support
 		- 	FireCheckout by Template Masters
  
 Product-level Configuration enhancements
-- 	Merchant’s Afterpay transaction limits are now applied at the Product-level as well as at the Checkout-level.
-- 	Magento Admin Afterpay plugin Enabled / Disabled dropdown now removes Product-level assets when set to ‘Disabled’.
+- 	Merchant's Afterpay transaction limits are now applied at the Product-level as well as at the Checkout-level.
+- 	Magento Admin Afterpay plugin Enabled / Disabled dropdown now removes Product-level assets when set to 'Disabled'.
  
 Miscellaneous
 - 	Plugin version number convention now aligns for Composer support.
@@ -49,7 +151,7 @@ Miscellaneous
 Enterprise Edition only enhancements
  
 Magento Store credit support
-- 	Afterpay plugin now supports transactions that utilise Magento’s native store credit functionality.
+- 	Afterpay plugin now supports transactions that utilise Magento's native store credit functionality.
 - 	Plugin supports detection and deduction Magento store credit when used in conjunction with the Afterpay payment method.
 - 	A transaction decline or cancellation during the Afterpay payment process will not result in a store credit deduction.
 - 	Optional refund support for return of store credit from Magento Admin.
@@ -66,13 +168,13 @@ Plugin now populates the following flags:
 ·         sales_flat_order.customer_group_id
 
 
-[2] Additional handling has been added so that the Afterpay plugin explicitly sets the ‘customer_is_guest’ flag (to 0 or 1) for all quote-to-order conversion scenarios.  
+[2] Additional handling has been added so that the Afterpay plugin explicitly sets the 'customer_is_guest' flag (to 0 or 1) for all quote-to-order conversion scenarios.  
 This is an overriding measure should the flag be set to an incorrect state by another actor.
 
 
 [3] Revised error message handling for the scenario when a user attempts to register with Afterpay using an email address that already exists on Magento. 
 Magento message now displayed in this scenario:
-“There was an error processing your order. There is already a customer registered using this email address. Please login using this email address or enter a different email address to register your account."
+'There was an error processing your order. There is already a customer registered using this email address. Please login using this email address or enter a different email address to register your account."
  
  
 [4] Added support for Registering users with OneStepCheckout shopping cart extension.

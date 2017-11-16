@@ -27,6 +27,8 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
         // TODO: Add warning log in case if rounding changes amount, because it's potential problem
         $precision = 2;
 
+        $this->_validateData($object);
+
         $data = $object->getData();
 
         $billingAddress  = $object->getBillingAddress();
@@ -56,11 +58,11 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
             /** @var Mage_Sales_Model_Order_Item $orderItem */
             $params['items'][] = array(
                 'name'     => (string)$item->getName(),
-                'sku'      => $this->truncate_string( (string)$item->getSku() ),
+                'sku'      => $this->_truncateString( (string)$item->getSku() ),
                 'quantity' => (int)$item->getQty(),
                 'price'    => array(
                     'amount'   => round((float)$item->getPriceInclTax(), $precision),
-                    'currency' => (string)$data['store_currency_code']
+                    'currency' => (string)Mage::app()->getStore()->getCurrentCurrencyCode()
                 )
             );
 
@@ -79,7 +81,7 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
                     'displayName'   =>  substr( $discount_name . ' - ' . (string)$item->getName(), 0, 128 ),
                     'amount'        =>  array(
                                             'amount'   => round((float)$item->getDiscountAmount(), $precision),
-                                            'currency' => (string)$data['store_currency_code'] 
+                                            'currency' => (string)Mage::app()->getStore()->getCurrentCurrencyCode() 
                                         ),
                 );
             }
@@ -91,7 +93,7 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
         if ($shippingAddress->getShippingInclTax()) {
             $params['shippingAmount'] = array(
                 'amount'   => round((float)$shippingAddress->getShippingInclTax(), $precision), // with tax
-                'currency' => (string)$data['store_currency_code']
+                'currency' => (string)Mage::app()->getStore()->getCurrentCurrencyCode()
             );
         }
 
@@ -99,25 +101,28 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
         if( isset($taxTotal) && round((float)$taxTotal, $precision) > 0 ) {
             $params['taxAmount'] = array(
                 'amount'   => isset($taxTotal) ? round((float)$taxTotal, $precision) : 0,
-                'currency' => (string)$data['store_currency_code']
+                'currency' => (string)Mage::app()->getStore()->getCurrentCurrencyCode()
             );
         }
 
         // $params['orderDetail']['subTotal'] = array(
         //     'amount'   => round((float)$data['subtotal'], $precision),
-        //     'currency' => (string)$data['store_currency_code'],
+        //     'currency' => (string)Mage::app()->getStore()->getCurrentCurrencyCode(),
         // );
 
-        $params['shipping'] = array(
-            'name'          => (string)$shippingAddress->getFirstname() . ' ' . $shippingAddress->getLastname(),
-            'line1'         => (string)$shippingAddress->getStreet1(),
-            'line2'         => (string)$shippingAddress->getStreet2(),
-            'suburb'        => (string)$shippingAddress->getCity(),
-            'postcode'      => (string)$shippingAddress->getPostcode(),
-            'state'         => (string)$shippingAddress->getRegion(),
-            'phoneNumber'   => (string)$shippingAddress->getTelephone(),
-            'countryCode'   => 'AU',
-        );
+        if( !empty($params['shipping']) ) {
+            $params['shipping'] = array(
+                'name'          => (string)$shippingAddress->getFirstname() . ' ' . $shippingAddress->getLastname(),
+                'line1'         => (string)$shippingAddress->getStreet1(),
+                'line2'         => (string)$shippingAddress->getStreet2(),
+                'suburb'        => (string)$shippingAddress->getCity(),
+                'postcode'      => (string)$shippingAddress->getPostcode(),
+                'state'         => (string)$shippingAddress->getRegion(),
+                'phoneNumber'   => (string)$shippingAddress->getTelephone(),
+                // 'countryCode'   => 'AU',
+                'countryCode'   => (string)$shippingAddress->getCountry(),
+            );
+        }
 
         $params['billing'] = array(
             'name'          => (string)$billingAddress->getFirstname() . ' ' . $billingAddress->getLastname(),
@@ -127,12 +132,13 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
             'postcode'      => (string)$billingAddress->getPostcode(),
             'state'         => (string)$billingAddress->getRegion(),
             'phoneNumber'   => (string)$billingAddress->getTelephone(),
-            'countryCode'   => 'AU',
+            // 'countryCode'   => 'AU',
+            'countryCode'   => (string)$billingAddress->getCountry(),
         );
 
         $params['totalAmount'] = array(
             'amount'   => round((float)$object->getGrandTotal(), $precision),
-            'currency' => (string)$data['store_currency_code'],
+            'currency' => (string)Mage::app()->getStore()->getCurrentCurrencyCode(),
         );
 
         $params['merchant'] = array(
@@ -183,8 +189,8 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
     public function buildRefundRequest($amount, $payment)
     {
         $params['amount'] = array(
-                                'amount'    => abs($amount), // Afterpay API Ver 1 requires a positive amount
-                                'currency'  => $payment->getOrder()->getGlobalCurrencyCode(),
+                                'amount'    => abs( round($amount, 2) ), // Afterpay API Ver 1 requires a positive amount
+                                'currency'  => $payment->getOrder()->getOrderCurrencyCode(),
                             );
 
         $params['merchantReference'] = NULL;
@@ -202,12 +208,97 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
      * @param string $appendStr    string to be appended after truncate
      * @return string
      */
-    private function truncate_string($string, $length = 64, $appendStr = "") {
+    private function _truncateString($string, $length = 64, $appendStr = "") {
         $truncated_str = "";
         $useAppendStr = (strlen($string) > intval($length))? true:false;
         $truncated_str = substr($string,0,$length);
         $truncated_str .= ($useAppendStr)? $appendStr:"";
         return $truncated_str;
     }
-}
 
+
+    private function _handleState( $object ) {
+
+        $billing_country = $object->getBillingAddress()->getCountry();
+        $shipping_country = $object->getShippingAddress()->getCountry();
+
+        if( !empty($billing_country) ) {
+
+            $list_state_required = $this->_getStateRequired();
+
+            //if the country doesn't require state, make Suburb goes to State Field
+            if( !in_array( $billing_country, $list_state_required ) ) {
+                $object->getBillingAddress()->setRegion( $object->getBillingAddress()->getCity() )->save(); 
+                $object->getShippingAddress()->setRegion( $object->getShippingAddress()->getCity() )->save(); 
+            }
+        }
+    }
+
+    private function _getStateRequired() {
+        $destinations = (string)Mage::getStoreConfig('general/region/state_required');
+
+        $state_required = !empty($destinations) ? explode(',', $destinations) : [];
+
+        return $state_required; 
+    }
+
+    private function _validateData( $object ) {
+
+        $errors = array();
+
+        $this->_handleState( $object );
+
+        $billingAddress = $object->getBillingAddress();
+        $shippingAddress = $object->getShippingAddress();
+
+    	$billing_postcode = $billingAddress->getPostcode();
+    	$billing_state = $billingAddress->getRegion();
+    	$billing_telephone = $billingAddress->getTelephone();
+    	$billing_city = $billingAddress->getCity();
+    	$billing_street = $billingAddress->getStreet1();
+
+        if( empty($billing_postcode) ) {
+            $errors[] = "Billing Postcode is required";
+        }
+        if( empty($billing_state) ) {
+            $errors[] = "Billing State is required";
+        }
+        if( empty($billing_telephone) ) {
+            $errors[] = "Billing Phone is required";
+        }
+        if( empty($billing_city) ) {
+            $errors[] = "Billing City/Suburb is required";
+        }
+        if( empty($billing_street) ) {
+            $errors[] = "Billing Address is required";
+        }
+
+        if( !empty($shippingAddress) ) {
+        	$shipping_postcode = $shippingAddress->getPostcode();
+        	$shipping_state = $shippingAddress->getRegion();
+        	$shipping_telephone = $shippingAddress->getTelephone();
+        	$shipping_city = $shippingAddress->getCity();
+        	$shipping_street = $shippingAddress->getStreet1();
+
+            if( empty($shipping_postcode) ) {
+                $errors[] = "Shipping Postcode is required";
+            }
+            if( empty($shipping_state) ) {
+                $errors[] = "Shipping State is required";
+            }
+            if( empty($shipping_telephone) ) {
+                $errors[] = "Shipping Phone is required";
+            }
+            if( empty($shipping_city) ) {
+                $errors[] = "Shipping City/Suburb is required";
+            }
+            if( empty($shipping_street) ) {
+                $errors[] = "Shipping Address is required";
+            }
+        }
+
+        if( !empty($errors) && count($errors) ) {
+            throw new InvalidArgumentException( "<br/>" . implode($errors, '<br/>') );
+        }
+    }
+}
