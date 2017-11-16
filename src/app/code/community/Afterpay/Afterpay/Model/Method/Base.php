@@ -345,7 +345,7 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
             );
         }
 
-        $resultObject = json_decode($result->getBody(), true);
+        $resultObject = json_decode( $helper->getChunkedBody( $result ), true);
 
         $helper->log(
             'retrieveOrderToken() response: ' . print_r(
@@ -413,7 +413,7 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
             );
         }
 
-        $resultObject = json_decode($result->getBody(), true);
+        $resultObject = json_decode( $helper->getChunkedBody( $result ), true);
 
         if (isset($resultObject['errorId']) || isset($resultObject['errorCode'])) {
             throw Mage::exception(
@@ -463,7 +463,7 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
             );
         }
 
-        $resultObject = json_decode($result->getBody(), true);
+        $resultObject = json_decode( $helper->getChunkedBody( $result ), true);
 
         if (isset($resultObject['errorId']) || isset($resultObject['errorCode'])) {
             throw Mage::exception(
@@ -547,7 +547,7 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
 
         $response       = $this->_sendRequest($url, $postData, Varien_Http_Client::PUT);
         $httpStatusCode = $response->getStatus();
-        $contents       = $response->getBody();
+        $contents       = $helper->getChunkedBody( $response );
 
         // log info about HTTP status code
         $helper->log(
@@ -719,7 +719,7 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
             );
         }
 
-        $resultObject = $coreHelper->jsonDecode($response->getBody(), true);
+        $resultObject = $coreHelper->jsonDecode( $helper->getChunkedBody( $response ), true);
 
         if (isset($resultObject['errorId']) || isset($resultObject['errorCode'])) {
             throw Mage::exception(
@@ -825,7 +825,7 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
             throw Mage::exception('Afterpay_Afterpay', 'Afterpay API error: ' . 'Payment Limits Update Error. Please check Merchant ID and Key.');
         }
 
-        $data = Mage::helper('core')->jsonDecode($response->getBody());
+        $data = Mage::helper('core')->jsonDecode( $helper->getChunkedBody( $response ) );
 
         if( empty($data) || count($data) < 1 ) {
             throw Mage::exception('Afterpay_Afterpay', 'Afterpay API error: ' . 'Empty Payment Limits Update Results. Please check Merchant ID and Key.');
@@ -854,9 +854,9 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
     }
 
     private function _construct_user_agent() {
-        return 'AfterpayMagentoPlugin/' . $this->helper()->getModuleVersion() . 
-                ' (Magento ' . Mage::getEdition() . ' ' . Mage::getVersion() . 
-                ') MerchantID: ' . trim($this->_cleanup_string($this->getConfigData(self::API_USERNAME_CONFIG_FIELD))) . 
+        return 'AfterpayMagentoPlugin/' . $this->helper()->getModuleVersion() .
+                ' (Magento ' . Mage::getEdition() . ' ' . Mage::getVersion() .
+                ') MerchantID: ' . trim($this->_cleanup_string($this->getConfigData(self::API_USERNAME_CONFIG_FIELD))) .
                 ' URL: ' . Mage::getBaseUrl();
     }
 }
