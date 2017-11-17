@@ -411,8 +411,11 @@ class Afterpay_Afterpay_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getChunkedBody($response){
         try{
-            return $response->getBody();
+            $body = $response->getBody();
         }catch(\Exception $e){
+            // We only want to ignore the exception in this specific case.
+            if($e->getMessage() !== "Error parsing body - doesn't seem to be a chunked message") throw $e;
+
             // For some reason, Afterpay server seems to send the response as non-chunked and then compressed,
             // but with a heading indicating it's chunked.
             $body = $response->getRawBody();
@@ -427,10 +430,8 @@ class Afterpay_Afterpay_Helper_Data extends Mage_Core_Helper_Abstract
                 default:
                     break;
             }
-
-            return $body;
         }
-
+        return $body;
     }
     
 }
