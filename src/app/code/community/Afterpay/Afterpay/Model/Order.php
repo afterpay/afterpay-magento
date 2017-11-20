@@ -44,7 +44,8 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
 
         // Request order token to API
         $result = $this->_sendRequest($gatewayUrl, $postData, Varien_Http_Client::POST, 'StartAfterpayPayment');
-        $resultObject = json_decode($result->getBody());
+        $helper = Mage::helper('afterpay');
+        $resultObject = json_decode( $helper->getChunkedBody( $result ));
 
         // Check if token is NOT in response
         if ( empty($resultObject->orderToken) && empty($resultObject->token) ) {
@@ -99,7 +100,7 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
 
         // Request order token to API
         $result = $this->_sendRequest($gatewayUrl, $postData, Varien_Http_Client::POST, 'StartAfterpayDirectCapture');
-        $resultObject = json_decode($result->getBody());
+        $resultObject = json_decode( Mage::helper('afterpay')->getChunkedBody( $result ) );
 
         // Check if token is NOT in response
         if( !empty($resultObject->errorCode) || !empty($resultObject->errorId) ) {
@@ -131,7 +132,7 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
 
         // Request order token to API
         $result = $this->_sendRequest($gatewayUrl, false, Varien_Http_Client::GET, 'Get order by token ' . $orderToken);
-        $resultObject = json_decode($result->getBody());
+        $resultObject = json_decode( Mage::helper('afterpay')->getChunkedBody( $result ) );
 
         return $resultObject;
     }

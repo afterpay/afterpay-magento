@@ -117,7 +117,7 @@ class Afterpay_Afterpay_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function calculateInstalment()
     {
-        $total = Mage::getSingleton('checkout/session')->getQuote()->getGrandTotal();
+        $total = round( Mage::getSingleton('checkout/session')->getQuote()->getGrandTotal(), 2);
         $installment = ceil($total / 4 * 100) / 100;
         return Mage::app()->getStore()->formatPrice($installment, false);
     }
@@ -401,6 +401,37 @@ class Afterpay_Afterpay_Helper_Data extends Mage_Core_Helper_Abstract
 
         return true;
     }
-    
+
+    /**
+     * Workaround to deal with Afterpay response which has been chunked and then compressed,
+     * rather than compressed and then chunked.
+     *
+     * @param Zend_Http_Response $response
+     * @return string
+     */
+    public function getChunkedBody($response){
+        try{
+            $body = $response->getBody();
+        }catch(\Exception $e){
+            // We only want to ignore the exception in this specific case.
+            if($e->getMessage() !== "Error parsing body - doesn't seem to be a chunked message") throw $e;
+
+            // For some reason, Afterpay server seems to send the response as non-chunked and then compressed,
+            // but with a heading indicating it's chunked.
+            $body = $response->getRawBody();
+            // Decode any content-encoding (gzip or deflate) if needed
+            switch (strtolower($response->getHeader('content-encoding'))) {
+                case 'gzip':
+                    $body = Zend_Http_Response::decodeGzip($body);
+                    break;
+                case 'deflate':
+                    $body = Zend_Http_Response::decodeDeflate($body);
+                    break;
+                default:
+                    break;
+            }
+        }
+        return $body;
+    }
     
 }
