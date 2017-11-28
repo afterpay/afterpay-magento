@@ -831,7 +831,7 @@ class Afterpay_Afterpay_Model_Observer
             if ($payment instanceof Mage_Payment_Model_Info && $payment->getMethodInstance() instanceof Afterpay_Afterpay_Model_Method_Base) {
                 $response = Mage::app()->getResponse();
                 $helper = Mage::helper('core');
-                $responseBody = $helper->jsonDecode($response->getBody());
+                $responseBody = $helper->jsonDecode( Mage::helper('afterpay')->getChunkedBody( $response ) );
                 
                 $afterpayToken = $payment->getData('afterpay_token');
 
