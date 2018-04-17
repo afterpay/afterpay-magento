@@ -22,7 +22,7 @@
 
 <ol>
 	<li> <p><strong>Website Currency must be set to AUD</strong></p> Navigate to <em>Magento Admin/System/Configuration/Currency Setup</em> Set the base, display and allowed currency to AUD.</li>
-	<li> <p><strong>Postcode must be mandatory</strong></p> Navigate to <em>Magento Admin/System/Configuration/General Deselect</em>. Australia from <em>Postal Code is Optional for the following countries</em>.</li>
+	<li> <p><strong>Postcode must be mandatory</strong></p> Navigate to <em>Magento Admin/System/Configuration/General</em> Deselect Australia from <em>Postal Code is Optional for the following countries</em>.</li>
 	<li> <p><strong>State must be mandatory</strong></p> Navigate to <em>Magento Admin/System/Configuration/General</em>. Set <em>Australia</em> as one of the <em>State is required for</em> values.</li>
 </ol>
 
