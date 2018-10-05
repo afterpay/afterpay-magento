@@ -423,6 +423,7 @@ with&nbsp;
                 <api_mode>sandbox</api_mode>
                 <api_password backend_model="adminhtml/system_config_backend_encrypted"/>
                 <installments_amount>4</installments_amount>
+                <allowcurrencies>AUD,NZD</allowcurrencies>
             </afterpaypayovertime>
         </payment>
     </default>

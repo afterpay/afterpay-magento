@@ -83,15 +83,10 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
      */
     public function canUseForCurrency($currencyCode)
     {
-        // TODO: Move list of supported currencies to config.xml
+        $allowedCurrencies = explode(",", Mage::getStoreConfig('payment/afterpaypayovertime/allowcurrencies'));
+        if(sizeof($allowedCurrencies) == 0) $allowedCurrencies = array('AUD','NZD');
 
-        if( strtoupper($currencyCode) === "AUD" ) {
-            return true;
-        }
-        else if( strtoupper($currencyCode) === "NZD" ) {
-            return true;
-        }
-        return false;
+        return in_array($currencyCode, $allowedCurrencies);
     }
 
     /**
