@@ -3,8 +3,8 @@
 /**
  * API Model configuration source model
  * @package   Afterpay_Afterpay
- * @author    Afterpay <steven.gunarso@touchcorp.com>
- * @copyright Copyright (c) 2016 Afterpay (http://www.afterpay.com.au/)
+ * @author    Afterpay
+ * @copyright 2016-2018 Afterpay https://www.afterpay.com
  */
 class Afterpay_Afterpay_Model_System_Config_Source_ApiMode
 {
@@ -53,16 +53,53 @@ class Afterpay_Afterpay_Model_System_Config_Source_ApiMode
      */
     protected static function _getConfigSettings()
     {
+        if(Mage::app()->getStore()->isAdmin()) {
+            $websiteCode = Mage::app()->getRequest()->getParam('website');
+            
+            if ($websiteCode) {
+                $website = Mage::getModel('core/website')->load($websiteCode);
+                $websiteId = $website->getId();
+            } else {
+                $order_id = Mage::app()->getRequest()->getParam('order_id');
+
+                if($order_id) {
+                    $websiteId = Mage::getModel('core/store')->load(Mage::getModel('sales/order')->load($order_id)->getStoreId())->getWebsiteId();
+                } else {
+                    $websiteId = 0;
+                }
+            }
+        } else {
+            $websiteId = '';
+        }
+
+        if(Mage::app()->getStore($websiteId)->getCurrentCurrencyCode() == 'USD') {
+            $api = 'api_us_url';
+            $web = 'web_us_url';
+        } else {
+            $api = 'api_url';
+            $web = 'web_url';
+        }
+
         $options = array();
 
         foreach (Mage::getConfig()->getNode('afterpay/environments')->children() as $environment) {
             $options[$environment->getName()] = array(
                 self::KEY_NAME      => (string) $environment->name,
-                self::KEY_API_URL   => (string) $environment->api_url,
-                self::KEY_WEB_URL   => (string) $environment->web_url,
+                self::KEY_API_URL   => (string) $environment->{$api},
+                self::KEY_WEB_URL   => (string) $environment->{$web},
             );
         }
 
         return $options;
+    }
+
+    /**
+     * Get currencyCode for the store
+     *
+     * @return array
+     */
+    public static function getCurrencyCode()
+    {
+        return Mage::app()->getStore()->getCurrentCurrencyCode();
     }
 }

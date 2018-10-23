@@ -2,8 +2,8 @@
 
 /**
  * @package   Afterpay_Afterpay
- * @author    Afterpay <steven.gunarso@touchcorp.com>
- * @copyright Copyright (c) 2016 Afterpay (http://www.afterpay.com.au/)
+ * @author    Afterpay
+ * @copyright 2016-2018 Afterpay https://www.afterpay.com
  */
 
 /**
@@ -56,7 +56,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
             if (!$this->_validateFormKey()) {
 
                 $frontend_form_key  =   Mage::app()->getRequest()->getParam('form_key');
-                $session_form_key   =   Mage::getSingleton('core/session')->getFormKey();
+                $session_form_key   =   $this->getSession()->getFormKey();
 
                 $this->helper()->log('Detected fraud. Front-End Key:' . $frontend_form_key . ' Session Key:' . $session_form_key, Zend_Log::ERR);
 
@@ -82,7 +82,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
                     $this->_quote,
                     $this->_quote->getStoreId()
                 )) {
-                Mage::getSingleton('core/session')->addNotice(
+                $this->getSession()->addNotice(
                     Mage::helper('afterpay')->__('To proceed to Checkout, please log in using your email address.')
                 );
                 $this->redirectLogin();
@@ -113,7 +113,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
             // Adding error for redirect and JSON
             $message = Mage::helper('afterpay')->__('There was an error processing your order. %s', $e->getMessage());
 
-            Mage::getSingleton('core/session')->addError($message);
+            $this->getCheckoutSession()->addError($message);
             // Response to the
             $response = array(
                 'success'  => false,
@@ -165,7 +165,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
             // log error and notify customer about incident
             $this->helper()->log('Exception on processing payment redirect request: ' . $e->getMessage(), Zend_Log::ERR);
             Mage::logException($e);
-            Mage::getSingleton('checkout/session')->addError($this->__('Afterpay: Error processing payment request.'));
+            $this->getCheckoutSession()->addError($this->__('Afterpay: Error processing payment request.'));
 
             // re-add all products to shopping cart in case of error
             if ($order->getId()) {
@@ -189,12 +189,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
     public function returnAction()
     {
         // check if using capture then handle new API Ver 1
-        if ( Mage::getModel('afterpay/method_payovertime')->isAPIVersion1() ) {
-            $this->_capture();
-        } else {
-            // fall back to using old one
-            $this->_order();
-        }
+        $this->_processAPIV1();
     }
 
     /**
@@ -264,7 +259,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
                     $this->_quote->getData('afterpay_order_id'),
                     $this->_quote->getId(),
                     $this->_quote->getReservedOrderId(),
-		    $e->getTraceAsString()
+		            $e->getTraceAsString()
                 ),
                 Zend_Log::ERR
             );
@@ -283,7 +278,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
      */
     public function getCheckoutMethod()
     {
-        if (Mage::getSingleton('customer/session')->isLoggedIn()) {
+        if ($this->getCustomerSession()->isLoggedIn()) {
             return Mage_Checkout_Model_Type_Onepage::METHOD_CUSTOMER;
         }
         if (!$this->_quote->getCheckoutMethod()) {
@@ -361,7 +356,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
         if ($customer->getData()) {
             // $quote->loginById($customerId);
 
-            $session = Mage::getSingleton('customer/session')->setCustomerAsLoggedIn($customer);
+            $session = $this->getCustomerSession()->setCustomerAsLoggedIn($customer);
             return $this->_prepareAfterpayCustomerQuote();
         }
 
@@ -410,7 +405,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
         $customer->save();
 
         //force login
-        $session = Mage::getSingleton('customer/session')->setCustomerAsLoggedIn($customer);
+        $session = $this->getCustomerSession()->setCustomerAsLoggedIn($customer);
         $session->login($email, $password);
 
         $quote->setCustomer($customer)->setCustomerIsGuest(false);
@@ -433,35 +428,17 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
      */
     public function cancelAction()
     {
-        // If we are using API version 1, an order won't have been created so we shouldn't attempt to cancel anything
-        // Unless it is Enterprise Edition, we need to make sure the Store Credit Session is unset
-        if ( Mage::getModel('afterpay/method_payovertime')->isAPIVersion1() ) {
-
-            if( Mage::getEdition() == Mage::EDITION_ENTERPRISE ) {
-    	    	$this->helper()->storeCreditSessionUnset();
-    	    	$this->helper()->giftCardsSessionUnset();
-    	    }
-
-            $this->_getQuote()->getPayment()->setData('afterpay_token', NULL)->save();
-	
-            $this->_redirect('checkout/cart');
-            return;
+        if( Mage::getEdition() == Mage::EDITION_ENTERPRISE ) {
+            $this->helper()->storeCreditSessionUnset();
+            $this->helper()->giftCardsSessionUnset();
         }
 
-        $order = $this->getLastRealOrder();
+        $this->_getQuote()->getPayment()->setData('afterpay_token', NULL)->save();
 
-        if ($order && $order->getId()) {
-            $this->helper()->log(
-                'Requested order cancellation by customer. OrderId: ' . $order->getIncrementId(),
-                Zend_Log::DEBUG
-            );
-            $this->cancelOrder($order);
-            $this->returnProductsToCart($order);
-
-            $order->save();
-        }
+        $this->getCheckoutSession()->addNotice("Afterpay Transaction was cancelled.");
 
         $this->_redirect('checkout/cart');
+        return;
     }
 
     /**
@@ -513,6 +490,17 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
     protected function getSession()
     {
         return Mage::getSingleton('core/session');
+    }
+
+    /**
+         * Get customer session
+         *
+         * @return Mage_Customer_Model_Session
+         */
+
+    protected function getCustomerSession()
+    {
+        return Mage::getSingleton('customer/session');
     }
 
     /**
@@ -645,226 +633,14 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
     protected function _checkAndRedirect()
     {
         // Default redirect to checkout if Session afterpay redirect is not exist
-        if (!Mage::getSingleton('core/session')->getData('afterpay_error_redirect')) {
+        if (!$this->getSession()->getData('afterpay_error_redirect')) {
             // Redirect to checkout
             $this->_redirectUrl(Mage::helper('checkout/url')->getCheckoutUrl());
         } else {
             // Redirect to cart
-            $this->_redirect(Mage::getSingleton('core/session')->getData('afterpay_error_redirect', true));
+            $this->_redirect($this->getSession()->getData('afterpay_error_redirect', true));
         }
     }
-
-    /**
-     * Perform changes according to given payment status
-     *
-     * @param string                 $returnedStatus
-     * @param Mage_Sales_Model_Order $order
-     */
-    protected function processPaymentOrderStatus($returnedStatus, Mage_Sales_Model_Order $order)
-    {
-        $returnedStatus = strtoupper($returnedStatus);
-        $payment        = $order->getPayment();
-        $paymentMethod  = $payment->getMethodInstance();
-        $logPrefix      = 'Return notification: ';
-        $checkoutHelper = Mage::helper('checkout/url');
-        $session        = Mage::getSingleton('core/session');
-
-        // retrieve payment status online in case of SUCCESS return notification
-        $helper = $this->helper();
-
-        if (self::RETURN_STATUS_SUCCESS == $returnedStatus) {
-            if ($order->isPaymentReview()) {
-                $helper->log($logPrefix . 'Re-checking order payment status: ' . $order->getIncrementId(), Zend_Log::INFO);
-                $payment->registerPaymentReviewAction(Mage_Sales_Model_Order_Payment::REVIEW_ACTION_UPDATE, true);
-            } else {
-                $helper->log($logPrefix . 'Order status was not re-checked. Order is not in Payment Review state. OrderID=' . $order->getIncrementId(), Zend_Log::NOTICE);
-            }
-        }
-
-        // process return notification code and order payment status
-        if (self::RETURN_STATUS_SUCCESS == $returnedStatus && $order->isPaymentReview()) {
-
-            // order payment is pending review -> send email and just redirect to success
-            if (!$order->getEmailSent() && $paymentMethod->getConfigData('order_email')) {
-                $order->sendNewOrderEmail();
-            }
-
-            $helper->log($logPrefix . 'Order is in Payment Review status. Redirecting customer to success page. OrderID=' . $order->getIncrementId(), Zend_Log::INFO);
-            $this->_redirect('checkout/onepage/success');
-
-        } elseif (self::RETURN_STATUS_SUCCESS == $returnedStatus
-            && $order->getState() === Mage_Sales_Model_Order::STATE_PROCESSING
-        ) {
-
-            // order payment has been approved -> send email and redirect to success
-            if (!$order->getEmailSent() && $paymentMethod->getConfigData('order_email')) {
-                $order->sendNewOrderEmail();
-            }
-
-            $helper->log($logPrefix . 'Creating invoice...', Zend_Log::DEBUG);
-
-            try {
-                $helper->createInvoice($order);
-
-                $helper->log($helper->__($logPrefix . 'Invoice successfully created'), Zend_Log::DEBUG);
-            } catch (Afterpay_Afterpay_Exception $e) {
-                $helper->log($helper->__($logPrefix . '%s. Invoice is not created', $e->getMessage()), Zend_Log::INFO);
-            } catch (Exception $e) {
-                Mage::logException($e);
-                $helper->log(
-                    $helper->__($logPrefix . 'Invoice creation failed with message: %s', $e->getMessage()),
-                    Zend_Log::ERR
-                );
-            }
-
-            $helper->log($logPrefix . 'Order is in Processing status. Redirecting customer to success page. OrderID=' . $order->getIncrementId(), Zend_Log::INFO);
-            $this->_redirect('checkout/onepage/success');
-
-        } elseif (self::RETURN_STATUS_FAILURE == $returnedStatus) {
-            // payment failure -> cancel order and redirect to failure page
-
-            $isPendingPayment = $order->getState() === Mage_Sales_Model_Order::STATE_PENDING_PAYMENT;
-
-            if ($isPendingPayment || $order->isPaymentReview()) {
-                $helper->log($logPrefix . 'Payment failed. Cancelling order and redirecting to failure page. OrderID=' . $order->getIncrementId(), Zend_Log::INFO);
-
-                $payment->setNotificationResult(true);
-                $payment->registerPaymentReviewAction(Mage_Sales_Model_Order_Payment::REVIEW_ACTION_DENY, false);
-
-                $this->returnProductsToCart($order);
-
-            } else {
-                $helper->log($logPrefix . 'Payment failed. Redirecting customer to checkout. OrderID=' . $order->getIncrementId(), Zend_Log::INFO);
-            }
-
-            $session->addError($helper->__('Your Afterpay payment was declined. Please select an alternative payment method.'));
-            $this->_redirectUrl($checkoutHelper->getCheckoutUrl());
-
-        } elseif (self::RETURN_STATUS_CANCELLED == $returnedStatus || $order->isCanceled()) {
-
-            // order has been cancelled -> cancel order and add all products to shopping cart
-            $this->cancelOrder($order);
-            $this->returnProductsToCart($order);
-
-            $helper->log($logPrefix . 'Order has been cancelled. Redirecting customer to checkout. OrderID=' . $order->getIncrementId(), Zend_Log::INFO);
-
-            $session->addError($helper->__('You have cancelled your Afterpay payment. Please select an alternative payment method.'));
-            $this->_redirectUrl($checkoutHelper->getCheckoutUrl());
-
-        } else {
-            // TODO: add default redirect for unknown cases + log message about incident
-        }
-    }
-
-
-    /*------------------------------------------------------------------------------------------------------
-                                    Functions used ONLY on API Version 0 
-    ------------------------------------------------------------------------------------------------------*/
-
-    /**
-     * Return function if configuration is using order to process order
-     * Only used in API V0
-     */
-    protected function _order()
-    {
-        $startTime = microtime(true); // basic profiling
-
-        $order = $this->getLastRealOrder();
-
-        $helper  = $this->helper();
-        $request = $this->getRequest();
-
-        try {
-
-            // get request parameters
-            $receivedStatus  = trim((string)$request->getParam('status'));
-            $receivedToken   = trim((string)$request->getParam('orderToken'));
-            $receivedOrderId = trim((string)$request->getParam('orderId'));
-
-            $helper->log(sprintf(
-                'Return notification: status=%s orderToken=%s checkoutSessionOrderId=%s ',
-                $receivedStatus, $receivedToken, $order->getIncrementId()),
-                Zend_Log::DEBUG);
-
-
-            // check received parameters and order ID from session
-            if (!$order->getId()) {
-                $this->throwException('No order saved in checkout session');
-            } elseif (empty($receivedStatus) || empty($receivedToken)) {
-                $this->throwException('Cannot get status and orderToken from session');
-            }
-
-            // get payment data from database
-            $payment         = $order->getPayment();
-            $afterpayToken   = $payment->getData('afterpay_token');
-            $afterpayOrderId = $payment->getData('afterpay_order_id');
-
-            // compare received token with saved in DB
-            if ($receivedToken !== $afterpayToken) {
-                $this->throwException(sprintf(
-                    'Order token doesn\'t match database data: orderId=%s receivedToken=%s savedToken=%s',
-                    $order->getIncrementId(), $receivedToken, $afterpayToken));
-            }
-
-            // check for trial to override order ID
-            if (!empty($afterpayOrderId) && !empty($afterpayOrderId) && $receivedOrderId !== $afterpayOrderId) {
-                $this->throwException(sprintf(
-                    'Trial to override afterpayOrderId: currentOrderId=%s receivedOrderId=%s',
-                    $afterpayOrderId, $receivedOrderId));
-            }
-
-            if (!empty($receivedOrderId)) {
-                /** @var Afterpay_Afterpay_Model_Method_Base $paymentMethod */
-                $paymentMethod = $payment->getMethodInstance();
-                $paymentMethod->saveAfterpayOrderId($order, $receivedOrderId);
-
-                try {
-                    $paymentMethod->createOrderTransaction($order, !in_array($receivedStatus, array(self::RETURN_STATUS_FAILURE, self::RETURN_STATUS_CANCELLED)));
-                } catch (Afterpay_Afterpay_Exception $e) {
-                    $helper->log('Return notification: ' . $e->getMessage(), Zend_Log::NOTICE);
-                }
-
-                $this->processPaymentOrderStatus($receivedStatus, $order);
-
-            } else {
-                $this->processPaymentOrderStatus(self::RETURN_STATUS_CANCELLED, $order);
-            }
-
-            $order->save();
-
-        } catch (Afterpay_Afterpay_Exception $e) {
-
-            $helper->log('Return notification: ' . $e->getMessage(), Zend_Log::ERR);
-            Mage::getSingleton('checkout/session')->addError($this->__('Afterpay: Error processing payment notification.'));
-
-            // return all products to shopping cart and redirect to shopping cart
-            $quote = Mage::getModel('sales/quote')->load($order->getQuoteId());
-            if ($quote->getId()) {
-                $quote->setIsActive(1)->setReservedOrderId(NULL)->save();
-                $this->getCheckoutSession()->replaceQuote($quote);
-            }
-            $this->_redirect('checkout/cart');
-
-        } catch (Exception $e) {
-
-            $helper->log('Return notification: Exception during processing request: ' . $e->getMessage(), Zend_Log::ERR);
-            Mage::logException($e);
-            Mage::getSingleton('checkout/session')->addError($this->__('Afterpay: Error processing payment notification.'));
-            $this->_redirect('checkout/onepage/failure');
-
-        }
-
-        $endTime = microtime(true);
-        $helper->log(
-            sprintf(
-                "Return notification: Processing took %s ms. Request data:\n%s",
-                round(1000 * ($endTime - $startTime)),
-                print_r($request->getParams(), true)
-            ),
-            Zend_Log::DEBUG
-        );
-    }
-
 
     /*------------------------------------------------------------------------------------------------------
                                     Functions used ONLY on API Version 1
@@ -874,7 +650,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
      * Process payment confirmations / failures / cancellations for API ver 1
      * Only used in API V1
      */
-    protected function _capture()
+    protected function _processAPIV1()
     {
         try {
             $orderToken = $this->getRequest()->getParam('orderToken');
@@ -918,7 +694,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
                     }
 
                     // Debug log
-                    $this->helper()->log($this->__('Payment Afterpay succeeded with Afterpay. QuoteID=%s ReservedOrderID=%s',$this->_quote->getId(), $this->_quote->getReservedOrderId()), Zend_Log::NOTICE);
+                    $this->helper()->log($this->__('Afterpay Payment Gateway Confirmation. QuoteID=%s ReservedOrderID=%s',$this->_quote->getId(), $this->_quote->getReservedOrderId()), Zend_Log::NOTICE);
 
                     // Place order when validation is correct
                     $this->_forward('placeOrder');
@@ -984,7 +760,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
      */
     public function userProcessing($quote, $request)
     {
-        $logged_in = Mage::getSingleton('customer/session')->isLoggedIn();
+        $logged_in = $this->getCustomerSession()->isLoggedIn();
         $create_account = $request->getParam("create_account");
 	
 	    if( !is_null($this->getCheckoutMethod()) && ( empty($create_account) ) ) {
@@ -1025,12 +801,25 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
 
         $token = Mage::getModel('afterpay/order')->start($this->_quote);
 
-        $payment = $this->_quote->getPayment();
-        $payment->setData('afterpay_token', $token);
-        $payment->save();
+        try {
+            $payment = $this->_quote->getPayment();
+            $payment->setData('afterpay_token', $token);
+            $payment->save();
 
-        $this->_quote->setPayment($payment);
-        $this->_quote->save();
+            $this->_quote->setPayment($payment);
+            $this->_quote->save();
+        }
+        catch (Exception $e) {
+            // Add error message
+            $message = 'Exception during Afterpay Transaction Redirection.';
+            $this->getCheckoutSession()->addError($message);
+
+            $this->helper()->log($this->__('Exception during redirect fallback. %s', $e->getMessage()), Zend_Log::ERR);
+
+            Mage::throwException(
+                    Mage::helper('afterpay')->__($message)
+                );
+        }
 
         // Mage::getSingleton("checkout/session")->setQuote($quote);
         $target_url = Mage::getModel('afterpay/order')->getApiAdapter()->getApiRouter()->getGatewayApiUrl($token);

@@ -4,8 +4,8 @@
  * Default Afterpay helper class
  *
  * @package   Afterpay_Afterpay
- * @author    Afterpay <steven.gunarso@touchcorp.com>
- * @copyright Copyright (c) 2017 Afterpay (http://www.afterpay.com.au/)
+ * @author    Afterpay
+ * @copyright 2016-2018 Afterpay https://www.afterpay.com
  */
 class Afterpay_Afterpay_Helper_Data extends Mage_Core_Helper_Abstract
 {
@@ -118,10 +118,18 @@ class Afterpay_Afterpay_Helper_Data extends Mage_Core_Helper_Abstract
     public function calculateInstalment()
     {
         $total = Mage::getSingleton('checkout/session')->getQuote()->getGrandTotal();
-        $installment = ceil($total / 4 * 100) / 100;
+        $installment = round($total / 4, 2, PHP_ROUND_HALF_UP);
         return Mage::app()->getStore()->formatPrice($installment, false);
     }
 
+    public function calculateInstalmentLast()
+    {
+        $total = Mage::getSingleton('checkout/session')->getQuote()->getGrandTotal();
+        $prev_instalments = round($total / 4, 2, PHP_ROUND_HALF_UP);
+        $installment = $total - 3 * $prev_instalments;
+
+        return Mage::app()->getStore()->formatPrice($installment, false);
+     }
     
     /**
      * Calculate The Total Amount

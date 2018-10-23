@@ -2,7 +2,7 @@
  * Override function for MageStore checkout when submit order
  */
 (function() {
-    if (typeof window.oscPlaceOrder !== 'undefined' && window.Afterpay.paymentAction == 'authorize_capture') {
+    if (typeof window.oscPlaceOrder !== 'undefined') {
         var original = window.oscPlaceOrder;
 
         /**
@@ -79,7 +79,11 @@
 
                                 //modified to suit API V1
                                 if( window.afterpayReturnUrl === false ) {
-                                    AfterPay.init(); 
+                                    if (typeof AfterPay.initialize === "function") {
+                                        AfterPay.initialize(window.afterpayCountryCode);
+                                    } else {
+                                        AfterPay.init();
+                                    }
                                 }
                                 else {
                                     AfterPay.init({
@@ -117,11 +121,6 @@
                         }
                     }
                 );
-            } else {
-                /**
-                 * Call original function
-                 */
-                original.apply(this, arguments);
             }
         };
     }

@@ -2,8 +2,8 @@
 
 /**
  * @package   Afterpay_Afterpay
- * @author    Aferpay <steven.gunarso@touchcorp.com>
- * @copyright Copyright (c) 2016 Afterpay (http://www.afterpay.com.au)
+ * @author    Afterpay
+ * @copyright 2016-2018 Afterpay https://www.afterpay.com
  */
 
 /**
@@ -109,19 +109,20 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
         //     'amount'   => round((float)$data['subtotal'], $precision),
         //     'currency' => (string)Mage::app()->getStore()->getCurrentCurrencyCode(),
         // );
-
-        if( !empty($params['shipping']) ) {
-            $params['shipping'] = array(
-                'name'          => (string)$shippingAddress->getFirstname() . ' ' . $shippingAddress->getLastname(),
-                'line1'         => (string)$shippingAddress->getStreet1(),
-                'line2'         => (string)$shippingAddress->getStreet2(),
-                'suburb'        => (string)$shippingAddress->getCity(),
-                'postcode'      => (string)$shippingAddress->getPostcode(),
-                'state'         => (string)$shippingAddress->getRegion(),
-                'phoneNumber'   => (string)$shippingAddress->getTelephone(),
-                // 'countryCode'   => 'AU',
-                'countryCode'   => (string)$shippingAddress->getCountry(),
-            );
+        if( !empty( $shippingAddress ) ) {
+            if( !empty( $shippingAddress->getStreet1() ) ) {
+                $params['shipping'] = array(
+                    'name'          => (string)$shippingAddress->getFirstname() . ' ' . $shippingAddress->getLastname(),
+                    'line1'         => (string)$shippingAddress->getStreet1(),
+                    'line2'         => (string)$shippingAddress->getStreet2(),
+                    'suburb'        => (string)$shippingAddress->getCity(),
+                    'postcode'      => (string)$shippingAddress->getPostcode(),
+                    'state'         => (string)$shippingAddress->getRegion(),
+                    'phoneNumber'   => (string)$shippingAddress->getTelephone(),
+                    // 'countryCode'   => 'AU',
+                    'countryCode'   => (string)$shippingAddress->getCountry(),
+                );
+            }
         }
 
         $params['billing'] = array(
@@ -160,21 +161,6 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
         $params['webhookEventUrl'] = "";
 
         return $params;
-    }
-
-    /**
-     * @param string $trackingNumber
-     * @param string $courier
-     *
-     * @return array
-     */
-    public function buildSetShippedRequest($trackingNumber, $courier)
-    {
-        return array(
-            'tracking'      => is_null($trackingNumber) ? null : (string)$trackingNumber,
-            'shippedAt'     => date("Y-m-d H:i:s", Mage::getModel('core/date')->timestamp(time())),
-            'name'          => $courier,
-        );
     }
 
     /**

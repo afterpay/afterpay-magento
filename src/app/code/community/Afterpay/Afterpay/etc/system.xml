@@ -53,25 +53,6 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </api_password>
-                        <payment_action translate="label">
-                            <label>Payment Action</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>afterpay/system_config_source_paymentaction</source_model>
-                            <comment>Using &lt;strong&gt;Authorize and Capture&lt;&#47;strong&gt; will reduce the number of pending order created in the store. </comment>
-                            <sort_order>43</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </payment_action>
-                        <payment_review_status translate="label">
-                            <label>Payment Review Status</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>afterpay/system_config_source_paymentreview</source_model>
-                            <sort_order>50</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </payment_review_status>
                         <order_email translate="label">
                             <label>Send Order Email</label>
                             <frontend_type>select</frontend_type>
@@ -193,40 +174,6 @@
                         </debug>
                     </fields>
                 </general>
-                <!--
-                <banner>
-                    <label>Banner Display Settings</label>
-                    <frontend_type>text</frontend_type>
-                    <sort_order>20</sort_order>
-                    <show_in_default>1</show_in_default>
-                    <show_in_website>1</show_in_website>
-                    <show_in_store>1</show_in_store>
-                    <expanded>1</expanded>
-                    <fields>
-                        <enabled translate="label">
-                            <label>Display banner with video popup</label>
-                            <comment>If "Yes" - then Afterpay banner with video popup will be displayed</comment>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>0</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </enabled>
-                        <banner_block_selector>
-                            <label>Display banner after selector</label>
-                            <comment>
-                                CSS selector for block, after which Afterpay banner will be displayed
-                            </comment>
-                            <frontend_type>text</frontend_type>
-                            <sort_order>10</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </banner_block_selector>
-                    </fields>
-                </banner>
-                -->
                 <payovertime_installments translate="label">
                     <label>Installment Amount Display Settings</label>
                     <frontend_type>text</frontend_type>
@@ -274,45 +221,6 @@
                                 <enable_product_page>1</enable_product_page>
                             </depends>
                         </product_page_html_template>
-                        <enable_product_list translate="label">
-                            <label>Show installments amount on Category page and Search results page</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>20</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </enable_product_list>
-                        <product_list_price_block_selectors>
-                            <label>Category / Search page: price block selectors</label>
-                            <comment>
-                                CSS selectors for price-box elements. Afterpay amount will be displayed after each price-box element.
-                                CSS selectors should be splitted by new line character.
-                            </comment>
-                            <frontend_type>textarea</frontend_type>
-                            <sort_order>21</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends>
-                                <enable_product_list>1</enable_product_list>
-                            </depends>
-                        </product_list_price_block_selectors>
-                        <product_list_html_template translate="label">
-                            <label>Category / Search page: HTML template</label>
-                            <comment>
-                                HTML template of block with installments amount. Substring "{price_here}" will be replaced with installments amount.
-                                You may need to adjust CSS styles to show installments amount in right place in current Magento theme.
-                            </comment>
-                            <frontend_type>textarea</frontend_type>
-                            <sort_order>22</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends>
-                                <enable_product_list>1</enable_product_list>
-                            </depends>
-                        </product_list_html_template>
                         <check_order_total_limits translate="label">
                             <label>Check Min/Max Order Total before displaying Installments Amount</label>
                             <comment>
@@ -401,25 +309,6 @@
                         </show_onetouch>
                     </fields>
                 </payovertime_cart>
-                <api translate="label">
-                    <label>API Settings</label>
-                    <frontend_type>text</frontend_type>
-                    <sort_order>51</sort_order>
-                    <show_in_default>0</show_in_default>
-                    <show_in_website>0</show_in_website>
-                    <show_in_store>0</show_in_store>
-                    <fields>
-                        <setshipped_api_enabled>
-                            <label>Enable SetShipped API integration</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>10</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </setshipped_api_enabled>
-                    </fields>
-                </api>
             </groups>
         </afterpay>
     </sections>

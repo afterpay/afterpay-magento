@@ -47,12 +47,10 @@
             return;
         }
 
-        // create OptionsPrice object - we'll use if for price formatting in JS
-        // var productOptionsPrice = new Product.OptionsPrice({
-        //     priceFormat: this.config.priceFormat
-        // });
-
         // find all price-box elements (according to configured selectors)
+        this.config.selectors = this.config.selectors.filter(function(str) {
+            return str.replace(/\s/g, '').length;
+        });
         var priceBoxes = Prototype.Selector.select(this.config.selectors.join(','), document);
 
         for (var i = 0; i < priceBoxes.length; i++) {
@@ -95,7 +93,7 @@
                         after: this.config.template.replace(this.config.priceSubstitution,
                             // productOptionsPrice.formatPrice(price / this.config.installmentsAmount)
                             this.config.currencySymbol + individualInstalment.toFixed(2)
-                        )
+                        ).replace(this.config.regionSpecific, this.config.regionText)
                     });
 
                     Element.addClassName(priceBoxes[i].nextSibling, this.config.className);

@@ -11,14 +11,4 @@ class Afterpay_Afterpay_Block_Config extends Mage_Core_Block_Template
     {
         return Mage::getStoreConfig('afterpay/payovertime_checkout/checkout_mode');
     }
-
-    /**
-     * Get the payment action
-     *
-     * @return mixed (order | authorize_capture)
-     */
-    public function getPaymentAction()
-    {
-        return Mage::getStoreConfig('payment/afterpaypayovertime/payment_action');
-    }
 }

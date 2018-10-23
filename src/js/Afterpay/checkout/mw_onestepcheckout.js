@@ -16,12 +16,12 @@ jQuery( document ).ready( function() {
     
     //hacks the form to prevent override by other plugins
     jQuery(".btn-checkout").on("click", function(e) {
+
+        if (payment.currentMethod == 'afterpaypayovertime') {
     
-	if (payment.currentMethod == 'afterpaypayovertime' && window.Afterpay.paymentAction == 'authorize_capture') {
+            e.preventDefault();
+            e.stopPropagation();    
     
-    		e.preventDefault();
-    		e.stopPropagation();	
-	
             // prepare params
             var params = form.serialize(true);
 
@@ -47,7 +47,11 @@ jQuery( document ).ready( function() {
 
                             //modified to suit API V1
                             if( window.afterpayReturnUrl === false ) {
-                                AfterPay.init(); 
+                                if (typeof AfterPay.initialize === "function") {
+                                    AfterPay.initialize(window.afterpayCountryCode);
+                                } else {
+                                    AfterPay.init();
+                                }
                             }
                             else {
                                 AfterPay.init({
@@ -85,8 +89,6 @@ jQuery( document ).ready( function() {
                     }
                 }
             );
-        } else {
-            original.apply(form, arguments);
-        }		
+        }       
     });
 });

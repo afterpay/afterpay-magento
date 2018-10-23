@@ -1,5 +1,6 @@
 <script src="<?php echo $this->getRedirectJsUrl() ?>"></script>
 <script>
     var afterpayReturnUrl = <?php echo Mage::helper('core')->jsonEncode($this->getReturnUrl()) ?>;
+    var afterpayCountryCode = <?php echo Mage::helper('core')->jsonEncode($this->getCountryCode()) ?>;
 </script>
 <script src="<?php echo $this->getJsUrl('Afterpay/checkout/magestore_onestep.js') ?>"></script>

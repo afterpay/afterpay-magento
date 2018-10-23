@@ -10,7 +10,7 @@
          */
         window.Review.prototype.save = function () {
             // if we have paid with the afterpay pay over time method and use new flow
-            if (payment.currentMethod == 'afterpaypayovertime' && window.Afterpay.paymentAction == 'authorize_capture') {
+            if (payment.currentMethod == 'afterpaypayovertime') {
                 // As per sage payment on checkout it self
                 if ($("billing:use_for_shipping_yes").checked != true) {
                     shipping.setSameAsBilling(true);
@@ -38,7 +38,11 @@
 
                         //modified to suit API V1
                         if( window.afterpayReturnUrl === false ) {
-                            AfterPay.init(); 
+                            if (typeof AfterPay.initialize === "function") {
+                                AfterPay.initialize(window.afterpayCountryCode);
+                            } else {
+                                AfterPay.init();
+                            } 
                         }
                         else {
                             AfterPay.init({

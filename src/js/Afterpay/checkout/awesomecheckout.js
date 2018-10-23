@@ -1,5 +1,5 @@
 (function() {
-    if (typeof window.Review !== "undefined" && window.Afterpay.paymentAction == 'authorize_capture') {
+    if (typeof window.Review !== "undefined") {
         /**
          * Override save on order review function
          */
@@ -35,7 +35,11 @@
 
                                 //modified to suit API V1
                                 if( window.afterpayReturnUrl === false ) {
-                                    AfterPay.init(); 
+                                    if (typeof AfterPay.initialize === "function") {
+                                        AfterPay.initialize(window.afterpayCountryCode);
+                                    } else {
+                                        AfterPay.init();
+                                    }
                                 }
                                 else {
                                     AfterPay.init({

@@ -1,8 +1,8 @@
 <?php
 /**
  * @package   Afterpay_Afterpay
- * @author    Afterpay <steven.gunarso@touchcorp.com>
- * @copyright Copyright (c) 2016 Afterpay (http://www.afterpay.com.au/)
+ * @author    Afterpay
+ * @copyright 2016-2018 Afterpay https://www.afterpay.com
  */
 
 class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payovertime
@@ -43,7 +43,7 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
         $gatewayUrl = $this->getApiAdapter()->getApiRouter()->getOrdersApiUrl();
 
         // Request order token to API
-        $result = $this->_sendRequest($gatewayUrl, $postData, Varien_Http_Client::POST, 'StartAfterpayPayment');
+        $result = $this->_sendRequest($gatewayUrl, $postData, Zend_Http_Client::POST, 'StartAfterpayPayment');
         $resultObject = json_decode($result->getBody());
 
         // Check if token is NOT in response
@@ -60,15 +60,27 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
                 $orderToken = $resultObject->token;
             }
 
-            $payment = $quote->getPayment();
-            $payment->setData('afterpay_token', $orderToken);
-            $payment->save();
+            try {
+                $payment = $quote->getPayment();
+                $payment->setData('afterpay_token', $orderToken);
+                $payment->save();
 
-            // Added to log
-            Mage::helper('afterpay')->log(
-                sprintf('Token successfully saved for reserved order %s. token=%s', $quote->getReservedOrderId(), $orderToken),
-                Zend_Log::NOTICE
-            );
+                // Added to log
+                Mage::helper('afterpay')->log(
+                    sprintf('Token successfully saved for reserved order %s. token=%s', $quote->getReservedOrderId(), $orderToken),
+                    Zend_Log::NOTICE
+                );
+            }
+            catch (Exception $e) {
+                // Add error message
+                $message = 'Exception during initial Afterpay Token saving.';
+
+                $this->helper()->log($this->__($message . ' %s', $e->getMessage()), Zend_Log::ERR);
+
+                Mage::throwException(
+                        Mage::helper('afterpay')->__($message)
+                    );
+            }
 
             return $orderToken;
         }
@@ -87,25 +99,16 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
      */
     public function directCapture( $orderToken, $merchantOrderId, $quote ) {
 
-        //need to do a check for stock levels here
-        if( empty($orderToken) ) {
-            // Perform the fallback in case of Unsupported checkout
-            $this->fallbackMechanism('token_missing');
-        }
-
         $postData = $this->getApiAdapter()->buildDirectCaptureRequest($orderToken,$merchantOrderId);
 
         $gatewayUrl = $this->getApiAdapter()->getApiRouter()->getDirectCaptureApiUrl();
 
         // Request order token to API
-        $result = $this->_sendRequest($gatewayUrl, $postData, Varien_Http_Client::POST, 'StartAfterpayDirectCapture');
+        $result = $this->_sendRequest($gatewayUrl, $postData, Zend_Http_Client::POST, 'StartAfterpayDirectCapture');
         $resultObject = json_decode($result->getBody());
 
         // Check if token is NOT in response
         if( !empty($resultObject->errorCode) || !empty($resultObject->errorId) ) {
-
-            // Perform the fallback in case of Unsupported checkut
-            $this->fallbackMechanism($resultObject->errorCode);
 
             throw Mage::exception('Afterpay_Afterpay', $resultObject->message);
         }
@@ -130,52 +133,10 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
         $gatewayUrl = $this->getApiAdapter()->getApiRouter()->getOrdersApiUrl( $orderToken, 'token' );
 
         // Request order token to API
-        $result = $this->_sendRequest($gatewayUrl, false, Varien_Http_Client::GET, 'Get order by token ' . $orderToken);
+        $result = $this->_sendRequest($gatewayUrl, false, Zend_Http_Client::GET, 'Get order by token ' . $orderToken);
         $resultObject = json_decode($result->getBody());
 
         return $resultObject;
-    }
-
-    /**
-     * Fallback Mechanism hwen Capture is failing
-     *
-     * @param string    $error_code
-     *
-     * @return void
-     * @throws Afterpay_Afterpay_Exception
-     */
-    private function fallbackMechanism($error_code) {
-
-        // Perform the fallback in case of Unsupported checkut
-        try {
-
-            //Unsupported checkout with unattached payovertime.js
-            //Or checkout with payovertime.js attached, but no checkout specific JS codes
-            $error_array = array(
-                'invalid_object'
-                , 'invalid_order_transaction_status'
-                , 'token_missing'
-                , 'invalid_token'
-            );
-
-            if( in_array($error_code, $error_array) ) {
-
-                Mage::helper('afterpay')->log(
-                    sprintf('Unsupported Checkout detected, starting fallback mechanism: ' . $error_code ),
-                    Zend_Log::NOTICE
-                );
-
-                // $fallback_url = "afterpay/payment/redirectFallback";
-                $fallback_url = Mage::getUrl( 'afterpay/payment/redirectFallback', array('_secure' => true) );
-                        
-                Mage::app()->getResponse()->setRedirect($fallback_url);
-                Mage::app()->getResponse()->sendResponse();
-                exit;
-            }
-        }
-        catch( Exception $e ) {
-            throw Mage::exception('Afterpay_Afterpay', $e->getMessage());
-        }
     }
 
     /**

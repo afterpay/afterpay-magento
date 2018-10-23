@@ -15,7 +15,9 @@
     var renderCheckoutTemplate = function (template, config) {
 
         return template.gsub(config.orderAmountSubstitution, config.orderAmount)
+            .gsub(config.regionSpecificSubstitution, config.regionText)
             .gsub(config.installmentAmountSubstitution, config.installmentAmount)
+            .gsub(config.installmentAmountSubstitutionLast, config.installmentAmountLast)
             .gsub(config.imageCircleOneSubstitution, config.imageCircleOne)
             .gsub(config.imageCircleTwoSubstitution, config.imageCircleTwo)
             .gsub(config.imageCircleThreeSubstitution, config.imageCircleThree)

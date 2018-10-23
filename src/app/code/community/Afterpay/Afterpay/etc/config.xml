@@ -2,35 +2,24 @@
 <config>
     <modules>
         <Afterpay_Afterpay>
-            <version>2.0.3</version>
+            <version>3.0.0</version>
         </Afterpay_Afterpay>
     </modules>
     <afterpay>
         <environments>
-            <qa>
-                <name>QA Test</name>
-                <api_url>https://api-qa.paylater.touchcorp.net/</api_url>
-                <web_url>https://portal-qa.paylater.touchcorp.net/</web_url>
-            </qa>
-            <threepi>
-                <name>3PI Test</name>
-                <api_url>https://api-3pi.secure-afterpay.com.au/</api_url>
-                <web_url>https://www-3pi.secure-afterpay.com.au/</web_url>
-            </threepi>
-            <stage>
-                <name>Stage Test</name>
-                <api_url>https://api-stg.secure-afterpay.com.au/</api_url>
-                <web_url>https://www-stg.secure-afterpay.com.au/</web_url>
-            </stage>
             <sandbox>
-                <name>Sandbox Test</name>
+                <name>Sandbox</name>
                 <api_url>https://api-sandbox.afterpay.com/</api_url>
+                <api_us_url>https://api.us-sandbox.afterpay.com/</api_us_url>
                 <web_url>https://portal-sandbox.afterpay.com/</web_url>
+                <web_us_url>https://portal.us-sandbox.afterpay.com/</web_us_url>
             </sandbox>
             <production>
                 <name>Production</name>
                 <api_url>https://api.afterpay.com/</api_url>
+                <api_us_url>https://api.us.afterpay.com/</api_us_url>
                 <web_url>https://portal.afterpay.com/</web_url>
+                <web_us_url>https://portal.us.afterpay.com/</web_us_url>
             </production>
         </environments>
     </afterpay>
@@ -74,9 +63,6 @@
             <afterpay_resource>
                 <class>Afterpay_Afterpay_Model_Resource</class>
                 <entities>
-                    <afterpay_shipped_api_queue>
-                        <table>afterpay_shipped_api_queue</table>
-                    </afterpay_shipped_api_queue>
                 </entities>
             </afterpay_resource>
         </models>
@@ -99,14 +85,6 @@
             </afterpay_setup>
         </resources>
         <events>
-            <sales_order_shipment_save_after>
-                <observers>
-                    <afterpay_sales_order_shipment_save_after>
-                        <class>afterpay/observer</class>
-                        <method>salesOrderShipmentSaveAfter</method>
-                    </afterpay_sales_order_shipment_save_after>
-                </observers>
-            </sales_order_shipment_save_after>
             <admin_system_config_changed_section_payment>
                 <observers>
                     <afterpay_payment_settings_changed>
@@ -164,15 +142,6 @@
                 </observers>
             </controller_action_postdispatch_firecheckout_index_saveOrder>
         </events>
-	<sales_order_payment_place_end>
-                <observers>
-                    <afterpay_order_payment_review>
-                        <type>singleton</type>
-                        <class>afterpay/observer</class>
-                        <method>assignOrderStatus</method>
-                    </afterpay_order_payment_review>
-                </observers>
-            </sales_order_payment_place_end>
             <controller_action_layout_load_before>
                 <observers>
                     <attributesethandle>
@@ -183,19 +152,6 @@
                 </observers>
             </controller_action_layout_load_before>
     </global>
-    <adminhtml>
-        <events>
-            <adminhtml_widget_container_html_before>
-                <observers>
-                    <afterpay>
-                        <class>afterpay/observer</class>
-                        <type>singleton</type>
-                        <method>adminhtmlWidgetContainerHtmlBefore</method>
-                    </afterpay>
-                </observers>
-            </adminhtml_widget_container_html_before>
-        </events>
-    </adminhtml>
     <admin>
         <routers>
             <adminhtml>
@@ -209,58 +165,6 @@
     </admin>
     <crontab>
         <jobs>
-            <!--
-                Cron job which looks for Pending Payment orders and does following:
-                 - try to look up afterpay_order_id by afterpay_token and then check status of payment
-                 - if there is no afterpay_token then cancel order in 1 hour
-                 - if it can't fetch afterpay_order_id then cancel order in 1 hour
-                Cancellation in 1 hour is needed in order not to keep too much inventory for non-paid orders.
-            -->
-            <Afterpay_fetchPendingPaymentOrdersInfo>
-                <schedule>
-                    <cron_expr>*/5 * * * *</cron_expr>
-                </schedule>
-                <run>
-                    <model>afterpay/observer::fetchPendingPaymentOrdersInfo</model>
-                </run>
-            </Afterpay_fetchPendingPaymentOrdersInfo>
-
-            <!-- Cron job to check payment status of Payment Review orders -->
-	    <!--
-            <Afterpay_fetchPaymentReviewPaymentStatus>
-                <schedule>
-                    <cron_expr>*/30 * * * *</cron_expr>
-                </schedule>
-                <run>
-                    <model>afterpay/observer::fetchPaymentReviewPaymentStatus</model>
-                </run>
-            </Afterpay_fetchPaymentReviewPaymentStatus>
-	    -->
-
-            <!-- Cron job to re-check payment status of Processing orders (needed for pre-approved orders) -->
-            <!--
-            <Afterpay_checkPreApprovedOrdersPaymentStatus>
-                <schedule>
-                    <cron_expr>*/15 * * * *</cron_expr>
-                </schedule>
-                <run>
-                    <model>afterpay/observer::checkPreApprovedOrdersPaymentStatus</model>
-                </run>
-            </Afterpay_checkPreApprovedOrdersPaymentStatus>
-            -->
-
-            <!-- Cron job which sends shipped orders info to Afterpay API -->
-	    <!--
-            <Afterpay_sendShippedAPIRequests>
-                <schedule>
-                    <cron_expr>*/10 * * * *</cron_expr>
-                </schedule>
-                <run>
-                    <model>afterpay/observer::sendQueuedSetShippedApiRequests</model>
-                </run>
-            </Afterpay_sendShippedAPIRequests>
-	    -->
-
             <!-- Cron job to fetch current order total limits with Afterpay API -->
             <Afterpay_updateOrderLimits>
                 <schedule>
@@ -274,28 +178,9 @@
     </crontab>
     <default>
         <afterpay>
-            <api>
-                <setshipped_api_enabled>0</setshipped_api_enabled>
-            </api>
             <general>
                 <debug>1</debug>
             </general>
-            <cron>
-                <!-- Payment Review orders payment status checking interval (1h by default) -->
-                <fetch_payment_info_interval>3600</fetch_payment_info_interval>
-                <!-- Payment status checking interval for processing orders (1h by default) -->
-                <check_preapproved_orders_interval>3600</check_preapproved_orders_interval>
-                <!-- Non-paid Pending Payment orders are cancelled automatically 1 hour -->
-                <pending_payment_timeout>4500</pending_payment_timeout> <!-- 4500 seconds == 75 minutes -->
-                <!-- Payment status checked during next N hours for Processing orders (24h by default) -->
-                <check_preapproved_orders_timeout>86400</check_preapproved_orders_timeout>
-            </cron>
-            <!--
-            <banner>
-                <enabled>0</enabled>
-                <banner_block_selector><![CDATA[.header-container]]></banner_block_selector>
-            </banner>
-            -->
             <payovertime_installments>
                 <enable_product_page>1</enable_product_page>
                 <product_page_price_block_selectors><![CDATA[.product-shop .price-box
@@ -304,7 +189,7 @@
      position: relative;
  font-style: italic;
  line-height: 1.4;
-" class="afterpay-installments">or 4 interest free payments of {price_here}
+" class="afterpay-installments">or 4 interest free payments of {price_here} {region_specific_text}
 <br><img src="{skin_url}frontend/base/default/afterpay/images/ap-logo-152x31.png" style="
     width: 76px;
     vertical-align: middle;
@@ -312,41 +197,6 @@
 "></img><a href="#afterpay-what-is-modal" class="afterpay-what-is-modal-trigger">   Learn more </a>
 </div>
 <style type="text/css">.price-box.ciq_price_box .ciq_view_shipping{margin-top:35px}</style>]]></product_page_html_template>
-
-
-<!-- (old version)
-                <div style="
-    text-align: right;
-    font-style: italic;
-    margin-bottom: 10px;
-    margin-top: 0px;
-    line-height: 1.4;
-    float: right;
-    padding-top: -5px;
-    width: 212px;
-" class="afterpay-installments">or 4 payments of {price_here}<br/>
-with&nbsp;
-<img src="{skin_url}frontend/base/default/afterpay/images/ap-logo-152x31.png" style="
-    width: 76px;
-    vertical-align: middle;
-    display: inline;
-"></div>
--->
-
-
-                <enable_product_list>1</enable_product_list>
-                <product_list_price_block_selectors><![CDATA[.products-grid .item .price-box
-.products-list .item .price-box]]></product_list_price_block_selectors>
-                <product_list_html_template><![CDATA[<div style="
-    text-align: center;
-    font-style: italic;
-    font-size: 13px;
-    margin-bottom: 5px;
-    margin-top: -5px;
-    line-height: 1.4;
-    padding-top: -5px;
-    padding-left: 10px;
-">(or 4 payments of {price_here})</div>]]></product_list_html_template>
                 <check_order_total_limits>1</check_order_total_limits>
             </payovertime_installments>
             <payovertime_checkout>
@@ -364,13 +214,13 @@ with&nbsp;
     <li class="form-alt">
         <div class="instalments">
             <p class="header-text">
-                Four interest-free payments totalling {order_amount}
+                Four interest-free payments {region_specific_text} totalling {order_amount}
             </p>
             <ul class="cost">
                 <li>{instalment_amount}</li>
                 <li>{instalment_amount}</li>
                 <li>{instalment_amount}</li>
-                <li>{instalment_amount}</li>
+                <li>{instalment_amount_last}</li>
             </ul>
             <ul class="icon">
                 <li>
@@ -414,13 +264,12 @@ with&nbsp;
 4 equal payments over the next 60 days.]]></message>
                 <order_status>processing</order_status>
                 <allowspecific>0</allowspecific>
-                <payment_review_status>afterpay_payment_review</payment_review_status>
                 <order_email>1</order_email>
                 <invoice_create>1</invoice_create>
                 <invoice_email>1</invoice_email>
                 <model>afterpay/method_payovertime</model>
-                <payment_action>authorize_capture</payment_action>
                 <api_mode>sandbox</api_mode>
+				<payment_action>authorize_capture</payment_action>
                 <api_password backend_model="adminhtml/system_config_backend_encrypted"/>
                 <installments_amount>4</installments_amount>
             </afterpaypayovertime>

@@ -2,8 +2,8 @@
 
 /**
  * @package   Afterpay_Afterpay
- * @author    Afterpay <steven.gunarso@touchcorp.com>
- * @copyright Copyright (c) 2016 Afterpay (http://www.afterpay.com.au/)
+ * @author    Afterpay
+ * @copyright 2016-2018 Afterpay https://www.afterpay.com
  */
 class Afterpay_Afterpay_Block_Form_Payovertime extends Afterpay_Afterpay_Block_Form_Abstract
 {
@@ -54,6 +54,16 @@ class Afterpay_Afterpay_Block_Form_Payovertime extends Afterpay_Afterpay_Block_F
         return $this->getData('instalment_amount');
     }
 
+    public function getInstalmentAmountLast()
+    {
+        if (!$this->hasData('instalment_amount_last')) {
+            $formatted = Mage::helper('afterpay')->calculateInstalmentLast();
+            $this->setData('instalment_amount_last', $formatted);
+        }
+
+        return $this->getData('instalment_amount_last');
+    }
+
     public function getOrderTotal()
     {
         $total = Mage::getSingleton('checkout/session')->getQuote()->getGrandTotal();
@@ -86,6 +96,17 @@ class Afterpay_Afterpay_Block_Form_Payovertime extends Afterpay_Afterpay_Block_F
         return self::TITLE_TEMPLATE_SELECTOR_ID;
     }
 
+    public function getRegionSpecificText()
+    {
+        if(Mage::app()->getStore()->getCurrentCurrencyCode() == 'USD') {
+            return 'bi-weekly with';
+        } elseif(Mage::app()->getStore()->getCurrentCurrencyCode() == 'NZD') {
+            return 'fortnightly with';
+        } elseif(Mage::app()->getStore()->getCurrentCurrencyCode() == 'AUD') {
+            return 'fortnightly with';
+        }
+    }
+
     private function _getCommonConfiguration()
     {
         return array(
@@ -93,8 +114,12 @@ class Afterpay_Afterpay_Block_Form_Payovertime extends Afterpay_Afterpay_Block_F
             'afterpayLogo' => $this->getSkinUrl('afterpay/images/ap-logo-152x31.png'),
             'orderAmountSubstitution' => '{order_amount}',
             'orderAmount' => $this->getOrderTotal(),
+            'regionSpecificSubstitution' => '{region_specific_text}',
+            'regionText' => $this->getRegionSpecificText(),
             'installmentAmountSubstitution' => '{instalment_amount}',
             'installmentAmount' => $this->getInstalmentAmount(),
+            'installmentAmountSubstitutionLast' => '{instalment_amount_last}',
+            'installmentAmountLast' => $this->getInstalmentAmountLast(),
             'imageCircleOneSubstitution' => '{img_circle_1}',
             'imageCircleOne' => $this->getSkinUrl('afterpay/images/checkout/circle_1@2x.png'),
             'imageCircleTwoSubstitution' => '{img_circle_2}',

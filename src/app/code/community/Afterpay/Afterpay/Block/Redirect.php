@@ -4,8 +4,8 @@
  * Afterpay payment redirect block
  *
  * @package   Afterpay_Afterpay
- * @author    Afterpay <steven.gunarso@touchcorp.com>
- * @copyright Copyright (c) 2016 Afterpay (http://www.afterpay.com.au/)
+ * @author    Afterpay
+ * @copyright 2016-2018 Afterpay https://www.afterpay.com
  */
 
 /**
@@ -39,26 +39,7 @@ class Afterpay_Afterpay_Block_Redirect extends Mage_Core_Block_Template
      */
     public function getReturnUrl()
     {
-        $result = (string)$this->getData('return_url');
-
-        if (!$result) {
-            $urlString = $this->getUrl('afterpay/payment/return', array('_secure' => true));
-            $parsedUrl = Mage::getModel('core/url')->parseUrl($urlString);
-            $result    = $parsedUrl->getData('path');
-
-            if ($parsedUrl->getData('query')) {
-                $result .= '?' . $parsedUrl->getData('query');
-            }
-        }
-
-        if( Mage::getModel('afterpay/method_payovertime')->getConfigPaymentAction() 
-            == Afterpay_Afterpay_Model_Method_Payovertime::ACTION_AUTHORIZE_CAPTURE ) {
-
-            return false;
-        }
-        else {
-            return $result;
-        }
+        return false;
     }
 
     /**
@@ -70,5 +51,28 @@ class Afterpay_Afterpay_Block_Redirect extends Mage_Core_Block_Template
         $settings     = Afterpay_Afterpay_Model_System_Config_Source_ApiMode::getEnvironmentSettings($apiMode);
 
         return $settings[Afterpay_Afterpay_Model_System_Config_Source_ApiMode::KEY_WEB_URL] . 'afterpay.js';
+    }
+    /**
+     * @return Array
+     */
+    public function getCountryCode()
+    {
+        $currencyCode      = Afterpay_Afterpay_Model_System_Config_Source_ApiMode::getCurrencyCode();
+        if ($currencyCode == "USD") {
+            $country = "US";
+        }
+        else if ($currencyCode == "NZD") {
+            $country = "NZ";    
+        }
+        else if ($currencyCode == "AUD") {
+            $country = "AU";    
+        }
+
+        $countryCode =  array(
+                                "countryCode" => $country
+                            );  
+        
+
+        return $countryCode;
     }
 }

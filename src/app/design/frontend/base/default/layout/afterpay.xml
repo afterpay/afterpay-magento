@@ -7,11 +7,6 @@
             <block type="afterpay/banner" name="afterpay.banner.requirements" template="afterpay/banner_requirements.phtml" />
         </reference>
         <reference name="before_body_end">
-            <block type="cms/block" name="afterpay.video.banner">
-                <action method="setBlockId" ifconfig="afterpay/banner/enabled">
-                    <block_id>afterpay_video_banner</block_id>
-                </action>
-            </block>
             <block type="afterpay/banner" name="afterpay.banner" template="afterpay/banner.phtml" />
             <block type="core/template" name="afterpay.modal" template="afterpay/modal.phtml" />
         </reference>
@@ -30,38 +25,6 @@
             <action method="addJs"><script>Afterpay/Installments.js</script></action>
         </reference>
     </catalog_product_view>
-
-    <catalog_category_view>
-        <reference name="before_body_end">
-            <block type="afterpay/catalog_installments" name="afterpay.installments"
-                   template="afterpay/catalog/installments.phtml"  data-type="product_list">
-                <action method="setPageType">
-                    <pageType>product_list</pageType>
-                </action>
-            </block>
-        </reference>
-        <reference name="head">
-            <!-- varien/product.js is need for price formatting in JS -->
-            <action method="addJs"><script>varien/product.js</script></action>
-            <action method="addJs"><script>Afterpay/Installments.js</script></action>
-        </reference>
-    </catalog_category_view>
-
-    <catalogsearch_result_index>
-        <reference name="before_body_end">
-            <block type="afterpay/catalog_installments" name="afterpay.installments"
-                   template="afterpay/catalog/installments.phtml"  data-type="product_page">
-                <action method="setPageType">
-                    <pageType>product_list</pageType>
-                </action>
-            </block>
-        </reference>
-        <reference name="head">
-            <!-- varien/product.js is need for price formatting in JS -->
-            <action method="addJs"><script>varien/product.js</script></action>
-            <action method="addJs"><script>Afterpay/Installments.js</script></action>
-        </reference>
-    </catalogsearch_result_index>
 
     <afterpay_payment_redirect>
         <reference name="root">

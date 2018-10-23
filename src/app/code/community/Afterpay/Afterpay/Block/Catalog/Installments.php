@@ -2,8 +2,8 @@
 
 /**
  * @package   Afterpay_Afterpay
- * @author    Afterpay <steven.gunarso@touchcorp.com>
- * @copyright Copyright (c) 2016 Afterpay (http://www.afterpay.com.au/)
+ * @author    Afterpay
+ * @copyright 2016-2018 Afterpay https://www.afterpay.com
  *
  * @method string getPageType()
  * @method Afterpay_Afterpay_Block_Catalog_Installments setPageType(string $pageType)
@@ -70,12 +70,25 @@ class Afterpay_Afterpay_Block_Catalog_Installments extends Mage_Core_Block_Templ
         return (int)Mage::getStoreConfig('payment/afterpaypayovertime/installments_amount');
     }
 
+    public function getRegionSpecificText()
+    {
+        if(Mage::app()->getStore()->getCurrentCurrencyCode() == 'USD') {
+            return 'bi-weekly with';
+        } elseif(Mage::app()->getStore()->getCurrentCurrencyCode() == 'NZD') {
+            return 'fortnightly with';
+        } elseif(Mage::app()->getStore()->getCurrentCurrencyCode() == 'AUD') {
+            return 'fortnightly with';
+        }
+    }
+
     public function getJsConfig()
     {
         return array(
             'selectors'          => $this->getCssSelectors(),
             'template'           => $this->getHtmlTemplate(),
             'priceSubstitution'  => '{price_here}',
+            'regionSpecific'     => '{region_specific_text}',
+            'regionText'         => $this->getRegionSpecificText(),
             'minPriceLimit'      => $this->getMinPriceLimit(),
             'maxPriceLimit'      => $this->getMaxPriceLimit(),
             'installmentsAmount' => $this->getInstallmentsAmount(),

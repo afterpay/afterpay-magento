@@ -15,7 +15,7 @@
      */
     form.submit = function() {
     //jQuery("#onestepcheckout-place-order").on("click", function() {
-        if (payment.currentMethod == 'afterpaypayovertime' && window.Afterpay.paymentAction == 'authorize_capture') {
+        if (payment.currentMethod == 'afterpaypayovertime') {
             // prepare params
             var params = form.serialize(true);
 
@@ -60,7 +60,11 @@ function doAfterpayAPICall( saveURL, params ) {
 
                     //modified to suit API V1
                     if( window.afterpayReturnUrl === false ) {
-                        AfterPay.init(); 
+                        if (typeof AfterPay.initialize === "function") {
+                                AfterPay.initialize(window.afterpayCountryCode);
+                            } else {
+                                AfterPay.init();
+                            }
                     }
                     else {
                         AfterPay.init({

@@ -4,10 +4,15 @@
     window.addEventListener('load', function() {
         var returnUrl = <?php echo json_encode($this->getReturnUrl()); ?>;
         var transactionToken = <?php echo json_encode($this->getOrderToken()); ?>;
+        var afterpayCountryCode = <?php echo jsonEncode($this->getCountryCode()); ?>;
 
         //modified to suit API V1
         if( returnUrl === false ) {
-            AfterPay.init(); 
+            if (typeof AfterPay.initialize === "function") {                       
+                AfterPay.initialize(afterpayCountryCode);
+            } else {
+                AfterPay.init();
+            }
         }
         else {
             AfterPay.init({

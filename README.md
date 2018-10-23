@@ -7,9 +7,9 @@
 	<li> The Magento-Afterpay plugin is available as a .zip or tar.gz file from the Afterpay GitHub directory.</li>
 	<li> Unzip the file and follow the following instructions to copy the files to the Magento website directory. </li>
 	<li> Copy all files in: <br/><em>/app/code/community/</em> <br/> to: <br/> <em>[MAGENTO]/app/code/community</em> </li>
-	<li> Copy all files in: <br/><em>/app/design/frontend/base/default/layout</em> <br/> to: <br/> <em>[MAGENTO]/app/design/frontend/base/default/layout</em> </li>
+	<li> Copy all files in: <br/><em>/app/design/frontend/base/default/layout</em> <br/> to: <br/> <em>[MAGENTO]/design/frontend/base/default/layout</em> </li>
 	<li> Copy all files in: <br/><em>/app/design/frontend/base/default/template</em> <br/> to: <br/> <em>[MAGENTO]/app/design/frontend/base/default/template</em> </li>
-	<li> Copy all files in: <br/><em>/app/design/adminhtml/default/default/template</em> <br/> to: <br/> <em>[MAGENTO] /app/design/adminhtml/default/default/template</em> </li>
+	<li> Copy all files in: <br/><em>/design/adminhtml/default/default/template</em> <br/> to: <br/> <em>[MAGENTO] /design/adminhtml/default/default/template</em> </li>
 	<li> Copy all files in: <br/><em>/app/etc</em> <br/> to: <br/> <em>[MAGENTO]/app/etc</em> </li>
 	<li> Copy all files in: <br/><em>/js</em> <br/> to: <br/> <em>[MAGENTO]/js</em> </li>
 	<li> Copy all files in: <br/><em>/skin/frontend/base/default</em> <br/> to: <br/> <em>[MAGENTO]/skin/frontend/base/default</em> </li>
