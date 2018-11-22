@@ -53,26 +53,26 @@ class Afterpay_Afterpay_Model_System_Config_Source_ApiMode
      */
     protected static function _getConfigSettings()
     {
-        if(Mage::app()->getStore()->isAdmin()) {
-            $websiteCode = Mage::app()->getRequest()->getParam('website');
+        if (!Mage::app()->getStore()->isAdmin()) {
+            $store = Mage::app()->getStore();
+
+        } else {
+            $websiteCode    = Mage::app()->getRequest()->getParam('website');
+            $orderId        = Mage::app()->getRequest()->getParam('order_id');
             
             if ($websiteCode) {
-                $website = Mage::getModel('core/website')->load($websiteCode);
-                $websiteId = $website->getId();
-            } else {
-                $order_id = Mage::app()->getRequest()->getParam('order_id');
+                $website    = Mage::getModel('core/website')->load($websiteCode);
+                $store      = $website->getDefaultStore();
 
-                if($order_id) {
-                    $websiteId = Mage::getModel('core/store')->load(Mage::getModel('sales/order')->load($order_id)->getStoreId())->getWebsiteId();
-                } else {
-                    $websiteId = 0;
-                }
+            } else if ($orderId) {
+                $store      = Mage::getModel('sales/order')->load($orderId)->getStore();
+
+            } else {
+                $store      = Mage::app()->getDefaultStoreView();
             }
-        } else {
-            $websiteId = '';
         }
 
-        if(Mage::app()->getStore($websiteId)->getCurrentCurrencyCode() == 'USD') {
+        if ($store->getCurrentCurrencyCode() == 'USD') {
             $api = 'api_us_url';
             $web = 'web_us_url';
         } else {
