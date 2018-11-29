@@ -122,27 +122,27 @@ class Afterpay_Afterpay_Model_Observer
             {
 
                 $website_code = Mage::getSingleton('adminhtml/config_data')->getWebsite();
-                $website_id = Mage::getModel('core/website')->load($website_code)->getId();
+                $website = Mage::getModel('core/website')->load($website_code);
             
-                if (!Mage::getStoreConfigFlag('payment/' . $payment . '/active', $website_id)) {
+                if ($website->getConfig('payment/' . $payment . '/active')) {
                     continue;
                 }
 
-                $overrides = array('website_id' => $website_id);
+                $overrides = array('website_id' => $website->getId());
                 $level = 'websites';
-                $target_id = $website_id;
+                $target_id = $website->getId();
             }
             else if( !empty( $website_param ) ) {
 
-                $website_id = $website_param;
+                $website = Mage::getModel('core/website')->load($website_param);
             
-                if (!Mage::getStoreConfigFlag('payment/' . $payment . '/active', $website_id)) {
+                if ($website->getConfig('payment/' . $payment . '/active')) {
                     continue;
                 }
 
-                $overrides = array('website_id' => $website_id);
+                $overrides = array('website_id' => $website->getId());
                 $level = 'websites';
-                $target_id = $website_id;
+                $target_id = $website->getId();
             }
             else // default level
             {
