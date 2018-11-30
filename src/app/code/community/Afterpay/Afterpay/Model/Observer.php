@@ -124,7 +124,7 @@ class Afterpay_Afterpay_Model_Observer
                 $website_code = Mage::getSingleton('adminhtml/config_data')->getWebsite();
                 $website = Mage::getModel('core/website')->load($website_code);
             
-                if ($website->getConfig('payment/' . $payment . '/active')) {
+                if (!$website->getConfig('payment/' . $payment . '/active')) {
                     continue;
                 }
 
@@ -136,7 +136,7 @@ class Afterpay_Afterpay_Model_Observer
 
                 $website = Mage::getModel('core/website')->load($website_param);
             
-                if ($website->getConfig('payment/' . $payment . '/active')) {
+                if (!$website->getConfig('payment/' . $payment . '/active')) {
                     continue;
                 }
 
