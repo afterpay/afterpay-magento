@@ -1,0 +1,9 @@
+{
+    "name": "afterpay/afterpay-magento",
+    "description": "Afterpay magento module integration",
+    "type": "magento-module",
+    "license": "Apache License 2.0",
+    "require": {
+        "magento-hackathon/magento-composer-installer": "*"
+    }
+}
