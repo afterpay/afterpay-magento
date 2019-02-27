@@ -69,7 +69,8 @@ class Afterpay_Afterpay_Model_System_Config_Source_ApiMode
                 }
             }
         } else {
-            $websiteId = '';
+            // use current store website outside of the admin section
+            $websiteId = Mage::app()->getStore()->getWebsite()->getId();
         }
 
         $api = 'api_url';
