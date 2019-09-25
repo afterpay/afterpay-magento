@@ -10,7 +10,7 @@
  * Class Afterpay_Afterpay_PaymentController
  *
  * Controller for the entire Payment Process
- * A number of functions here are used across both API Ver 0 and 1 
+ * A number of functions here are used across both API Ver 0 and 1
  */
 class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Action
 {
@@ -51,7 +51,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
             if ($params) {
                 $this->_saveCart($params);
             }
-            
+
             // Check with security updated on form key
             if (!$this->_validateFormKey()) {
 
@@ -109,7 +109,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
             else {
                 $this->helper()->log($this->__('Error occur during process. %s. QuoteID=%s', $e->getMessage(), $this->_quote->getId()), Zend_Log::ERR);
             }
-            
+
             // Adding error for redirect and JSON
             $message = Mage::helper('afterpay')->__('There was an error processing your order. %s', $e->getMessage());
 
@@ -228,7 +228,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
             $placeOrder = Mage::getModel('afterpay/order')->place($this->_quote);
 
             if ($placeOrder) {
-	    
+
         	    //process the Store Credit on Orders
                 if( Mage::getEdition() == Mage::EDITION_ENTERPRISE ) {
             		$this->helper()->storeCreditPlaceOrder();
@@ -342,7 +342,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
 
     /**
      *
-     * Handles customer quote creation for registering customers 
+     * Handles customer quote creation for registering customers
      *
      */
     protected function _prepareNewAfterpayCustomerQuote()
@@ -433,7 +433,11 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
             $this->helper()->giftCardsSessionUnset();
         }
 
-        $this->_getQuote()->getPayment()->setData('afterpay_token', NULL)->save();
+        $quote = $this->_getQuote();
+        // Check if Magento session has timed out
+        if ($quote->hasItems()) {
+            $quote->getPayment()->setData('afterpay_token', NULL)->save();
+        }
 
         $this->getCheckoutSession()->addNotice("Afterpay Transaction was cancelled.");
 
@@ -469,7 +473,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
 
 
     /*------------------------------------------------------------------------------------------------------
-                                    Functions used on ALL API Versions 
+                                    Functions used on ALL API Versions
     ------------------------------------------------------------------------------------------------------*/
 
     /**
@@ -660,12 +664,12 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
             // Magento finalise the current cart session
             $this->_initCheckout();
             $this->_quote->collectTotals();
-	    
+
     	    if( Mage::getEdition() == Mage::EDITION_ENTERPRISE ) {
-    	    	$this->_quote = $this->helper()->storeCreditCapture($this->_quote); 
+    	    	$this->_quote = $this->helper()->storeCreditCapture($this->_quote);
 		        $this->_quote->save();
     	    }
-	    
+
 
             // Check status
             switch ($status) {
@@ -673,14 +677,14 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
                     /**
                      * SUCCESS => validate, save orderid, create order
                      */
-    	    	     
-        	     //Gift Card handling needs to be here to avoid the reversal problems 
+
+        	     //Gift Card handling needs to be here to avoid the reversal problems
         	     if( Mage::getEdition() == Mage::EDITION_ENTERPRISE ) {
-        	     	$this->_quote = $this->helper()->giftCardsCapture($this->_quote); 
+        	     	$this->_quote = $this->helper()->giftCardsCapture($this->_quote);
                         $this->_quote->save();
         	     }
-		
-		
+
+
                     $payment = $this->_quote->getPayment();
 
                     // validate = Check if order token return on the url same as order token has been use on session
@@ -762,7 +766,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
     {
         $logged_in = $this->getCustomerSession()->isLoggedIn();
         $create_account = $request->getParam("create_account");
-	
+
 	    if( !is_null($this->getCheckoutMethod()) && ( empty($create_account) ) ) {
             return;
         }
@@ -780,7 +784,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
             }
 
             $quote->save();
-	      
+
         }
         catch (Exception $e) {
             // Add error message
@@ -829,14 +833,14 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
             $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($result));
         }
         else {
-                    
+
             $this->getResponse()->setRedirect($target_url);
             $this->getResponse()->sendResponse();
             exit;
         }
     }
-    
-    
+
+
 
     /**
      * Save Cart data from post request

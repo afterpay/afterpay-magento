@@ -1,17 +1,19 @@
-<script src="<?php echo $this->getRedirectJsUrl() ?>"></script>
-<script>
-    var afterpayReturnUrl = <?php echo Mage::helper('core')->jsonEncode($this->getReturnUrl()) ?>;
-    var afterpayCountryCode = <?php echo Mage::helper('core')->jsonEncode($this->getCountryCode()) ?>;
-</script>
+<?php if (Mage::helper('afterpay/checkout')->noConflict()) { ?>
+    <script src="<?php echo $this->getRedirectJsUrl() ?>"></script>
+    <script>
+        var afterpayReturnUrl = <?php echo Mage::helper('core')->jsonEncode($this->getReturnUrl()) ?>;
+        var afterpayCountryCode = <?php echo Mage::helper('core')->jsonEncode($this->getCountryCode()) ?>;
+    </script>
 
-<?php
-$mage_store = Mage::helper('core')->isModuleEnabled("Magestore_Onestepcheckout");
-$idev = Mage::helper('core')->isModuleEnabled("Idev_Onestepcheckout");
-$iksanika = Mage::helper('core')->isModuleEnabled("Iksanika_Onestepcheckout");
-?>
+    <?php
+    $mage_store = Mage::helper('core')->isModuleEnabled("Magestore_Onestepcheckout");
+    $idev = Mage::helper('core')->isModuleEnabled("Idev_Onestepcheckout");
+    $iksanika = Mage::helper('core')->isModuleEnabled("Iksanika_Onestepcheckout");
+    ?>
 
-<?php if( $mage_store ): ?>
-	<script src="<?php echo $this->getJsUrl('Afterpay/checkout/magestore_onestep.js') ?>"></script>
-<?php else: ?>
-	<script src="<?php echo $this->getJsUrl('Afterpay/checkout/idev_onestep.js') ?>"></script>
-<?php endif; ?>
+    <?php if( $mage_store ): ?>
+    	<script src="<?php echo $this->getJsUrl('Afterpay/checkout/magestore_onestep.js') ?>"></script>
+    <?php else: ?>
+    	<script src="<?php echo $this->getJsUrl('Afterpay/checkout/idev_onestep.js') ?>"></script>
+    <?php endif; ?>
+<?php } ?>

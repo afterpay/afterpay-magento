@@ -8,7 +8,7 @@
         </reference>
         <reference name="before_body_end">
             <block type="afterpay/banner" name="afterpay.banner" template="afterpay/banner.phtml" />
-            <block type="core/template" name="afterpay.modal" template="afterpay/modal.phtml" />
+            <block type="afterpay/modal" name="afterpay.modal" template="afterpay/modal.phtml" />
         </reference>
     </default>
 
@@ -62,16 +62,16 @@
         </reference>
     </checkout_cart_index>
 
-    <!-- Default Checkout & MW OneStep Checkout Handlers -->
+    <!-- Default Checkout & MW OneStep Checkout Handlers & Amasty One Step Checkout-->
     <checkout_onepage_index>
-        <reference name="before_body_end">
-            <!-- Default Checkout & MW OneStep Checkout Handlers -->
-            <block type="afterpay/redirect" name="afterpay.checkout.default.info" after="checkout.onepage" template="afterpay/checkout/default.phtml" />
-	    </reference>
         <reference name="head">
             <action method="addJs"><script>Afterpay/checkout/payovertime.js</script></action>
             <block type="afterpay/config" name="afterpay.default.config" template="afterpay/checkout/config.phtml" />
         </reference>
+        <reference name="before_body_end">
+            <!-- Default Checkout & MW OneStep Checkout Handlers -->
+            <block type="afterpay/redirect" name="afterpay.checkout.default.info" after="checkout.onepage" template="afterpay/checkout/default.phtml" />
+	    </reference>
     </checkout_onepage_index>
 
     <!-- Layout update for supported and tested checkout-->
@@ -147,7 +147,7 @@
             <action method="addJs"><script>Afterpay/checkout/payovertime.js</script></action>
             <block type="afterpay/config" name="afterpay.osc.config" template="afterpay/checkout/config.phtml" />
         </reference>
-	
+
 	<!-- Magestore_Onestepcheckout -->
 	<!-- Idev_Onestepcheckout -->
 	<!-- Iksanika_Onestepcheckout -->

@@ -53,7 +53,7 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
 
             $session = Mage::getSingleton('checkout/session');
             $quote = $session->getQuote();
-            
+
             $orderToken = $payment->getData('afterpay_token');
             $reserved_order_id = $quote->getReservedOrderId();
 
@@ -67,12 +67,12 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
         $data = Mage::getModel('afterpay/order')->getOrderByToken( $orderToken );
 
         /**
-        +         * Validation to check between session and post request
-        +         */
+        * Validation to check between session and post request
+        */
         if( !$data ) {
             // Check the order token being use
             $this->resetTransactionToken($quote);
-            
+
             Mage::helper('afterpay')->log(
                 'Afterpay gateway has rejected request. Invalid token. ' .
                 ' Token Value: ' . $orderToken
@@ -85,7 +85,7 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
         else if( $reserved_order_id != $data->merchantReference ) {
             // Check order id
             $this->resetTransactionToken($quote);
-            
+
             Mage::helper('afterpay')->log(
                 'Afterpay gateway has rejected request. Incorrect merchant reference. ' .
                 ' Quote Value: ' . $reserved_order_id .
@@ -100,7 +100,7 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
 
             // Check the order amount
             $this->resetTransactionToken($quote);
-		    
+
             Mage::helper('afterpay')->log(
                 'Afterpay gateway has rejected request. Invalid amount. ' .
                 ' Quote Amount: ' . round($quote->getGrandTotal(), 2) .
@@ -118,9 +118,9 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
         catch( Exception $e ) {
             $this->resetTransactionToken($quote);
             $this->resetPayment($payment);
-                
+
             Mage::helper('afterpay')->log( 'Direct Capture Failed: ' . $e->getMessage() );
-              
+
             Mage::throwException(
                 Mage::helper('afterpay')->__( $e->getMessage() )
             );
@@ -202,9 +202,6 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
     */
 
     private function fallbackMechanism($error_code) {
-    // Perform the fallback in case of Unsupported checkut
-    try {
-
         //Unsupported checkout with unattached payovertime.js
         //Or checkout with payovertime.js attached, but no checkout specific JS codes
         $error_array = array(
@@ -221,18 +218,15 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
                 Zend_Log::NOTICE
             );
 
-                // $fallback_url = "afterpay/payment/redirectFallback";
-                $fallback_url = Mage::getUrl( 'afterpay/payment/redirectFallback', array('_secure' => true) );
+            $fallback_url = Mage::getUrl( 'afterpay/payment/redirectFallback', array('_secure' => true) );
 
-                Mage::app()->getResponse()->setRedirect($fallback_url);
-                Mage::app()->getResponse()->sendResponse();
-                Mage::throwException(
-                    Mage::helper('afterpay')->__('Fallback Mechanism Triggered')
-                );
-            }
-        }
-        catch( Exception $e ) {
-                    throw Mage::exception('Afterpay_Afterpay', $e->getMessage());
+            Mage::app()->getResponse()->setRedirect($fallback_url);
+            Mage::app()->getResponse()->sendResponse();
+
+            // Throw this exception to avoid sending the PaymentFailedEmail
+            throw new Mage_Payment_Model_Info_Exception(
+                Mage::helper('afterpay')->__('Fallback Mechanism Triggered')
+            );
         }
     }
 }

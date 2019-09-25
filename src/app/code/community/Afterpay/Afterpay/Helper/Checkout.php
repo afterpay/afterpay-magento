@@ -128,4 +128,17 @@ class Afterpay_Afterpay_Helper_Checkout extends Mage_Checkout_Helper_Url
 
         return false;
     }
+
+    public function noConflict()
+    {
+        switch (Mage::app()->getStore()->getCurrentCurrencyCode())
+        {
+            case 'AUD':
+            case 'NZD':
+            case 'USD':
+                return true;
+            default:
+                return false;
+        }
+    }
 }

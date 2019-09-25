@@ -8,6 +8,43 @@
 class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payovertime
 {
     /**
+     * Overrides in order to obfuscate sensitive info in log (JIRA PIP-419)
+     */
+     protected function _logRequest($url, $type, $call, $body, $level = Zend_Log::DEBUG)
+     {
+         $helper = Mage::helper('afterpay');
+
+         $helper->log(array(
+             'url' => $url,
+             'type' => $type,
+             'call' => $call,
+             'body' => $this->_sanitizeContent($body)
+         ), $level);
+     }
+
+    /**
+     * The actual function that obfuscates personal info.
+     * The keywords ['consumer', 'billing', 'shipping'] are derived from the API documents
+     */
+    protected function _sanitizeContent($body)
+    {
+        if (is_array($body)) {
+            foreach ($body as $i => $val)
+            {
+                if (in_array($i, ['consumer', 'billing', 'shipping'], TRUE)) {
+                    foreach ($body[$i] as $j => $sensitive)
+                    {
+                        $body[$i][$j] = preg_replace('/\S/', '*', $sensitive);
+                    }
+                } else {
+                    $body[$i] = $this->_sanitizeContent($val);
+                }
+            }
+        }
+        return $body;
+    }
+
+    /**
      * @return Mage_Checkout_Model_Session
      */
     protected function _getSession()
@@ -39,7 +76,7 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
 
         // Afterpay build order token request - accommodate both Ver 0 and 1
         $postData = $this->getApiAdapter()->buildOrderTokenRequest($quote, array('merchantOrderId' => $quote->getReservedOrderId()), $this->afterPayPaymentTypeCode);
-      
+
         $gatewayUrl = $this->getApiAdapter()->getApiRouter()->getOrdersApiUrl();
 
         // Request order token to API
@@ -84,7 +121,7 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
 
             return $orderToken;
         }
-    
+
     }
 
     /**
@@ -114,7 +151,7 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
         }
         else if ( empty($resultObject->id) && empty($resultObject->id) ) {
             throw Mage::exception('Afterpay_Afterpay', 'Afterpay API Gateway Error');
-        } 
+        }
         else {
             return $resultObject;
         }
@@ -154,7 +191,7 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
 
         $service->submitAll();
         $order = $service->getOrder();
-	
+
         //ensure that Grand Total is not doubled
         $order->setBaseGrandTotal( $quote->getBaseGrandTotal() );
         $order->setGrandTotal( $quote->getGrandTotal() );
@@ -191,7 +228,7 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
             $order->setData('afterpay_order_id', $quote->getData('afterpay_order_id'));
             $order->save();
 
-                        
+
             if (!$order->getEmailSent() && $paymentMethod->getConfigData('order_email')) {
                 $order->sendNewOrderEmail();
             }

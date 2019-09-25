@@ -36,9 +36,11 @@
         }
         try {
             var payOverTimeForms = Prototype.Selector.select(configuration.cssSelector);
-            Element.insert(payOverTimeForms[0], {
-                after: renderCheckoutTemplate(configuration.template, configuration)
-            });
+            if (Element.nextSiblings(payOverTimeForms[0]).length == 0) {
+                Element.insert(payOverTimeForms[0], {
+                    after: renderCheckoutTemplate(configuration.template, configuration)
+                });
+            }
         } catch (e) {
         }
     };

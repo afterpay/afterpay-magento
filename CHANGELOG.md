@@ -1,5 +1,31 @@
 # Afterpay Magento 1 Extension Changelog
 
+## Version 3.0.2
+
+_Wed 25 Sep 2019 (AEST)_
+
+### Supported Editions & Versions
+
+- Magento Community Edition (CE) version 1.7 and later.
+- Magento Enterprise Edition (EE) version 1.13 and later.
+
+### Highlights
+
+Version 3.0.2 of the Afterpay Magento 1 Extension includes:
+
+- Improved support for TLS 1.2.
+- Improved support for guest checkouts, where customer name is not provided.
+- Improved handling of orders created by unsupported checkout extensions.
+- Improved handling of Magento session expiry.
+- Improved address display in the Afterpay portals, where address state is not provided.
+- Improved compatibility between Afterpay and Clearpay modules in multi-regional Magento installations.
+- Revised assets for US merchants.
+- Extended internationalisation of instructional documentation.
+- Extended checkout extension support to include Amasty OneStepCheckout.
+- Removed potentially sensitive information from log files.
+
+---
+
 ## Version 3.0.1
 
 _Wed 10 Oct 2018 (AEDT)_

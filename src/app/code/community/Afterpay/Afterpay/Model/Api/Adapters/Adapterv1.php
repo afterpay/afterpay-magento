@@ -18,7 +18,7 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
      * @return Afterpay_Afterpay_Model_Api_Router
      */
     public function getApiRouter()
-    {   
+    {
         return Mage::getModel('afterpay/api_routers_routerv1');
     }
 
@@ -39,8 +39,8 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
 
         $params['consumer'] = array(
             'email'         => (string)$object->getCustomerEmail(),
-            'givenNames'    => (string)$object->getCustomerFirstname(),
-            'surname'       => (string)$object->getCustomerLastname(),
+            'givenNames'    => $object->getCustomerFirstname() ? (string)$object->getCustomerFirstname() : $billingAddress->getFirstname(),
+            'surname'       => $object->getCustomerLastname() ? (string)$object->getCustomerLastname() : $billingAddress->getLastname(),
             'phoneNumber'   => substr( (string)$billingAddress->getTelephone(), 0, 32 )
         );
 
@@ -81,7 +81,7 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
                     'displayName'   =>  substr( $discount_name . ' - ' . (string)$item->getName(), 0, 128 ),
                     'amount'        =>  array(
                                             'amount'   => round((float)$item->getDiscountAmount(), $precision),
-                                            'currency' => (string)Mage::app()->getStore()->getCurrentCurrencyCode() 
+                                            'currency' => (string)Mage::app()->getStore()->getCurrentCurrencyCode()
                                         ),
                 );
             }
@@ -202,52 +202,20 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
         return $truncated_str;
     }
 
-
-    private function _handleState( $object ) {
-
-        $billing_country = $object->getBillingAddress()->getCountry();
-        $shipping_country = $object->getShippingAddress()->getCountry();
-
-        if( !empty($billing_country) ) {
-
-            $list_state_required = $this->_getStateRequired();
-
-            //if the country doesn't require state, make Suburb goes to State Field
-            if( !in_array( $billing_country, $list_state_required ) ) {
-                $object->getBillingAddress()->setRegion( $object->getBillingAddress()->getCity() )->save(); 
-                $object->getShippingAddress()->setRegion( $object->getShippingAddress()->getCity() )->save(); 
-            }
-        }
-    }
-
-    private function _getStateRequired() {
-        $destinations = (string)Mage::getStoreConfig('general/region/state_required');
-
-        $state_required = !empty($destinations) ? explode(',', $destinations) : [];
-
-        return $state_required; 
-    }
-
     private function _validateData( $object ) {
 
         $errors = array();
-
-        $this->_handleState( $object );
 
         $billingAddress = $object->getBillingAddress();
         $shippingAddress = $object->getShippingAddress();
 
     	$billing_postcode = $billingAddress->getPostcode();
-    	$billing_state = $billingAddress->getRegion();
     	$billing_telephone = $billingAddress->getTelephone();
     	$billing_city = $billingAddress->getCity();
     	$billing_street = $billingAddress->getStreet1();
 
         if( empty($billing_postcode) ) {
             $errors[] = "Billing Postcode is required";
-        }
-        if( empty($billing_state) ) {
-            $errors[] = "Billing State is required";
         }
         if( empty($billing_telephone) ) {
             $errors[] = "Billing Phone is required";
@@ -261,16 +229,12 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
 
         if( !empty($shippingAddress) ) {
         	$shipping_postcode = $shippingAddress->getPostcode();
-        	$shipping_state = $shippingAddress->getRegion();
         	$shipping_telephone = $shippingAddress->getTelephone();
         	$shipping_city = $shippingAddress->getCity();
         	$shipping_street = $shippingAddress->getStreet1();
 
             if( empty($shipping_postcode) ) {
                 $errors[] = "Shipping Postcode is required";
-            }
-            if( empty($shipping_state) ) {
-                $errors[] = "Shipping State is required";
             }
             if( empty($shipping_telephone) ) {
                 $errors[] = "Shipping Phone is required";

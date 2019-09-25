@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Afterpay_Afterpay>
-            <version>3.0.1</version>
+            <version>3.0.2</version>
         </Afterpay_Afterpay>
     </modules>
     <afterpay>
@@ -11,15 +11,15 @@
                 <name>Sandbox</name>
                 <api_url>https://api-sandbox.afterpay.com/</api_url>
                 <api_us_url>https://api.us-sandbox.afterpay.com/</api_us_url>
-                <web_url>https://portal-sandbox.afterpay.com/</web_url>
-                <web_us_url>https://portal.us-sandbox.afterpay.com/</web_us_url>
+                <web_url>https://portal.sandbox.afterpay.com/</web_url>
+                <web_us_url>https://portal.sandbox.afterpay.com/</web_us_url>
             </sandbox>
             <production>
                 <name>Production</name>
                 <api_url>https://api.afterpay.com/</api_url>
                 <api_us_url>https://api.us.afterpay.com/</api_us_url>
                 <web_url>https://portal.afterpay.com/</web_url>
-                <web_us_url>https://portal.us.afterpay.com/</web_us_url>
+                <web_us_url>https://portal.afterpay.com/</web_us_url>
             </production>
         </environments>
     </afterpay>

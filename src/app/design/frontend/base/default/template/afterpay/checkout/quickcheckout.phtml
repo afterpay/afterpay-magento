@@ -1,6 +1,8 @@
 <?php Mage::getSingleton('core/session')->setAfterpayErrorRedirect('checkout/cart'); ?>
-<script src="<?php echo $this->getRedirectJsUrl() ?>"></script>
-<script>
-    var afterpayReturnUrl = <?php echo Mage::helper('core')->jsonEncode($this->getReturnUrl()) ?>;
-</script>
-<script src="<?php echo $this->getJsUrl('Afterpay/checkout/quickcheckout.js') ?>"></script>
+<?php if (Mage::helper('afterpay/checkout')->noConflict()) { ?>
+    <script src="<?php echo $this->getRedirectJsUrl() ?>"></script>
+    <script>
+        var afterpayReturnUrl = <?php echo Mage::helper('core')->jsonEncode($this->getReturnUrl()) ?>;
+    </script>
+    <script src="<?php echo $this->getJsUrl('Afterpay/checkout/quickcheckout.js') ?>"></script>
+<?php } ?>

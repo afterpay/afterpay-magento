@@ -223,7 +223,7 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
 
         //Ver 1 needs Merchant Reference variable
         $body = $this->getApiAdapter()->buildRefundRequest($amount, $payment);
-        
+
         $response = $this->_sendRequest($url, $body, $method = Zend_Http_Client::POST);
 
         if ($response->isError()) {
@@ -250,7 +250,6 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
     protected function _sendRequest($url, $body = false, $method = Zend_Http_Client::GET, $call = null)
     {
         $client = new Zend_Http_Client($url);
-        $helper = Mage::helper('afterpay');
         $coreHelper = Mage::helper('core');
 
         $client->setAuth(
@@ -259,6 +258,7 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
         );
 
         $client->setConfig(array(
+            'adapter' => 'Zend_Http_Client_Adapter_Curl',
             'useragent' => $this->_construct_user_agent(),
             'timeout'   => 80
         ));
@@ -268,24 +268,26 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
         }
 
         // Do advanced logging before
-        $helper->log(array(
-            'url' => $url,
-            'type' => 'request',
-            'call' => $call,
-            'body' => $body
-        ), Zend_Log::DEBUG);
+        $this->_logRequest($url, 'request', $call, $body);
 
         $response = $client->request($method);
 
         // Do advanced logging after
-        $helper->log(array(
-            'url' => $url,
-            'type' => 'response',
-            'call' => $call,
-            'body' => ($response->getBody() && json_decode($response->getBody())) ? json_decode($response->getBody()) : $response,
-        ), Zend_Log::DEBUG);
+        $this->_logRequest($url, 'response', $call, json_decode($response->getBody(), TRUE));
 
         return $response;
+    }
+
+    protected function _logRequest($url, $type, $call, $body, $level = Zend_Log::DEBUG)
+    {
+        $helper = Mage::helper('afterpay');
+
+        $helper->log(array(
+            'url' => $url,
+            'type' => $type,
+            'call' => $call,
+            'body' => $body
+        ), $level);
     }
 
     /**
@@ -308,14 +310,14 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
 
             $merchant_id = trim($this->_cleanup_string(Mage::getStoreConfig('payment/' . $method . '/' . Afterpay_Afterpay_Model_Method_Base::API_USERNAME_CONFIG_FIELD, $default_store_id)));
             $merchant_key = trim($this->_cleanup_string(Mage::getStoreConfig('payment/' . $method . '/' . Afterpay_Afterpay_Model_Method_Base::API_PASSWORD_CONFIG_FIELD, $default_store_id)));
-           
+
             $client->setAuth( $merchant_id, $merchant_key);
         }
         else {
 
             $merchant_id = trim($this->_cleanup_string(Mage::getStoreConfig('payment/' . $method . '/' . Afterpay_Afterpay_Model_Method_Base::API_USERNAME_CONFIG_FIELD)));
             $merchant_key = trim($this->_cleanup_string(Mage::getStoreConfig('payment/' . $method . '/' . Afterpay_Afterpay_Model_Method_Base::API_PASSWORD_CONFIG_FIELD)));
-            
+
             $client->setAuth( $merchant_id, $merchant_key);
         }
 
@@ -328,6 +330,7 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
         $helper->log( 'Merchant Key: ' . $masked_merchant_key );
 
         $client->setConfig(array(
+            'adapter' => 'Zend_Http_Client_Adapter_Curl',
             'useragent' => $this->_construct_user_agent(),
             'timeout'   => 80
         ));
@@ -359,7 +362,7 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
     /**
      * Filters the String for secret keys
      *
-     * @return string Authorization code 
+     * @return string Authorization code
      * @since 1.0.0
      */
     private function _cleanup_string($string) {
@@ -368,9 +371,9 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
     }
 
     private function _construct_user_agent() {
-        return 'AfterpayMagentoPlugin/' . $this->helper()->getModuleVersion() . 
-                ' (Magento ' . Mage::getEdition() . ' ' . Mage::getVersion() . 
-                ') MerchantID: ' . trim($this->_cleanup_string($this->getConfigData(self::API_USERNAME_CONFIG_FIELD))) . 
+        return 'AfterpayMagentoPlugin/' . $this->helper()->getModuleVersion() .
+                ' (Magento ' . Mage::getEdition() . ' ' . Mage::getVersion() .
+                ') MerchantID: ' . trim($this->_cleanup_string($this->getConfigData(self::API_USERNAME_CONFIG_FIELD))) .
                 ' URL: ' . Mage::getBaseUrl();
     }
 }

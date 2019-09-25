@@ -1,8 +1,9 @@
+<?php if (Mage::helper('afterpay/checkout')->noConflict()) { ?>
 <script>
 //<![CDATA[
     window.Afterpay = window.Afterpay || {};
     window.Afterpay.redirectMode = "<?php echo $this->getMode() ?>";
-    window.Afterpay.paymentAction = "<?php echo $this->getPaymentAction(); ?>";
     window.Afterpay.saveUrl = "<?php echo $this->getUrl('afterpay/payment/start', array('form_key' => Mage::getSingleton('core/session')->getFormKey())) ?>";
 //]]>
 </script>
+<?php } ?>

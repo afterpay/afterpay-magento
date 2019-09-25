@@ -1,14 +1,19 @@
-<script src="<?php echo $this->getRedirectJsUrl() ?>"></script>
-<script>
-    var afterpayReturnUrl = <?php echo Mage::helper('core')->jsonEncode($this->getReturnUrl()) ?>;
-    var afterpayCountryCode = <?php echo Mage::helper('core')->jsonEncode($this->getCountryCode()) ?>;
-</script>
+<?php if (Mage::helper('afterpay/checkout')->noConflict()) { ?>
+    <script src="<?php echo $this->getRedirectJsUrl() ?>"></script>
+    <script>
+        var afterpayReturnUrl = <?php echo Mage::helper('core')->jsonEncode($this->getReturnUrl()) ?>;
+        var afterpayCountryCode = <?php echo Mage::helper('core')->jsonEncode($this->getCountryCode()) ?>;
+    </script>
 
-<?php
-$mw_onestepcheckout = Mage::helper('core')->isModuleEnabled("MW_Onestepcheckout");
-?>
-<?php if( $mw_onestepcheckout ): ?>
-	<script src="<?php echo $this->getJsUrl('Afterpay/checkout/mw_onestepcheckout.js') ?> "></script>
-<?php else: ?>
-	<script src="<?php echo $this->getJsUrl('Afterpay/checkout/onepage.js') ?> "></script>
-<?php endif; ?>
+    <?php
+    $mw_onestepcheckout = Mage::helper('core')->isModuleEnabled("MW_Onestepcheckout");
+    $amasty_onestepcheckout = Mage::helper('core')->isModuleEnabled("Amasty_Scheckout");
+    ?>
+    <?php if( $mw_onestepcheckout ): ?>
+    	<script src="<?php echo $this->getJsUrl('Afterpay/checkout/mw_onestepcheckout.js') ?> "></script>
+    <?php elseif( $amasty_onestepcheckout ): ?>
+    	<script src="<?php echo $this->getJsUrl('Afterpay/checkout/amasty_onestepcheckout.js') ?> "></script>
+    <?php else: ?>
+    	<script src="<?php echo $this->getJsUrl('Afterpay/checkout/onepage.js') ?> "></script>
+    <?php endif; ?>
+<?php } ?>
