@@ -1,5 +1,22 @@
 # Afterpay Magento 1 Extension Changelog
 
+## Version 3.0.3
+
+_Wed 09 Oct 2019 (AEDT)_
+
+### Supported Editions & Versions
+
+- Magento Community Edition (CE) version 1.7 and later.
+- Magento Enterprise Edition (EE) version 1.13 and later.
+
+### Highlights
+
+- Improved handling of complex Website, Store and Store View configurations.
+- Improved handling of decimal payment limits.
+- Improved processing of customer registration during checkout.
+
+---
+
 ## Version 3.0.2
 
 _Wed 25 Sep 2019 (AEST)_

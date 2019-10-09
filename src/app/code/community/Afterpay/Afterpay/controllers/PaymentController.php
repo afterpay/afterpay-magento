@@ -212,20 +212,30 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
                 Zend_Log::NOTICE
             );
 
-
-            $checkout_method = $this->_quote->getCheckoutMethod();
-            if( $checkout_method == Mage_Checkout_Model_Type_Onepage::METHOD_REGISTER ) {
-                $this->_prepareNewAfterpayCustomerQuote();
-            }
-            else if( $checkout_method == Mage_Checkout_Model_Type_Onepage::METHOD_GUEST ) {
-                $this->_prepareAfterpayGuestQuote();
-            }
-            else {
-                $this->_prepareAfterpayCustomerQuote();
+            $isNewCustomer = false;
+            switch ($this->getCheckoutMethod()) {
+                case Mage_Checkout_Model_Type_Onepage::METHOD_GUEST:
+                    $this->_prepareAfterpayGuestQuote();
+                    break;
+                case Mage_Checkout_Model_Type_Onepage::METHOD_REGISTER:
+                    $this->_prepareNewAfterpayCustomerQuote();
+                    $isNewCustomer = true;
+                    break;
+                default:
+                    $this->_prepareAfterpayCustomerQuote();
+                    break;
             }
 
             // Placing order using Afterpay
-            $placeOrder = Mage::getModel('afterpay/order')->place($this->_quote);
+            $placeOrder = Mage::getModel('afterpay/order')->place();
+
+            if ($isNewCustomer) {
+                try {
+                    $this->_involveNewCustomer();
+                } catch (Exception $e) {
+                    Mage::logException($e);
+                }
+            }
 
             if ($placeOrder) {
 
@@ -234,7 +244,6 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
             		$this->helper()->storeCreditPlaceOrder();
             		$this->helper()->giftCardsPlaceOrder();
             	}
-
 
                 // Debug log
                 $this->helper()->log(
@@ -246,6 +255,8 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
                     ),
                     Zend_Log::NOTICE
                 );
+
+                $this->_quote->save();
             }
 
             // Redirect to success page
@@ -281,7 +292,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
         if ($this->getCustomerSession()->isLoggedIn()) {
             return Mage_Checkout_Model_Type_Onepage::METHOD_CUSTOMER;
         }
-        if (!$this->_quote->getCheckoutMethod()) {
+        if (!$this->_getQuote()->getCheckoutMethod()) {
             if (Mage::helper('checkout')->isAllowedGuestCheckout($this->_quote)) {
                 $this->_quote->setCheckoutMethod(Mage_Checkout_Model_Type_Onepage::METHOD_GUEST);
             } else {
@@ -299,7 +310,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
      */
     protected function _prepareAfterpayGuestQuote()
     {
-        $quote = $this->_quote;
+        $quote = $this->_getQuote();
         $quote->setCustomerId(null)
             ->setCustomerEmail($quote->getBillingAddress()->getEmail())
             ->setCustomerIsGuest(true)
@@ -312,18 +323,17 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
      */
     protected function _prepareAfterpayCustomerQuote()
     {
-        $quote      = $this->_quote;
+        $quote      = $this->_getQuote();
         $billing    = $quote->getBillingAddress();
-        $shipping   = $quote->isVirtual() ? $quote->getBillingAddress() : $quote->getShippingAddress();
+        $shipping   = $quote->isVirtual() ? null : $quote->getShippingAddress();
 
-        $customer = $quote->getCustomer();
+        $customer = $this->getCustomerSession()->getCustomer();
         if (!$billing->getCustomerId() || $billing->getSaveInAddressBook()) {
             $customerBilling = $billing->exportCustomerAddress();
             $customer->addAddress($customerBilling);
             $billing->setCustomerAddress($customerBilling);
         }
-        if ($shipping && ((!$shipping->getCustomerId() && !$shipping->getSameAsBilling())
-            || (!$shipping->getSameAsBilling() && $shipping->getSaveInAddressBook()))) {
+        if ($shipping && !$shipping->getSameAsBilling() && (!$shipping->getCustomerId() || $shipping->getSaveInAddressBook())) {
             $customerShipping = $shipping->exportCustomerAddress();
             $customer->addAddress($customerShipping);
             $shipping->setCustomerAddress($customerShipping);
@@ -332,12 +342,12 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
         if (isset($customerBilling) && !$customer->getDefaultBilling()) {
             $customerBilling->setIsDefaultBilling(true);
         }
-        if ($shipping && isset($customerBilling) && !$customer->getDefaultShipping() && $shipping->getSameAsBilling()) {
-            $customerBilling->setIsDefaultShipping(true);
-        } elseif ($shipping && isset($customerShipping) && !$customer->getDefaultShipping()) {
+        if ($shipping && isset($customerShipping) && !$customer->getDefaultShipping()) {
             $customerShipping->setIsDefaultShipping(true);
+        } else if (isset($customerBilling) && !$customer->getDefaultShipping()) {
+            $customerBilling->setIsDefaultShipping(true);
         }
-        $quote->setCustomer($customer)->setCustomerIsGuest(false);
+        $quote->setCustomer($customer);
     }
 
     /**
@@ -347,18 +357,9 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
      */
     protected function _prepareNewAfterpayCustomerQuote()
     {
-        $quote      = $this->_quote;
+        $quote      = $this->_getQuote();
         $billing    = $quote->getBillingAddress();
-        $shipping   = $quote->isVirtual() ? $quote->getBillingAddress() : $quote->getShippingAddress();
-
-        $customer = $this->_lookupCustomer();
-
-        if ($customer->getData()) {
-            // $quote->loginById($customerId);
-
-            $session = $this->getCustomerSession()->setCustomerAsLoggedIn($customer);
-            return $this->_prepareAfterpayCustomerQuote();
-        }
+        $shipping   = $quote->isVirtual() ? null : $quote->getShippingAddress();
 
         $customer = $quote->getCustomer();
         /** @var $customer Mage_Customer_Model_Customer */
@@ -371,7 +372,7 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
             $customer->addAddress($customerShipping);
             $shipping->setCustomerAddress($customerShipping);
             $customerShipping->setIsDefaultShipping(true);
-        } elseif ($shipping) {
+        } else {
             $customerBilling->setIsDefaultShipping(true);
         }
         /**
@@ -391,36 +392,28 @@ class Afterpay_Afterpay_PaymentController extends Mage_Core_Controller_Front_Act
 
         Mage::helper('core')->copyFieldset('checkout_onepage_billing', 'to_customer', $billing, $customer);
 
-        $email = $quote->getCustomerEmail();
-        $password = $customer->decryptPassword($quote->getPasswordHash());
-
-        $customer->setEmail($email);
-        $customer->setPrefix($quote->getCustomerPrefix());
-        $customer->setFirstname($quote->getCustomerFirstname());
-        $customer->setMiddlename($quote->getCustomerMiddlename());
-        $customer->setLastname($quote->getCustomerLastname());
-        $customer->setSuffix($quote->getCustomerSuffix());
-        $customer->setPassword($password);
-        $customer->setPasswordHash($customer->hashPassword($customer->getPassword()));
-        $customer->save();
-
-        //force login
-        $session = $this->getCustomerSession()->setCustomerAsLoggedIn($customer);
-        $session->login($email, $password);
-
-        $quote->setCustomer($customer)->setCustomerIsGuest(false);
+        $customer->setPassword($customer->decryptPassword($quote->getPasswordHash()));
+        $passwordCreatedTime = $this->getCheckoutSession()->getData('_session_validator_data')['session_expire_timestamp']
+            - Mage::getSingleton('core/cookie')->getLifetime();
+        $customer->setPasswordCreatedAt($passwordCreatedTime);
+        $quote->setCustomer($customer)
+            ->setCustomerId(true);
+        $quote->setPasswordHash('');
     }
 
-    /**
-     * Fins the customer ID
-     *
-     * @return int
-     */
-    protected function _lookupCustomer()
+    protected function _involveNewCustomer()
     {
-        return Mage::getModel('customer/customer')
-            ->setWebsiteId(Mage::app()->getWebsite()->getId())
-            ->loadByEmail($this->_quote->getCustomerEmail());
+        $customer = $this->_getQuote()->getCustomer();
+        if ($customer->isConfirmationRequired()) {
+            $customer->sendNewAccountEmail('confirmation', '', $this->_getQuote()->getStoreId());
+            $url = Mage::helper('customer')->getEmailConfirmationUrl($customer->getEmail());
+            $this->getCustomerSession()->addSuccess(
+                Mage::helper('customer')->__('Account confirmation is required. Please, check your e-mail for confirmation link. To resend confirmation email please <a href="%s">click here</a>.', $url)
+            );
+        } else {
+            $customer->sendNewAccountEmail('registered', '', $this->_getQuote()->getStoreId());
+            $this->getCustomerSession()->loginById($customer->getId());
+        }
     }
 
     /**

@@ -55,7 +55,7 @@ class Afterpay_Afterpay_Model_System_Config_Source_ApiMode
     {
         if(Mage::app()->getStore()->isAdmin()) {
             $websiteCode = Mage::app()->getRequest()->getParam('website');
-            
+
             if ($websiteCode) {
                 $website = Mage::getModel('core/website')->load($websiteCode);
                 $websiteId = $website->getId();
@@ -69,10 +69,10 @@ class Afterpay_Afterpay_Model_System_Config_Source_ApiMode
                 }
             }
         } else {
-            $websiteId = '';
+            $websiteId = null;
         }
 
-        if(Mage::app()->getStore($websiteId)->getCurrentCurrencyCode() == 'USD') {
+        if(Mage::app()->getWebsite($websiteId)->getConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_DEFAULT) == 'USD') {
             $api = 'api_us_url';
             $web = 'web_us_url';
         } else {

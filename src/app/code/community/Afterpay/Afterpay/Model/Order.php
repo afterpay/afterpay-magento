@@ -179,78 +179,42 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
     /**
      * Placing order to Magento
      *
-     * @param $quote
      * @return bool
      * @throws Exception
      */
-    public function place(Mage_Sales_Model_Quote $quote)
+    public function place()
     {
-
         // Converting quote to order
-        $service = Mage::getModel('sales/service_quote', $quote);
-
+        $service = Mage::getModel('sales/service_quote', $this->_getSession()->getQuote());
         $service->submitAll();
-        $order = $service->getOrder();
-
-        //ensure that Grand Total is not doubled
-        $order->setBaseGrandTotal( $quote->getBaseGrandTotal() );
-        $order->setGrandTotal( $quote->getGrandTotal() );
-
-
-        //adjust the Quote currency to prevent the default currency being stuck
-        $order->setBaseCurrencyCode(Mage::app()->getStore()->getCurrentCurrencyCode());
-        $order->setQuoteCurrencyCode(Mage::app()->getStore()->getCurrentCurrencyCode());
-        $order->setOrderCurrencyCode(Mage::app()->getStore()->getCurrentCurrencyCode());
-        $order->save();
-
 
         $session = $this->_getSession();
+        $quote = $session->getQuote();
 
-        if ($order->getId()) {
-            // Check with recurring payment
-            $profiles = $service->getRecurringPaymentProfiles();
-            if ($profiles) {
-                $ids = array();
-                foreach($profiles as $profile) {
-                    $ids[] = $profile->getId();
-                }
-                $session->setLastRecurringProfileIds($ids);
-            }
+        $session->setLastQuoteId($quote->getId())
+            ->setLastSuccessQuoteId($quote->getId())
+            ->clearHelperData();
 
-            //ensure the order amount due is 0
-            $order->setTotalDue(0);
-
-            $payment        = $order->getPayment();
-            $paymentMethod  = $payment->getMethodInstance();
-
-
-            // save an order
+        $order = $service->getOrder();
+        if ($order) {
             $order->setData('afterpay_order_id', $quote->getData('afterpay_order_id'));
             $order->save();
 
-
+            $paymentMethod = $order->getPayment()->getMethodInstance();
             if (!$order->getEmailSent() && $paymentMethod->getConfigData('order_email')) {
                 $order->sendNewOrderEmail();
             }
 
-
-            // prepare session to success or cancellation page clear current session
-            $session->clearHelperData();
-
-            // "last successful quote" for correctly redirect to success page
-            $quoteId = $session->getQuote()->getId();
-            $session->setLastQuoteId($quoteId)->setLastSuccessQuoteId($quoteId);
-
-            // an order may be created
+            // add order information to the session
             $session->setLastOrderId($order->getId())
                 ->setLastRealOrderId($order->getIncrementId());
-
-            //clear the checkout session
-            $session->getQuote()->setIsActive(0)->save();
-
-            return true;
         }
 
-        return false;
+        Mage::dispatchEvent(
+            'checkout_submit_all_after',
+            array('order' => $order, 'quote' => $quote, 'recurring_profiles' => array())
+        );
+
+        return $order ? true : false;
     }
 }

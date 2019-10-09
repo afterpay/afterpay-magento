@@ -123,8 +123,8 @@ class Afterpay_Afterpay_Model_Observer
 
                 $website_code = Mage::getSingleton('adminhtml/config_data')->getWebsite();
                 $website_id = Mage::getModel('core/website')->load($website_code)->getId();
-            
-                if (!Mage::getStoreConfigFlag('payment/' . $payment . '/active', $website_id)) {
+
+                if (!Mage::app()->getWebsite($website_id)->getConfig('payment/' . $payment . '/active')) {
                     continue;
                 }
 
@@ -135,8 +135,8 @@ class Afterpay_Afterpay_Model_Observer
             else if( !empty( $website_param ) ) {
 
                 $website_id = $website_param;
-            
-                if (!Mage::getStoreConfigFlag('payment/' . $payment . '/active', $website_id)) {
+
+                if (!Mage::app()->getWebsite($website_id)->getConfig('payment/' . $payment . '/active')) {
                     continue;
                 }
 
@@ -148,7 +148,7 @@ class Afterpay_Afterpay_Model_Observer
             {
                 $target_id = 0;
                 $level = 'default';
-            
+
                 if (!Mage::getStoreConfigFlag('payment/' . $payment . '/active')) {
                     continue;
                 }
@@ -158,13 +158,13 @@ class Afterpay_Afterpay_Model_Observer
             }
 
             $values = $base->getPaymentAmounts($payment, $tla, $overrides);
-        
+
             //skip if there is no values
             if( !$values ) {
                 continue;
             }
 
-            $this->_doPaymentLimitUpdate($payment, $values, $level, $target_id);            
+            $this->_doPaymentLimitUpdate($payment, $values, $level, $target_id);
         }
 
         // after changing system configuration, we need to clear the config cache
@@ -231,7 +231,7 @@ class Afterpay_Afterpay_Model_Observer
                 $response = Mage::app()->getResponse();
                 $helper = Mage::helper('core');
                 $responseBody = $helper->jsonDecode($response->getBody());
-                
+
                 $afterpayToken = $payment->getData('afterpay_token');
 
                 $responseBody['afterpayToken'] = $afterpayToken;

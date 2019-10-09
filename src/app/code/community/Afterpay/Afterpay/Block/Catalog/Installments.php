@@ -39,7 +39,7 @@ class Afterpay_Afterpay_Block_Catalog_Installments extends Mage_Core_Block_Templ
     {
         if (Mage::getStoreConfigFlag(self::XML_CONFIG_PREFIX . 'check_order_total_limits')) {
             // min order total limit for Afterpay Pay Over Time payment method
-            return (int)Mage::getStoreConfig('payment/afterpaypayovertime/min_order_total');
+            return (float)Mage::getStoreConfig('payment/afterpaypayovertime/min_order_total');
         } else {
             return 0;
         }
@@ -49,7 +49,7 @@ class Afterpay_Afterpay_Block_Catalog_Installments extends Mage_Core_Block_Templ
     {
         if (Mage::getStoreConfigFlag(self::XML_CONFIG_PREFIX . 'check_order_total_limits')) {
             // max order total limit for Afterpay Pay Over Time payment method
-            return (int)Mage::getStoreConfig('payment/afterpaypayovertime/max_order_total');
+            return (float)Mage::getStoreConfig('payment/afterpaypayovertime/max_order_total');
         } else {
             return 0;
         }
