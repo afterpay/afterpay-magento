@@ -121,6 +121,12 @@
                         }
                     }
                 );
+            } else {
+                /**
+                 * Call original function
+                 */
+                original.apply(this, arguments);
+            }
             }
         };
     }
