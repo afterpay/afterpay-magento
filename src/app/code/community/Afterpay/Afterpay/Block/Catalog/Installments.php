@@ -12,10 +12,26 @@ class Afterpay_Afterpay_Block_Catalog_Installments extends Mage_Core_Block_Templ
 {
     const XML_CONFIG_PREFIX = 'afterpay/payovertime_installments/';
 
+    /**
+     * Retrieve product
+     *
+     * @return Mage_Catalog_Model_Product
+     */
+    public function getProduct()
+    {
+        $product = $this->_getData('product');
+        if (!$product) {
+            $product = Mage::registry('product');
+        }
+        return $product;
+    }
+
     public function isEnabled()
     {
-        return Mage::getStoreConfigFlag(self::XML_CONFIG_PREFIX . 'enable_' . $this->getPageType());
-
+        $product = $this->getProduct();
+        return Mage::getStoreConfigFlag(self::XML_CONFIG_PREFIX . 'enable_' . $this->getPageType())
+            && Mage::getModel('afterpay/method_payovertime')->canUseForProduct($product)
+            && !$product->isGrouped();
     }
 
     public function getCssSelectors()

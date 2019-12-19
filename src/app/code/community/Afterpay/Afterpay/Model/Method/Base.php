@@ -66,6 +66,52 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
     protected $afterPayPaymentTypeCode = null;
 
     /**
+     * Get IDs of restricted categories as set in config.
+     * @return array
+     */
+    public function getRestrictedCategoryIds()
+    {
+        $ids = Mage::getStoreConfig('payment/afterpaypayovertime/restricted_categories');
+        return explode(',', $ids);
+    }
+
+    /**
+     * @param Mage_Catalog_Model_Product $product
+     * @return bool
+     */
+    public function canUseForProduct($product)
+    {
+        $restricted = $this->getRestrictedCategoryIds();
+        if (!empty($restricted)) {
+            $ids = $product->getCategoryIds();
+            foreach ($ids as $id) {
+                if (in_array($id, $restricted)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public function canUseForCheckoutSession()
+    {
+        $quote = Mage::getSingleton('checkout/session')->getQuote();
+        $items = $quote->getAllItems();
+        foreach ($items as $item) {
+            $product = $item->getProduct();
+            if (!$this->canUseForProduct($product)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public function canUseCheckout()
+    {
+        return $this->_canUseCheckout && $this->canUseForCheckoutSession();
+    }
+
+    /**
      * Check method for processing with base currency
      *
      * @param string $currencyCode
@@ -212,33 +258,24 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
     {
         $url = $this->getApiAdapter()->getApiRouter()->getRefundUrl($payment->getData('afterpay_order_id'));
         $helper = $this->helper();
-        $coreHelper = Mage::helper('core');
 
         $helper->log('Refunding order url: ' . $url . ' amount: ' . $amount, Zend_Log::DEBUG);
 
-	if( $amount == 0 ) {
-		$helper->log("Zero amount refund is detected, skipping Afterpay API Refunding");
-		return $this;
-	}
+    	if( $amount == 0 ) {
+    		$helper->log("Zero amount refund is detected, skipping Afterpay API Refunding");
+    		return $this;
+    	}
 
         //Ver 1 needs Merchant Reference variable
         $body = $this->getApiAdapter()->buildRefundRequest($amount, $payment);
 
-        $response = $this->_sendRequest($url, $body, $method = Zend_Http_Client::POST);
-
-        if ($response->isError()) {
-            throw Mage::exception(
-                'Afterpay_Afterpay',
-                Mage::helper('afterpay')->__('Afterpay API Error: %s', $response->getMessage())
-            );
-        }
-
-        $resultObject = $coreHelper->jsonDecode($response->getBody(), true);
+        $response = $this->_sendRequest($url, $body, 'POST');
+        $resultObject = json_decode($response, true);
 
         if (isset($resultObject['errorId']) || isset($resultObject['errorCode'])) {
             throw Mage::exception(
                 'Afterpay_Afterpay',
-                Mage::helper('afterpay')->__('Afterpay API Error: %s', $resultObject['message'])
+                $helper->__('Afterpay API Error: %s', $resultObject['message'])
             );
         }
 
@@ -247,33 +284,24 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
         return $this;
     }
 
-    protected function _sendRequest($url, $body = false, $method = Zend_Http_Client::GET, $call = null)
+    protected function _sendRequest($url, $body = false, $method = 'GET', $call = null)
     {
-        $client = new Zend_Http_Client($url);
         $coreHelper = Mage::helper('core');
 
-        $client->setAuth(
-            trim($this->_cleanup_string($this->getConfigData(self::API_USERNAME_CONFIG_FIELD))),
-            trim($this->_cleanup_string($this->getConfigData(self::API_PASSWORD_CONFIG_FIELD)))
-        );
-
-        $client->setConfig(array(
-            'adapter' => 'Zend_Http_Client_Adapter_Curl',
+        $client = new Afterpay_Afterpay_Model_Api_Http_Client($url);
+        $client->setConfigs(array(
+            'auth_user' => trim($this->_cleanup_string($this->getConfigData(self::API_USERNAME_CONFIG_FIELD))),
+            'auth_pwd' => trim($this->_cleanup_string($this->getConfigData(self::API_PASSWORD_CONFIG_FIELD))),
             'useragent' => $this->_construct_user_agent(),
-            'timeout'   => 80
         ));
-
-        if ($body !== false) {
-            $client->setRawData($coreHelper->jsonEncode($body), 'application/json');
-        }
 
         // Do advanced logging before
         $this->_logRequest($url, 'request', $call, $body);
 
-        $response = $client->request($method);
+        $response = $client->request($method, ($body!==false)?$body:array());
 
         // Do advanced logging after
-        $this->_logRequest($url, 'response', $call, json_decode($response->getBody(), TRUE));
+        $this->_logRequest($url, 'response', $call, json_decode($response, true));
 
         return $response;
     }
@@ -302,49 +330,40 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
     public function getPaymentAmounts($method, $tla, $overrides = array() )
     {
         $helper = Mage::helper('afterpay');
-        $client = new Zend_Http_Client($this->getApiAdapter()->getApiRouter()->getPaymentUrl($method));
 
+        $url = $this->getApiAdapter()->getApiRouter()->getPaymentUrl($method);
+        $client = new Afterpay_Afterpay_Model_Api_Http_Client($url);
+
+        $default_store_id = null;
         if( !empty($overrides) && !empty($overrides['website_id']) ) {
-
             $default_store_id = Mage::getModel('core/website')->load($overrides['website_id'])->getDefaultStore()->getId();
-
-            $merchant_id = trim($this->_cleanup_string(Mage::getStoreConfig('payment/' . $method . '/' . Afterpay_Afterpay_Model_Method_Base::API_USERNAME_CONFIG_FIELD, $default_store_id)));
-            $merchant_key = trim($this->_cleanup_string(Mage::getStoreConfig('payment/' . $method . '/' . Afterpay_Afterpay_Model_Method_Base::API_PASSWORD_CONFIG_FIELD, $default_store_id)));
-
-            $client->setAuth( $merchant_id, $merchant_key);
         }
-        else {
-
-            $merchant_id = trim($this->_cleanup_string(Mage::getStoreConfig('payment/' . $method . '/' . Afterpay_Afterpay_Model_Method_Base::API_USERNAME_CONFIG_FIELD)));
-            $merchant_key = trim($this->_cleanup_string(Mage::getStoreConfig('payment/' . $method . '/' . Afterpay_Afterpay_Model_Method_Base::API_PASSWORD_CONFIG_FIELD)));
-
-            $client->setAuth( $merchant_id, $merchant_key);
-        }
-
+        $merchant_id = trim($this->_cleanup_string(Mage::getStoreConfig('payment/' . $method . '/' . Afterpay_Afterpay_Model_Method_Base::API_USERNAME_CONFIG_FIELD, $default_store_id)));
+        $merchant_key = trim($this->_cleanup_string(Mage::getStoreConfig('payment/' . $method . '/' . Afterpay_Afterpay_Model_Method_Base::API_PASSWORD_CONFIG_FIELD, $default_store_id)));
 
         //log the credentials used in the Payment Limits Updates
         $helper->log( 'Merchant Origin: ' . $_SERVER['REQUEST_URI'] );
-        $helper->log( 'Target URL: ' . $this->getApiAdapter()->getApiRouter()->getPaymentUrl($method) );
+        $helper->log( 'Target URL: ' . $url );
         $helper->log( 'Merchant ID: ' . $merchant_id );
         $masked_merchant_key = substr($merchant_key, 0, 4) . '****' . substr($merchant_key, -4);
         $helper->log( 'Merchant Key: ' . $masked_merchant_key );
 
-        $client->setConfig(array(
-            'adapter' => 'Zend_Http_Client_Adapter_Curl',
+        $client->setConfigs(array(
+            'auth_user' => $merchant_id,
+            'auth_pwd' => $merchant_key,
             'useragent' => $this->_construct_user_agent(),
-            'timeout'   => 80
         ));
 
         $response = $client->request();
 
-        if ($response->isError()) {
-            $helper->log($response);
+        $data = json_decode($response, true);
+
+        if (isset($data['errorId']) || isset($data['errorCode'])) {
+            $helper->log($data);
             throw Mage::exception('Afterpay_Afterpay', 'Afterpay API error: ' . 'Payment Limits Update Error. Please check Merchant ID and Key.');
         }
 
-        $data = Mage::helper('core')->jsonDecode($response->getBody());
-
-        if( empty($data) || count($data) < 1 ) {
+        if( empty($data) ) {
             throw Mage::exception('Afterpay_Afterpay', 'Afterpay API error: ' . 'Empty Payment Limits Update Results. Please check Merchant ID and Key.');
         }
 

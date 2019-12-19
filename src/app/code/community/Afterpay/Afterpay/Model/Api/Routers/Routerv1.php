@@ -58,23 +58,23 @@ class Afterpay_Afterpay_Model_Api_Routers_Routerv1
 
         //make sure we are using the same version of API for consistency purpose
         $gatewayUrl = $settings[Afterpay_Afterpay_Model_System_Config_Source_ApiMode::KEY_API_URL] . 'v1/payments/';
-        
+
         if( !empty($type) && $type == $search_target ) {
-            $url = (substr($gatewayUrl, -1) == '/' ? $gatewayUrl : $gatewayUrl . '/') . 'token:' . urlencode($search_target); 
+            $url = (substr($gatewayUrl, -1) == '/' ? $gatewayUrl : $gatewayUrl . '/') . 'token:' . urlencode($search_target);
         }
         else if( !empty($type) && $type == 'id') {
             $url = (substr($gatewayUrl, -1) == '/' ? $gatewayUrl : $gatewayUrl . '/') . $search_target;
-        }   
+        }
         else if( !empty($type) && $type == 'courier') {
             $url = (substr($gatewayUrl, -1) == '/' ? $gatewayUrl : $gatewayUrl . '/') . $search_target . "/courier/";
-        }   
+        }
         else if( !empty($type) && $type == 'token' ) {
-            $url = $settings[Afterpay_Afterpay_Model_System_Config_Source_ApiMode::KEY_API_URL] . 'v1/orders/' . $search_target; 
-        }  
+            $url = $settings[Afterpay_Afterpay_Model_System_Config_Source_ApiMode::KEY_API_URL] . 'v1/orders/' . $search_target;
+        }
         else {
-            $url = $settings[Afterpay_Afterpay_Model_System_Config_Source_ApiMode::KEY_API_URL] . 'v1/orders/'; 
-        }    
-        
+            $url = $settings[Afterpay_Afterpay_Model_System_Config_Source_ApiMode::KEY_API_URL] . 'v1/orders/';
+        }
+
         return $url;
     }
 
@@ -127,7 +127,7 @@ class Afterpay_Afterpay_Model_Api_Routers_Routerv1
         $apiMode      = Mage::getStoreConfig('payment/afterpaypayovertime/' . Afterpay_Afterpay_Model_Method_Base::API_MODE_CONFIG_FIELD);
         $settings     = Afterpay_Afterpay_Model_System_Config_Source_ApiMode::getEnvironmentSettings($apiMode);
 
-        return $settings[Afterpay_Afterpay_Model_System_Config_Source_ApiMode::KEY_API_URL] . 'v1/payments/capture/';  
+        return $settings[Afterpay_Afterpay_Model_System_Config_Source_ApiMode::KEY_API_URL] . 'v1/payments/capture/';
     }
 
 
@@ -141,13 +141,23 @@ class Afterpay_Afterpay_Model_Api_Routers_Routerv1
         $apiMode      = Mage::getStoreConfig('payment/afterpaypayovertime/' . Afterpay_Afterpay_Model_Method_Base::API_MODE_CONFIG_FIELD);
         $settings     = Afterpay_Afterpay_Model_System_Config_Source_ApiMode::getEnvironmentSettings($apiMode);
 
+        $countryCode = 'au';
+        switch (Mage::app()->getStore()->getCurrentCurrencyCode()) {
+            case 'USD':
+                $countryCode = 'us';
+                break;
+            case 'NZD':
+                $countryCode = 'nz';
+                break;
+        }
+
         //make sure we are using the same version of API for consistency purpose
-        $gatewayUrl = $settings[Afterpay_Afterpay_Model_System_Config_Source_ApiMode::KEY_WEB_URL] . 'checkout';
-        
+        $gatewayUrl = $settings[Afterpay_Afterpay_Model_System_Config_Source_ApiMode::KEY_WEB_URL] . $countryCode . '/checkout';
+
         if( !empty($token) ) {
-            $url = (substr($gatewayUrl, -1) == '/' ? $gatewayUrl : $gatewayUrl . '/') . '?token=' . urlencode($token) . '&redirected=1&relativeCallbackUrl='; 
-        }   
-        
+            $url = (substr($gatewayUrl, -1) == '/' ? $gatewayUrl : $gatewayUrl . '/') . '?token=' . urlencode($token) . '&redirected=1&relativeCallbackUrl=';
+        }
+
         return $url;
     }
 }

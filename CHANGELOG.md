@@ -1,5 +1,25 @@
 # Afterpay Magento 1 Extension Changelog
 
+## Version 3.0.4
+
+_Thu 19 Dec 2019 (AEDT)_
+
+### Supported Editions & Versions
+
+- Magento Community Edition (CE) version 1.7 and later.
+- Magento Enterprise Edition (EE) version 1.13 and later.
+
+### Highlights
+
+- Allow admin users to restrict Afterpay from a given set of product categories.
+- Improved fallback mechanism for unsupported checkouts.
+- Improved support for virtual products.
+- Improved support for HTTP/2.
+- Improved compatibility with the "OneStepCheckout" checkout extension.
+- Hide Afterpay elements from PDP for Grouped Products.
+
+---
+
 ## Version 3.0.3
 
 _Wed 09 Oct 2019 (AEDT)_

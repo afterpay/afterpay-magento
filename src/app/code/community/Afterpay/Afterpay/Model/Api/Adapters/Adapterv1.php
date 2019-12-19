@@ -207,7 +207,6 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
         $errors = array();
 
         $billingAddress = $object->getBillingAddress();
-        $shippingAddress = $object->getShippingAddress();
 
     	$billing_postcode = $billingAddress->getPostcode();
     	$billing_telephone = $billingAddress->getTelephone();
@@ -227,7 +226,9 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
             $errors[] = "Billing Address is required";
         }
 
-        if( !empty($shippingAddress) ) {
+        if (!$object->isVirtual()) {
+            $shippingAddress = $object->getShippingAddress();
+            
         	$shipping_postcode = $shippingAddress->getPostcode();
         	$shipping_telephone = $shippingAddress->getTelephone();
         	$shipping_city = $shippingAddress->getCity();

@@ -80,8 +80,8 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
         $gatewayUrl = $this->getApiAdapter()->getApiRouter()->getOrdersApiUrl();
 
         // Request order token to API
-        $result = $this->_sendRequest($gatewayUrl, $postData, Zend_Http_Client::POST, 'StartAfterpayPayment');
-        $resultObject = json_decode($result->getBody());
+        $result = $this->_sendRequest($gatewayUrl, $postData, 'POST', 'StartAfterpayPayment');
+        $resultObject = json_decode($result);
 
         // Check if token is NOT in response
         if ( empty($resultObject->orderToken) && empty($resultObject->token) ) {
@@ -141,15 +141,15 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
         $gatewayUrl = $this->getApiAdapter()->getApiRouter()->getDirectCaptureApiUrl();
 
         // Request order token to API
-        $result = $this->_sendRequest($gatewayUrl, $postData, Zend_Http_Client::POST, 'StartAfterpayDirectCapture');
-        $resultObject = json_decode($result->getBody());
+        $result = $this->_sendRequest($gatewayUrl, $postData, 'POST', 'StartAfterpayDirectCapture');
+        $resultObject = json_decode($result);
 
         // Check if token is NOT in response
         if( !empty($resultObject->errorCode) || !empty($resultObject->errorId) ) {
 
             throw Mage::exception('Afterpay_Afterpay', $resultObject->message);
         }
-        else if ( empty($resultObject->id) && empty($resultObject->id) ) {
+        else if ( empty($resultObject->id) ) {
             throw Mage::exception('Afterpay_Afterpay', 'Afterpay API Gateway Error');
         }
         else {
@@ -170,8 +170,8 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
         $gatewayUrl = $this->getApiAdapter()->getApiRouter()->getOrdersApiUrl( $orderToken, 'token' );
 
         // Request order token to API
-        $result = $this->_sendRequest($gatewayUrl, false, Zend_Http_Client::GET, 'Get order by token ' . $orderToken);
-        $resultObject = json_decode($result->getBody());
+        $result = $this->_sendRequest($gatewayUrl, false, 'GET', 'Get order by token ' . $orderToken);
+        $resultObject = json_decode($result);
 
         return $resultObject;
     }

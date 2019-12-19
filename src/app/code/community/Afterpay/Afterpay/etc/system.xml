@@ -98,10 +98,20 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </specificcountry>
+                        <restricted_categories translate="label">
+                            <label>Restricted Categories</label>
+                            <frontend_type>multiselect</frontend_type>
+                            <sort_order>180</sort_order>
+                            <source_model>afterpay/system_config_source_category</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <can_be_empty>1</can_be_empty>
+                        </restricted_categories>
                         <min_order_total translate="label">
                             <label>Minimum Order Total</label>
                             <frontend_type>label</frontend_type>
-                            <sort_order>180</sort_order>
+                            <sort_order>190</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -109,7 +119,7 @@
                         <max_order_total translate="label">
                             <label>Maximum Order Total</label>
                             <frontend_type>label</frontend_type>
-                            <sort_order>190</sort_order>
+                            <sort_order>200</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -117,7 +127,7 @@
                         <update_order_limits>
                             <label/>
                             <frontend_model>afterpay/adminhtml_system_config_form_field_update_limits</frontend_model>
-                            <sort_order>200</sort_order>
+                            <sort_order>210</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>

@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Afterpay_Afterpay>
-            <version>3.0.3</version>
+            <version>3.0.4</version>
         </Afterpay_Afterpay>
     </modules>
     <afterpay>
