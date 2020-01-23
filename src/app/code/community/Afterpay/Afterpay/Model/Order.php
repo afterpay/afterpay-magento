@@ -76,6 +76,13 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
 
         // Afterpay build order token request - accommodate both Ver 0 and 1
         $postData = $this->getApiAdapter()->buildOrderTokenRequest($quote, array('merchantOrderId' => $quote->getReservedOrderId()), $this->afterPayPaymentTypeCode);
+        $nameParts = preg_split('/\s+/', $postData['consumer']['givenNames'], 0, PREG_SPLIT_NO_EMPTY);
+        if(count($nameParts) > 1) {
+            $postData['consumer']['surname'] = array_pop($nameParts);
+            $postData['consumer']['givenNames'] = implode(' ', $nameParts);
+        } else {
+            $postData['consumer']['surname'] = 'Zookal';
+        }
 
         $gatewayUrl = $this->getApiAdapter()->getApiRouter()->getOrdersApiUrl();
 
