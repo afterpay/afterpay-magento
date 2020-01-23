@@ -1,17 +1,10 @@
 <?php
 $region_specific_text = (Mage::app()->getStore()->getCurrentCurrencyCode() == 'AUD') ? 'fortnightly' : ((Mage::app()->getStore()->getCurrentCurrencyCode() == 'NZD') ? 'fortnightly' : 'bi-weekly');
 ?>
-<span class="paypal-or"><?php echo $this->__('-OR-'); ?></span>
-</li><li class="method-afterpay_onetouch">
-
-<h3><?php echo $this->__('Check out with Afterpay and pay over time.') ?></h3>
-<p><?php echo $this->__('Simply pay 4 ' . $region_specific_text . ' payments of %s.', $this->getInstalmentAmount()) ?></p>
-<p>
-    <?php echo $this->__('Use your payment card, instant approval.') ?>
+<div class="zipmoney-repay-calc">
+<?php echo $this->__('pay 4 payments of %s with', $this->getInstalmentAmount()) ?>
     <a href="#afterpay-what-is-modal" class="afterpay-what-is-modal-trigger">
-        <?php echo $this->__('Learn more') ?>
+        <img src="<?php echo $this->getSkinUrl('afterpay/images/ap-logo-152x31.png') ?>" style="width: 76px; vertical-align: middle; display: inline;"/>
     </a>
-</p>
-<a href="<?php echo $this->getUrl('afterpay/onetouch') ?>" class="button btn-proceed-checkout btn-checkout">
-    <img src="<?php echo $this->getSkinUrl('afterpay/images/afterpay_logo_white1.png') ?>" />
-</a>
+</div>
+<hr width="80%" style="margin: 10px auto">
