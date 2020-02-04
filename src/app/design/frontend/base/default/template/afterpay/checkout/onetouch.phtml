@@ -1,10 +1,12 @@
 <?php
+if(!Mage::helper('zookalsales')->doesQuoteHavePhysicalRentals()) :
+?>
+<?php
 $region_specific_text = (Mage::app()->getStore()->getCurrentCurrencyCode() == 'AUD') ? 'fortnightly' : ((Mage::app()->getStore()->getCurrentCurrencyCode() == 'NZD') ? 'fortnightly' : 'bi-weekly');
 ?>
 <div class="zipmoney-repay-calc">
 <?php echo $this->__('pay 4 payments of %s with', $this->getInstalmentAmount()) ?>
-    <a href="#afterpay-what-is-modal" class="afterpay-what-is-modal-trigger">
-        <img src="<?php echo $this->getSkinUrl('afterpay/images/ap-logo-152x31.png') ?>" style="width: 76px; vertical-align: middle; display: inline;"/>
-    </a>
+    <img src="<?php echo $this->getSkinUrl('afterpay/images/ap-logo-152x31.png') ?>" style="width: 76px; vertical-align: middle; display: inline;"/>
 </div>
 <hr width="80%" style="margin: 10px auto">
+<?php endif ?>
