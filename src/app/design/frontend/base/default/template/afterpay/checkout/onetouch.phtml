@@ -1,4 +1,7 @@
 <?php
+if(!Mage::helper('zookalsales')->doesQuoteHavePhysicalRentals()) :
+?>
+<?php
 $region_specific_text = (Mage::app()->getStore()->getCurrentCurrencyCode() == 'AUD') ? 'fortnightly' : ((Mage::app()->getStore()->getCurrentCurrencyCode() == 'NZD') ? 'fortnightly' : 'bi-weekly');
 ?>
 <div class="zipmoney-repay-calc">
@@ -8,3 +11,4 @@ $region_specific_text = (Mage::app()->getStore()->getCurrentCurrencyCode() == 'A
     </a>
 </div>
 <hr width="80%" style="margin: 10px auto">
+<?php endif ?>
