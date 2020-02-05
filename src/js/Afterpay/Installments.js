@@ -96,7 +96,7 @@
                         ).replace(this.config.regionSpecific, this.config.regionText)
                     });
 
-                    Element.addClassName(priceBoxes[i].nextSibling, this.config.className);
+                    Element.addClassName(priceBoxes[i].parentElement.select('.btn.btn-bundle')[0].parentElement.nextSibling, this.config.className);
                 }
                 else {
                     var oldElement = priceBoxes[i].nextSibling;
