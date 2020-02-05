@@ -32,7 +32,6 @@
     Afterpay.Installments.config = null;
 
     Afterpay.Installments.render = function () {
-
         // check all pre-requisites
         if (!Prototype || !Element) {
             console.warn('Afterpay: window.Prototype or window.Element is not defined, cannot render installments amount');
@@ -80,7 +79,8 @@
                     && (this.config.afterpayEnabled)
                 ) {
 
-                    var oldElement = priceBoxes[i].nextSibling;
+                    var oldElement = priceBoxes[i].parentElement.select('.btn.btn-bundle')[0].parentElement.nextSibling;
+
                     if (oldElement && oldElement instanceof Element
                         && Element.hasClassName(oldElement, this.config.className)) {
 
@@ -89,7 +89,7 @@
 
                     var individualInstalment = price / this.config.installmentsAmount;
 
-                    Element.insert(priceBoxes[i], {
+                    Element.insert(priceBoxes[i].parentElement.select('.btn.btn-bundle')[0].parentElement, {
                         after: this.config.template.replace(this.config.priceSubstitution,
                             // productOptionsPrice.formatPrice(price / this.config.installmentsAmount)
                             this.config.currencySymbol + individualInstalment.toFixed(2)

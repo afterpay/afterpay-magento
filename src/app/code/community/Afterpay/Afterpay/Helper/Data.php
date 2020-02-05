@@ -405,7 +405,7 @@ class Afterpay_Afterpay_Helper_Data extends Mage_Core_Helper_Abstract
                     
             Mage::getSingleton('checkout/session')->unsetData('afterpayGiftCards');
             Mage::getSingleton('checkout/session')->unsetData('afterpayGiftCardsAmount');
-	}
+	      }
 
         return true;
     }
