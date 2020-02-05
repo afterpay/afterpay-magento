@@ -421,4 +421,24 @@ class Afterpay_Afterpay_Helper_Data extends Mage_Core_Helper_Abstract
         return;
     }
 
+    public function getMinPriceLimit()
+    {
+        if (Mage::getStoreConfigFlag(Afterpay_Afterpay_Block_Catalog_Installments::XML_CONFIG_PREFIX . 'check_order_total_limits')) {
+            // min order total limit for Afterpay Pay Over Time payment method
+            return (float)Mage::getStoreConfig('payment/afterpaypayovertime/min_order_total');
+        } else {
+            return 0;
+        }
+    }
+
+    public function getMaxPriceLimit()
+    {
+        if (Mage::getStoreConfigFlag(Afterpay_Afterpay_Block_Catalog_Installments::XML_CONFIG_PREFIX . 'check_order_total_limits')) {
+            // max order total limit for Afterpay Pay Over Time payment method
+            return (float)Mage::getStoreConfig('payment/afterpaypayovertime/max_order_total');
+        } else {
+            return 0;
+        }
+    }
+
 }
