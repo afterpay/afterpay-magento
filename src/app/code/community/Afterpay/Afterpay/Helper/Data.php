@@ -409,16 +409,4 @@ class Afterpay_Afterpay_Helper_Data extends Mage_Core_Helper_Abstract
 
         return true;
     }
-
-    public function getRepaymentsDynamicHtml($page, $amount = null)
-    {
-        if($page == 'product' || $page == 'cart') {
-            $html = '<div class="zipmoney-repay-calc">';
-            $html .= 'or 4 interest free payments <img src="' . Mage::getDesign()->getSkinUrl('afterpay/images/ap-logo-152x31.png') . '" style="width: 76px; vertical-align: middle; display: inline;"></img>';
-            $html .= '</div>';
-            return $html;
-        }
-        return;
-    }
-
 }

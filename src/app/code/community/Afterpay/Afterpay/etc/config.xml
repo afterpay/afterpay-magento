@@ -185,18 +185,15 @@
                 <enable_product_page>1</enable_product_page>
                 <product_page_price_block_selectors><![CDATA[.product-shop .price-box
 .product-essential .price-box]]></product_page_price_block_selectors>
-                <product_page_html_template><![CDATA[<div style="
-     position: relative;
- font-style: italic;
- line-height: 1.4;
-" class="afterpay-installments">or 4 interest free payments of {price_here} {region_specific_text}
-<br><img src="{skin_url}frontend/base/default/afterpay/images/ap-logo-152x31.png" style="
+                <product_page_html_template><![CDATA[<div class="zipmoney-repay-calc">or 4 interest free payments of {price_here} {region_specific_text}
+<img src="{skin_url}frontend/base/default/afterpay/images/ap-logo-152x31.png" style="
     width: 76px;
     vertical-align: middle;
     display: inline;
 "></img><a href="#afterpay-what-is-modal" class="afterpay-what-is-modal-trigger">   Learn more </a>
 </div>
-<style type="text/css">.price-box.ciq_price_box .ciq_view_shipping{margin-top:35px}</style>]]></product_page_html_template>
+<style type="text/css">.price-box.ciq_price_box .ciq_view_shipping{margin-top:35px}</style>
+<hr width="80%" style="margin: 10px auto">]]></product_page_html_template>
                 <check_order_total_limits>1</check_order_total_limits>
             </payovertime_installments>
             <payovertime_checkout>

@@ -12,7 +12,7 @@
         </reference>
     </default>
 
-    <!--catalog_product_view translate="label">
+    <catalog_product_view translate="label">
         <reference name="before_body_end">
             <block type="afterpay/catalog_installments" name="afterpay.installments"
                    template="afterpay/catalog/installments.phtml" data-type="product_list">
@@ -24,7 +24,7 @@
         <reference name="head">
             <action method="addJs"><script>Afterpay/Installments.js</script></action>
         </reference>
-    </catalog_product_view-->
+    </catalog_product_view>
 
     <afterpay_payment_redirect>
         <reference name="root">
