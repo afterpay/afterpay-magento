@@ -79,7 +79,7 @@
                     && (this.config.afterpayEnabled)
                 ) {
 
-                    var oldElement = priceBoxes[i].parentElement.select('.btn.btn-bundle')[0].parentElement.nextSibling;
+                    var oldElement = priceBoxes[i].parentElement.select('.btn.btn-product-cart')[0].parentElement.nextSibling;
 
                     if (oldElement && oldElement instanceof Element
                         && Element.hasClassName(oldElement, this.config.className)) {
@@ -89,14 +89,14 @@
 
                     var individualInstalment = price / this.config.installmentsAmount;
 
-                    Element.insert(priceBoxes[i].parentElement.select('.btn.btn-bundle')[0].parentElement, {
+                    Element.insert(priceBoxes[i].parentElement.select('.btn.btn-product-cart')[0].parentElement, {
                         after: this.config.template.replace(this.config.priceSubstitution,
                             // productOptionsPrice.formatPrice(price / this.config.installmentsAmount)
                             this.config.currencySymbol + individualInstalment.toFixed(2)
                         ).replace(this.config.regionSpecific, this.config.regionText)
                     });
 
-                    Element.addClassName(priceBoxes[i].parentElement.select('.btn.btn-bundle')[0].parentElement.nextSibling, this.config.className);
+                    Element.addClassName(priceBoxes[i].parentElement.select('.btn.btn-product-cart')[0].parentElement.nextSibling, this.config.className);
                 }
                 else {
                     var oldElement = priceBoxes[i].nextSibling;
