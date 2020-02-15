@@ -17,11 +17,14 @@
     //jQuery("#onestepcheckout-place-order").on("click", function() {
         if (payment.currentMethod == 'afterpaypayovertime') {
             // prepare params
+            if ($('billing:country_id') != undefined && $('billing:country_id').value == "") {
+                $('billing:country_id').value = 'AU';
+            }
             var params = form.serialize(true);
 
             var customer_password = jQuery('#billing\\:customer_password').val();
 
-            if( typeof customer_password !== 'undefined' && customer_password.length ) {
+            if(jQuery('#id_create_account').is(':checked') && typeof customer_password !== 'undefined' && customer_password.length ) {
                 params.create_account = 1;
             }
 
