@@ -51,26 +51,6 @@ class Afterpay_Afterpay_Block_Catalog_Installments extends Mage_Core_Block_Templ
         return $result;
     }
 
-    public function getMinPriceLimit()
-    {
-        if (Mage::getStoreConfigFlag(self::XML_CONFIG_PREFIX . 'check_order_total_limits')) {
-            // min order total limit for Afterpay Pay Over Time payment method
-            return (float)Mage::getStoreConfig('payment/afterpaypayovertime/min_order_total');
-        } else {
-            return 0;
-        }
-    }
-
-    public function getMaxPriceLimit()
-    {
-        if (Mage::getStoreConfigFlag(self::XML_CONFIG_PREFIX . 'check_order_total_limits')) {
-            // max order total limit for Afterpay Pay Over Time payment method
-            return (float)Mage::getStoreConfig('payment/afterpaypayovertime/max_order_total');
-        } else {
-            return 0;
-        }
-    }
-
     public function getStoreConfigEnabled()
     {
         if (Mage::getStoreConfig('payment/afterpaypayovertime/' . Afterpay_Afterpay_Model_Method_Base::API_ENABLED_FIELD)) {
@@ -99,14 +79,15 @@ class Afterpay_Afterpay_Block_Catalog_Installments extends Mage_Core_Block_Templ
 
     public function getJsConfig()
     {
+        $helper = Mage::helper('afterpay');
         return array(
             'selectors'          => $this->getCssSelectors(),
             'template'           => $this->getHtmlTemplate(),
             'priceSubstitution'  => '{price_here}',
             'regionSpecific'     => '{region_specific_text}',
             'regionText'         => $this->getRegionSpecificText(),
-            'minPriceLimit'      => $this->getMinPriceLimit(),
-            'maxPriceLimit'      => $this->getMaxPriceLimit(),
+            'minPriceLimit'      => $helper->getMinPriceLimit(),
+            'maxPriceLimit'      => $helper->getMaxPriceLimit(),
             'installmentsAmount' => $this->getInstallmentsAmount(),
             'afterpayEnabled'    => $this->getStoreConfigEnabled(),
             'priceFormat'        => Mage::app()->getLocale()->getJsPriceFormat(),
