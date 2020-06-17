@@ -8,14 +8,7 @@
     //<![CDATA[
     // included inline as this template is loaded through an ajax request
     if (window.jQuery.fn.fancybox) {
-	    jQuery('#what-is-afterpay-trigger').fancybox({
-	        afterShow: function() {
-	            jQuery('#afterpay-what-is-modal').find('.close-afterpay-button').on('click', function(event) {
-	                event.preventDefault();
-	                jQuery.fancybox.close();
-	            })
-	        }
-	    });
+	    jQuery('#what-is-afterpay-trigger').fancybox();
     }
     else {
     	jQuery('#what-is-afterpay-trigger').hide();

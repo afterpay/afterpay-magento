@@ -17,8 +17,6 @@ class Afterpay_Afterpay_Block_Form_Payovertime extends Afterpay_Afterpay_Block_F
 
     const CONFIG_PATH_SHOW_DETAILS = 'afterpay/payovertime_checkout/show_checkout_details';
 
-    const TEMPLATE_OPTION_TITLE_DEFAULT = 'afterpay/checkout/title.phtml';
-
     const TEMPLATE_OPTION_DETAILS_DEFAULT = 'afterpay/form/payovertime.phtml';
 
     const TEMPLATE_OPTION_TITLE_CUSTOM = 'afterpay/checkout/title_custom.phtml';
@@ -54,6 +52,16 @@ class Afterpay_Afterpay_Block_Form_Payovertime extends Afterpay_Afterpay_Block_F
         return $this->getData('instalment_amount');
     }
 
+    public function getInstalmentAmountCreditUsed()
+    {
+        if (!$this->hasData('instalment_amount_credit_used')) {
+            $formatted = Mage::helper('afterpay')->calculateInstalment(true);
+            $this->setData('instalment_amount_credit_used', $formatted);
+        }
+
+        return $this->getData('instalment_amount_credit_used');
+    }
+
     public function getInstalmentAmountLast()
     {
         if (!$this->hasData('instalment_amount_last')) {
@@ -64,9 +72,29 @@ class Afterpay_Afterpay_Block_Form_Payovertime extends Afterpay_Afterpay_Block_F
         return $this->getData('instalment_amount_last');
     }
 
+    public function getInstalmentAmountLastCreditUsed()
+    {
+        if (!$this->hasData('instalment_amount_last_credit_used')) {
+            $formatted = Mage::helper('afterpay')->calculateInstalmentLast(true);
+            $this->setData('instalment_amount_last_credit_used', $formatted);
+        }
+
+        return $this->getData('instalment_amount_last_credit_used');
+    }
+
     public function getOrderTotal()
     {
         $total = Mage::getSingleton('checkout/session')->getQuote()->getGrandTotal();
+        return Mage::app()->getStore()->formatPrice($total, false);
+    }
+
+    public function getOrderTotalCreditUsed()
+    {
+        $total = Mage::getSingleton('checkout/session')->getQuote()->getGrandTotal();
+        $total = $total - Mage::helper('afterpay')->getCustomerBalance();
+        if ($total < 0) {
+            $total = 0;
+        }
         return Mage::app()->getStore()->formatPrice($total, false);
     }
 
@@ -111,23 +139,27 @@ class Afterpay_Afterpay_Block_Form_Payovertime extends Afterpay_Afterpay_Block_F
     {
         return array(
             'afterpayLogoSubstitution' => '{afterpay_logo}',
-            'afterpayLogo' => $this->getSkinUrl('afterpay/images/ap-logo-152x31.png'),
+            'afterpayLogo' => 'https://static.afterpay.com/integration/logo-afterpay-colour-72x15@2x.png',
             'orderAmountSubstitution' => '{order_amount}',
             'orderAmount' => $this->getOrderTotal(),
+            'orderAmountCreditUsed' => $this->getOrderTotalCreditUsed(),
             'regionSpecificSubstitution' => '{region_specific_text}',
             'regionText' => $this->getRegionSpecificText(),
             'installmentAmountSubstitution' => '{instalment_amount}',
             'installmentAmount' => $this->getInstalmentAmount(),
+            'installmentAmountCreditUsed' => $this->getInstalmentAmountCreditUsed(),
             'installmentAmountSubstitutionLast' => '{instalment_amount_last}',
             'installmentAmountLast' => $this->getInstalmentAmountLast(),
+            'installmentAmountLastCreditUsed' => $this->getInstalmentAmountLastCreditUsed(),
             'imageCircleOneSubstitution' => '{img_circle_1}',
-            'imageCircleOne' => $this->getSkinUrl('afterpay/images/checkout/circle_1@2x.png'),
+            'imageCircleOne' => 'https://static.afterpay.com/checkout/circle_1@2x.png',
             'imageCircleTwoSubstitution' => '{img_circle_2}',
-            'imageCircleTwo' => $this->getSkinUrl('afterpay/images/checkout/circle_2@2x.png'),
+            'imageCircleTwo' => 'https://static.afterpay.com/checkout/circle_2@2x.png',
             'imageCircleThreeSubstitution' => '{img_circle_3}',
-            'imageCircleThree' => $this->getSkinUrl('afterpay/images/checkout/circle_3@2x.png'),
+            'imageCircleThree' => 'https://static.afterpay.com/checkout/circle_3@2x.png',
             'imageCircleFourSubstitution' => '{img_circle_4}',
-            'imageCircleFour' => $this->getSkinUrl('afterpay/images/checkout/circle_4@2x.png')
+            'imageCircleFour' => 'https://static.afterpay.com/checkout/Circle_4@2x.png',
+            'creditUsedSelector' => '#use_customer_balance'
         );
     }
 

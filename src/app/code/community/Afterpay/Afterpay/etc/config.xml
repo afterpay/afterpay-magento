@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Afterpay_Afterpay>
-            <version>3.0.4</version>
+            <version>3.0.5</version>
         </Afterpay_Afterpay>
     </modules>
     <afterpay>
@@ -190,7 +190,7 @@
  font-style: italic;
  line-height: 1.4;
 " class="afterpay-installments">or 4 interest free payments of {price_here} {region_specific_text}
-<br><img src="{skin_url}frontend/base/default/afterpay/images/ap-logo-152x31.png" style="
+<br><img src="https://static.afterpay.com/integration/logo-afterpay-colour-72x15@2x.png" style="
     width: 76px;
     vertical-align: middle;
     display: inline;

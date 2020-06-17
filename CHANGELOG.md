@@ -1,5 +1,23 @@
 # Afterpay Magento 1 Extension Changelog
 
+## Version 3.0.5
+
+_Wed 17 Jun 2020 (AEST)_
+
+### Supported Editions & Versions
+
+- Magento Community Edition (CE) version 1.7 and later.
+- Magento Enterprise Edition (EE) version 1.13 and later.
+
+### Highlights
+
+- Addressed a known potential XSS vulnerability in FancyBox v2.x.
+- Optimised image assets; using CDN-hosted images instead of bundled images.
+- Improved checkout assets to automatically update instalment amounts when option to spend available store credit is selected/deselected.
+- Improved handling of invalid Afterpay/Clearpay configuration.
+
+---
+
 ## Version 3.0.4
 
 _Thu 19 Dec 2019 (AEDT)_
@@ -146,7 +164,7 @@ _Tue 17 Oct 2017 (AEDT)_
 
 Version 2.0.3 of the Afterpay Magento 1 Extension includes:
 
-- Single and Multi-Market Afterpay transaction processing. 
+- Single and Multi-Market Afterpay transaction processing.
 - Extended support for Magento default OnePageCheckout.
 - Implemented Magento default Mini-Cart clearing.
 - Improved Payment Limits API call.
@@ -178,12 +196,12 @@ Version 2.0.3 of the Afterpay Magento 1 Extension includes:
 - Added logging on Payment Limits query to monitor incorrect Merchant ID and Key combinations.
   - Following a Payment Limits API call, an entry is created on the afterpay.log file with the Merchant ID and masked Secret Key.
   - The log entry includes both the Payment Limits API request and response.
- 
+
 **Miscellaneous**
 
 - Implemented coding structure improvements to transition from utilising Magento's auto-generated Getter and Setter functions to direct database field reading.
 - Implemented logging to identify Session initialisation error.
-- Implemented Afterpay Token variable removal from Magento Checkout Session following a cancelled or declined Afterpay transaction. 
+- Implemented Afterpay Token variable removal from Magento Checkout Session following a cancelled or declined Afterpay transaction.
 - Set default configuration for Afterpay asset display on Product and Cart pages to enabled.
   - Previously set to disabled by default, requiring manual configuration changes.
 
@@ -197,7 +215,7 @@ _Wed 28 Jun 2017 (AEST)_
 
 - Magento Community Edition (CE) version 1.7 and later
 - Magento Enterprise Edition (EE) version 1.13 and later
- 
+
 ### Highlights
 
 - Version 2.0.2 of the Afterpay Magento 1 Extension has been tested on a clean installation of Magento Community Edition (Version 1.9.3.3).
@@ -207,16 +225,16 @@ _Wed 28 Jun 2017 (AEST)_
   - Improved JavaScript handling on Magento Product, Cart and Checkout Pages
   - Enhanced Store Credit support (Magento 1 Enterprise Only)
   - Addition of Gift Card support (Magento 1 Enterprise Only)
- 
+
 ### Community & Enterprise Edition Enhancements
- 
+
 **Magento Admin - Afterpay Configuration Updates**
 
 - Afterpay front-end display can now be configured at both a Website and View (Store) level.
 - Additional Magento Admin error reporting on entry of invalid Afterpay Merchant Credentials.
 - Shipping Courier settings removed from Afterpay Configuration.
 - Magento Admin configuration labels and section naming revised.
- 
+
 **Improved Afterpay Logging**
 
 - Afterpay logging to 'afterpay.log' enhanced to capture additional events and logging detail around Transaction Integrity and Payment Capture.
@@ -227,21 +245,21 @@ _Wed 28 Jun 2017 (AEST)_
 - Front-end validation added to Billing Address on checkout to align with Afterpay API validation and reduce error messages.
 - Additional validation for Configurable Product types where variation falls outside of Afterpay Merchant Payment Limits.
 - Revised the default redirection target to '/default/onepage/checkout' on Magento Cart.
- 
+
 **Miscellaneous**
 
 - Added 'Get Config' mechanism to support multi-site implementations with varying Afterpay Payment Limits.
 - Eliminated 'Pending' status check and 'Shipping Courier' check from the cron job, reducing redundant calls to the API.
- 
+
 ### Enterprise Edition Enhancements
- 
+
 **Enhanced Store Credit Handling**
 
 - Enhanced Customer Balance (Store Credit) deduction processing. Transactions now include an additional end-of-transaction Store Credit balance check.
 - Native Magento Store Credit support for the following checkout extensions:
   - Default Magento Checkout
   - OneStepCheckout by OneStepCheckout
- 
+
 **Implemented Gift Card Handling**
 
 - Native Magento Gift Card support for the following checkout extensions:
@@ -258,7 +276,7 @@ _Mon 20 Feb 2017 (AEDT)_
 
 - Magento Community Edition (CE) version 1.7 and later
 - Magento Enterprise Edition (EE) version 1.13 and later
- 
+
 ### Highlights
 
 Version 2.0.1 of the Afterpay Magento 1 Extension delivers:
@@ -267,7 +285,7 @@ Version 2.0.1 of the Afterpay Magento 1 Extension delivers:
 - Verification of transaction integrity
 - Enhanced checkout extension support and front-end improvements for Magento 1 Community Edition and Enterprise Edition
 - Support for native store credit functionality for Magento 1 Enterprise Edition
- 
+
 ### Community & Enterprise Edition Enhancements
 
 **Security**
@@ -277,7 +295,7 @@ Version 2.0.1 of the Afterpay Magento 1 Extension delivers:
   - Afterpay token ID
   - Magento Quote reserved order ID
   - Magento Quote total amount
-- In the instance of a discrepancy between these values, the transaction is cancelled and no payment capture attempts will be made. 
+- In the instance of a discrepancy between these values, the transaction is cancelled and no payment capture attempts will be made.
 
 **Checkout support**
 
@@ -290,20 +308,20 @@ Version 2.0.1 of the Afterpay Magento 1 Extension delivers:
   - One Step Checkout by Aheadworks
   - LightCheckout by GoMage
   - FireCheckout by Template Masters
- 
+
 **Product-level Configuration enhancements**
 
 - Merchant's Afterpay transaction limits are now applied at the Product-level as well as at the Checkout-level.
 - Magento Admin Afterpay plugin Enabled / Disabled dropdown now removes Product-level assets when set to 'Disabled'.
- 
+
 **Miscellaneous**
 
 - Plugin version number convention now aligns for Composer support.
 - Validation of merchant credentials (Merchant ID and Merchant Key) extended to exclude non-alphanumeric characters.
 - Installation process improvement to allow Magento to handle install error.
- 
+
 ### Enterprise Edition Enhancements
- 
+
 **Magento Store credit support**
 
 - Afterpay plugin now supports transactions that utilise Magento's native store credit functionality.
@@ -328,11 +346,11 @@ Plugin now populates the following flags:
 This is an overriding measure should the flag be set to an incorrect state by another actor.
 
 
-[3] Revised error message handling for the scenario when a user attempts to register with Afterpay using an email address that already exists on Magento. 
+[3] Revised error message handling for the scenario when a user attempts to register with Afterpay using an email address that already exists on Magento.
 Magento message now displayed in this scenario:
 'There was an error processing your order. There is already a customer registered using this email address. Please login using this email address or enter a different email address to register your account."
- 
- 
+
+
 [4] Added support for Registering users with OneStepCheckout shopping cart extension.
 https://www.onestepcheckout.com
 Enhancements to allow user creation in Magento for Registering users in transaction with OneStepCheckout.
@@ -340,7 +358,7 @@ Enhancements to allow user creation in Magento for Registering users in transact
 
 [5] Added support for Magento new batch confirmation email sending
 Prior to Magento version Community 1.9.1 and Enterprise 1.14.1, emails were triggered on transaction completion.
-From Magento version Community 1.9.1 and Enterprise 1.14.1 onwards, emails are batched. 
+From Magento version Community 1.9.1 and Enterprise 1.14.1 onwards, emails are batched.
 This release includes support for this batched email sending.
 
 ---
@@ -351,11 +369,11 @@ This release includes support for this batched email sending.
 - Added ability to select API V0 or V1
 - Major code changes to accommodate API V1
 - Major code refactoring to streamline the coding
-- Plugin will only create orders after Payment Approval in V1 
+- Plugin will only create orders after Payment Approval in V1
 - CRON jobs timing increase
 - Idev and MW Checkout supoort
 - Various Contents changes
- 
+
 ### 0.12.9 - 2016-05-26
 
 - Admin Afterpay Transaction Update processing
@@ -377,7 +395,7 @@ This release includes support for this batched email sending.
 
 - Added a better error handling for AfterPay Payment observers
 - Prevent AfterPay interference with eWay and Stripe plugins
-- Added default explanations for Late Fee 
+- Added default explanations for Late Fee
 
 ### 0.10.1 - 2015-10-30
 
@@ -394,7 +412,7 @@ This release includes support for this batched email sending.
 ### 0.9.2 - 2015-05-15
 
 - Fixed SetShipped API requests: Use PUT requests instead of POST
-- Fixed reading of system configuration by SetShipped API cron job, it was taken globally all the time, now it takes values from order's store ID 
+- Fixed reading of system configuration by SetShipped API cron job, it was taken globally all the time, now it takes values from order's store ID
 - Don't show Installments Amount if price or special price equals to $0.00
 - Fixed SetShipped API requests: Observer new Shipments instead of Shipment Tracks with support of "No tracking information available" case
 

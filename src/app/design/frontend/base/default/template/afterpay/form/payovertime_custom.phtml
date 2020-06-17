@@ -13,4 +13,8 @@
 //    });
     Afterpay.CheckoutForm.detailsRender();
 
+    jQuery(Afterpay.CheckoutForm.detailsConfiguration.creditUsedSelector).on('change', function(){
+        Afterpay.CheckoutForm.detailsRender();
+    });
+
 </script>

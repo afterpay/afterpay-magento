@@ -14,10 +14,18 @@
 
     var renderCheckoutTemplate = function (template, config) {
 
-        return template.gsub(config.orderAmountSubstitution, config.orderAmount)
-            .gsub(config.regionSpecificSubstitution, config.regionText)
-            .gsub(config.installmentAmountSubstitution, config.installmentAmount)
-            .gsub(config.installmentAmountSubstitutionLast, config.installmentAmountLast)
+        var useCredit = Prototype.Selector.select(config.creditUsedSelector);
+        if (useCredit.length != 0 && useCredit[0].checked) {
+            template = template.gsub(config.orderAmountSubstitution, config.orderAmountCreditUsed)
+                .gsub(config.installmentAmountSubstitution, config.installmentAmountCreditUsed)
+                .gsub(config.installmentAmountSubstitutionLast, config.installmentAmountLastCreditUsed);
+        } else {
+            template = template.gsub(config.orderAmountSubstitution, config.orderAmount)
+                .gsub(config.installmentAmountSubstitution, config.installmentAmount)
+                .gsub(config.installmentAmountSubstitutionLast, config.installmentAmountLast);
+        }
+
+        return template.gsub(config.regionSpecificSubstitution, config.regionText)
             .gsub(config.imageCircleOneSubstitution, config.imageCircleOne)
             .gsub(config.imageCircleTwoSubstitution, config.imageCircleTwo)
             .gsub(config.imageCircleThreeSubstitution, config.imageCircleThree)
@@ -36,11 +44,7 @@
         }
         try {
             var payOverTimeForms = Prototype.Selector.select(configuration.cssSelector);
-            if (Element.nextSiblings(payOverTimeForms[0]).length == 0) {
-                Element.insert(payOverTimeForms[0], {
-                    after: renderCheckoutTemplate(configuration.template, configuration)
-                });
-            }
+            Element.update(payOverTimeForms[0], renderCheckoutTemplate(configuration.template, configuration));
         } catch (e) {
         }
     };
