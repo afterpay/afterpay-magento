@@ -35,6 +35,30 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
 
     const TRUNCATE_SKU_LENGTH = 128;
 
+    const SUPPORTED_CURRENCIES = ['AUD', 'CAD', 'NZD', 'USD'];
+    const CURRENCY_PROPERTIES = [
+        'AUD' => [
+            'jsCountry' => 'AU',
+            'jsLocale' => 'en_AU',
+            'webCountry' => 'au',
+        ],
+        'CAD' => [
+            'jsCountry' => 'CA',
+            'jsLocale' => 'en_CA',
+            'webCountry' => 'ca',
+        ],
+        'NZD' => [
+            'jsCountry' => 'NZ',
+            'jsLocale' => 'en_NZ',
+            'webCountry' => 'nz',
+        ],
+        'USD' => [
+            'jsCountry' => 'US',
+            'jsLocale' => 'en_US',
+            'webCountry' => 'us',
+        ],
+    ];
+
     /**
      * Payment Method features common for all payment methods
      *
@@ -119,13 +143,7 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
      */
     public function canUseForCurrency($currencyCode)
     {
-        // TODO: Move list of supported currencies to config.xml
-
-        if( strtoupper($currencyCode) === "AUD" || strtoupper($currencyCode) === "NZD" || strtoupper($currencyCode) === "USD" ) {
-            return true;
-        }
-
-        return false;
+        return in_array(strtoupper($currencyCode), self::SUPPORTED_CURRENCIES);
     }
 
     /**
@@ -256,7 +274,7 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
 
     public function refund(Varien_Object $payment, $amount)
     {
-        $url = $this->getApiAdapter()->getApiRouter()->getRefundUrl($payment->getData('afterpay_order_id'));
+        $url = $this->getApiAdapter()->getApiRouter()->getRefundUrl($payment);
         $helper = $this->helper();
 
         $helper->log('Refunding order url: ' . $url . ' amount: ' . $amount, Zend_Log::DEBUG);
@@ -331,13 +349,14 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
     {
         $helper = Mage::helper('afterpay');
 
-        $url = $this->getApiAdapter()->getApiRouter()->getPaymentUrl($method);
-        $client = new Afterpay_Afterpay_Model_Api_Http_Client($url);
-
         $default_store_id = null;
         if( !empty($overrides) && !empty($overrides['website_id']) ) {
             $default_store_id = Mage::getModel('core/website')->load($overrides['website_id'])->getDefaultStore()->getId();
         }
+
+        $url = $this->getApiAdapter()->getApiRouter()->getPaymentUrl($method, $default_store_id);
+        $client = new Afterpay_Afterpay_Model_Api_Http_Client($url);
+
         $merchant_id = trim($this->_cleanup_string(Mage::getStoreConfig('payment/' . $method . '/' . Afterpay_Afterpay_Model_Method_Base::API_USERNAME_CONFIG_FIELD, $default_store_id)));
         $merchant_key = trim($this->_cleanup_string(Mage::getStoreConfig('payment/' . $method . '/' . Afterpay_Afterpay_Model_Method_Base::API_PASSWORD_CONFIG_FIELD, $default_store_id)));
 

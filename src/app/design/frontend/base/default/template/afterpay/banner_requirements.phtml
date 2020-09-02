@@ -1,13 +1,25 @@
 <?php /** @var Afterpay_Afterpay_Block_Banner $this */ ?>
+<?php if (Mage::helper('afterpay/checkout')->noConflict()) { ?>
 <script type="text/javascript">
     window.jQuery || <?php echo $this->getScriptHtml($this->getSkinUrl('afterpay/js/jquery-1.11.2.min.js')); ?>
 </script>
+<script src="<?php echo $this->getJsLibrary() ?>"></script>
 <script type="text/javascript">
-    jQuery.noConflict();
+(function($) {
+    let initAfterpayModal = function() {
+    	$(document).on("click", ".afterpay-what-is-modal-trigger, #what-is-afterpay-trigger", function(event) {
+    		event.preventDefault();
+    		Afterpay.launchModal("<?php echo $this->getJsLocale() ?>");
+    	});
+    };
 
-    if (!window.jQuery.fn.fancybox) {
-        <?php echo $this->getScriptHtml($this->getSkinUrl('afterpay/js/fancybox3/jquery.fancybox.min.js')); ?>
-        document.write('<link rel="stylesheet" type="text/css" media="all" href="<?php echo $this->getSkinUrl('afterpay/js/fancybox3/jquery.fancybox.min.css') . '?v=' . $this->getModuleVersion()?>" />');
+    if (typeof Afterpay === 'undefined') {
+    	window.addEventListener('Afterpay.ready', function() {
+    		initAfterpayModal();
+    	});
+    } else {
+    	initAfterpayModal();
     }
+})(jQuery);
 </script>
-<script src="<?php echo $this->getSkinUrl('afterpay/js/modal.js') ?>"></script>
+<?php } ?>

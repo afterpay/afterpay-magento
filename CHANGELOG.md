@@ -1,5 +1,22 @@
 # Afterpay Magento 1 Extension Changelog
 
+## Version 3.1.0
+
+_Wed 2 Sep 2020 (AEST)_
+
+### Supported Editions & Versions
+
+- Magento Community Edition (CE) version 1.7 and later.
+- Magento Enterprise Edition (EE) version 1.13 and later.
+
+### Highlights
+
+- Added support for Canadian merchants/consumers and CAD.
+- Standardized modal content by using Afterpay Global JS Library.
+- Fixed a defect where API Mode could be read from default scope instead of website scope.
+
+---
+
 ## Version 3.0.5
 
 _Wed 17 Jun 2020 (AEST)_

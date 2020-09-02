@@ -13,11 +13,7 @@ class Afterpay_Afterpay_Block_Form_Payovertime extends Afterpay_Afterpay_Block_F
 
     const CONFIG_PATH_CHECKOUT_TITLE_TEMPLATE = 'afterpay/payovertime_checkout/checkout_headline_html_template';
 
-    const CONFIG_PATH_CHECKOUT_DETAILS_TEMPLATE = 'afterpay/payovertime_checkout/checkout_details_html_template';
-
     const CONFIG_PATH_SHOW_DETAILS = 'afterpay/payovertime_checkout/show_checkout_details';
-
-    const TEMPLATE_OPTION_DETAILS_DEFAULT = 'afterpay/form/payovertime.phtml';
 
     const TEMPLATE_OPTION_TITLE_CUSTOM = 'afterpay/checkout/title_custom.phtml';
 
@@ -124,17 +120,6 @@ class Afterpay_Afterpay_Block_Form_Payovertime extends Afterpay_Afterpay_Block_F
         return self::TITLE_TEMPLATE_SELECTOR_ID;
     }
 
-    public function getRegionSpecificText()
-    {
-        if(Mage::app()->getStore()->getCurrentCurrencyCode() == 'USD') {
-            return 'bi-weekly with';
-        } elseif(Mage::app()->getStore()->getCurrentCurrencyCode() == 'NZD') {
-            return 'fortnightly with';
-        } elseif(Mage::app()->getStore()->getCurrentCurrencyCode() == 'AUD') {
-            return 'fortnightly with';
-        }
-    }
-
     private function _getCommonConfiguration()
     {
         return array(
@@ -143,8 +128,6 @@ class Afterpay_Afterpay_Block_Form_Payovertime extends Afterpay_Afterpay_Block_F
             'orderAmountSubstitution' => '{order_amount}',
             'orderAmount' => $this->getOrderTotal(),
             'orderAmountCreditUsed' => $this->getOrderTotalCreditUsed(),
-            'regionSpecificSubstitution' => '{region_specific_text}',
-            'regionText' => $this->getRegionSpecificText(),
             'installmentAmountSubstitution' => '{instalment_amount}',
             'installmentAmount' => $this->getInstalmentAmount(),
             'installmentAmountCreditUsed' => $this->getInstalmentAmountCreditUsed(),
@@ -165,7 +148,49 @@ class Afterpay_Afterpay_Block_Form_Payovertime extends Afterpay_Afterpay_Block_F
 
     private function _getCustomDetailTemplate()
     {
-        return Mage::getStoreConfig(self::CONFIG_PATH_CHECKOUT_DETAILS_TEMPLATE);
+        ob_start();
+?>
+<ul class="form-list">
+    <li class="form-alt">
+        <div class="instalments">
+            <p class="header-text">
+                Four interest-free payments totalling {order_amount}
+            </p>
+            <ul class="cost">
+                <li>{instalment_amount}</li>
+                <li>{instalment_amount}</li>
+                <li>{instalment_amount}</li>
+                <li>{instalment_amount_last}</li>
+            </ul>
+            <ul class="icon">
+                <li>
+                    <img src="{img_circle_1}" alt="" />
+                </li>
+                <li>
+                    <img src="{img_circle_2}" alt="" />
+                </li>
+                <li>
+                    <img src="{img_circle_3}" alt="" />
+                </li>
+                <li>
+                    <img src="{img_circle_4}" alt="" />
+                </li>
+            </ul>
+            <ul class="instalment">
+                <li>First instalment</li>
+                <li>2 weeks later</li>
+                <li>4 weeks later</li>
+                <li>6 weeks later</li>
+            </ul>
+        </div>
+        <div class="instalment-footer">
+            <p>You'll be redirected to the Afterpay website when you proceed to checkout.</p>
+            <a href="http://www.afterpay.com/terms/" target="_blank">Terms & Conditions</a>
+        </div>
+    </li>
+</ul>
+<?php
+        return ob_get_clean();
     }
 
     private function _getCustomTitleTemplate()

@@ -107,9 +107,7 @@ class Afterpay_Afterpay_Model_Observer
     public function updateOrderLimits($observer = null)
     {
         $configs = array(
-            'PBI'                   => 'afterpaypayovertime',
             'PAY_BY_INSTALLMENT'    => 'afterpaypayovertime',
-            // 'PAD'                   => 'afterpaybeforeyoupay',
         );
 
         $website_param = Mage::app()->getRequest()->getParam('website');
@@ -171,22 +169,17 @@ class Afterpay_Afterpay_Model_Observer
         Mage::app()->cleanCache(array(Mage_Core_Model_Config::CACHE_TAG));
     }
 
-    private function _doPaymentLimitUpdate($payment, $values, $level, $target_id) {
-
-        $path = 'payment/' . $payment . '/';
-
-        if (isset($values['minimumAmount'])) {
-            $website = Mage::app()->getRequest()->getParam('website');
-            $this->_setConfigData($path . 'min_order_total', $values['minimumAmount']['amount'], $level, $target_id);
-        } else {
-            $this->_setConfigData($path . 'min_order_total', 0, $level, $target_id);
+    private function _doPaymentLimitUpdate($payment, $values, $level, $target_id)
+    {
+        if (!isset($values['minimumAmount'])) {
+            $values['minimumAmount'] = ['amount' => 0];
         }
+        $this->_setConfigData('payment/'.$payment.'/min_order_total', $values['minimumAmount']['amount'], $level, $target_id);
 
-        if (isset($values['maximumAmount'])) {
-            $this->_setConfigData($path . 'max_order_total', $values['maximumAmount']['amount'], $level, $target_id);
-        } else {
-            $this->_setConfigData($path . 'max_order_total', 0, $level, $target_id);
+        if (!isset($values['maximumAmount'])) {
+            $values['maximumAmount'] = ['amount' => 0];
         }
+        $this->_setConfigData('payment/'.$payment.'/max_order_total', $values['maximumAmount']['amount'], $level, $target_id);
     }
 
     /**

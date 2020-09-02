@@ -91,9 +91,8 @@
 
                     Element.insert(priceBoxes[i], {
                         after: this.config.template.replace(this.config.priceSubstitution,
-                            // productOptionsPrice.formatPrice(price / this.config.installmentsAmount)
                             this.config.currencySymbol + individualInstalment.toFixed(2)
-                        ).replace(this.config.regionSpecific, this.config.regionText)
+                        )
                     });
 
                     Element.addClassName(priceBoxes[i].nextSibling, this.config.className);

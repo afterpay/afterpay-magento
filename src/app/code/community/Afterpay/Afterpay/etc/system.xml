@@ -216,21 +216,6 @@
                                 <enable_product_page>1</enable_product_page>
                             </depends>
                         </product_page_price_block_selectors>
-                        <product_page_html_template translate="label">
-                            <label>Product page: HTML template</label>
-                            <comment>
-                                HTML template of block with installments amount. Substring "{price_here}" will be replaced with installments amount.
-                                You may need to adjust CSS styles to show installments amount in right place in current Magento theme.
-                            </comment>
-                            <frontend_type>textarea</frontend_type>
-                            <sort_order>12</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends>
-                                <enable_product_page>1</enable_product_page>
-                            </depends>
-                        </product_page_html_template>
                         <check_order_total_limits translate="label">
                             <label>Check Min/Max Order Total before displaying Installments Amount</label>
                             <comment>
@@ -274,20 +259,6 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </show_checkout_details>
-                        <checkout_details_html_template>
-                            <label>Installment Amounts Display</label>
-                            <comment>
-                                To modify Afterpay checkout edit the details above
-                            </comment>
-                            <frontend_type>textarea</frontend_type>
-                            <sort_order>40</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends>
-                                <show_checkout_details>1</show_checkout_details>
-                            </depends>
-                        </checkout_details_html_template>
                         <checkout_mode>
                             <label>Payment Display Method</label>
                             <frontend_type>select</frontend_type>

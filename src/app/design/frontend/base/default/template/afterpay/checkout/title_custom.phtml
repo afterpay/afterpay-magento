@@ -5,13 +5,4 @@
     Afterpay.CheckoutForm.titleConfiguration = <?php echo json_encode($this->getTemplateHelper()->getTitleConfiguration()) ?>;
     Afterpay.CheckoutForm.titleRender();
 
-    //<![CDATA[
-    // included inline as this template is loaded through an ajax request
-    if (window.jQuery.fn.fancybox) {
-	    jQuery('#what-is-afterpay-trigger').fancybox();
-    }
-    else {
-    	jQuery('#what-is-afterpay-trigger').hide();
-    }
-    //]]>
 </script>

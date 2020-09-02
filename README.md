@@ -13,7 +13,7 @@ Magento can be installed in any folder on your server. For the purposes of this 
 
 Afterpay operates under a list of assumptions based on Magento configurations. To align with these assumptions, the Magento configurations must reflect the below.
 
-1. **Website Currency must be set to AUD, NZD or USD**
+1. **Website Currency must be set to AUD, NZD, USD or CAD**
 
     Inside the Magento Admin, navigate to "System > Configuration > Currency Setup". Set the base, display and allowed currency as appropriate to match your Afterpay Merchant Account.
 

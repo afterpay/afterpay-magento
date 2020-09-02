@@ -72,7 +72,8 @@ class Afterpay_Afterpay_Model_System_Config_Source_ApiMode
             $websiteId = null;
         }
 
-        if(Mage::app()->getWebsite($websiteId)->getConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_DEFAULT) == 'USD') {
+        if (Mage::app()->getWebsite($websiteId)->getConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_DEFAULT) == 'USD' ||
+            Mage::app()->getWebsite($websiteId)->getConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_DEFAULT) == 'CAD') {
             $api = 'api_us_url';
             $web = 'web_us_url';
         } else {

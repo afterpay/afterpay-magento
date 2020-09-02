@@ -11,6 +11,9 @@
  *
  * Building API URL.
  */
+
+use Afterpay_Afterpay_Model_Method_Base as Afterpay_Base;
+
 class Afterpay_Afterpay_Model_Api_Routers_Routerv1
 {
     /**
@@ -34,11 +37,12 @@ class Afterpay_Afterpay_Model_Api_Routers_Routerv1
      * Get the URL for valid payment types
      *
      * @param string $method Which payment method to get the URL for
+     * @param int|null $store_id Which store to get the config from
      * @return string
      */
-    public function getPaymentUrl($method)
+    public function getPaymentUrl($method, $store_id = null)
     {
-        $apiMode      = Mage::getStoreConfig('payment/' . $method . '/' . Afterpay_Afterpay_Model_Method_Base::API_MODE_CONFIG_FIELD);
+        $apiMode      = Mage::getStoreConfig('payment/' . $method . '/' . Afterpay_Base::API_MODE_CONFIG_FIELD, $store_id);
         $settings     = Afterpay_Afterpay_Model_System_Config_Source_ApiMode::getEnvironmentSettings($apiMode);
 
         //make sure we are using the same version of API for consistency purpose
@@ -53,7 +57,7 @@ class Afterpay_Afterpay_Model_Api_Routers_Routerv1
      */
     public function getOrdersApiUrl( $search_target = NULL, $type = NULL )
     {
-        $apiMode      = Mage::getStoreConfig('payment/afterpaypayovertime/' . Afterpay_Afterpay_Model_Method_Base::API_MODE_CONFIG_FIELD);
+        $apiMode      = Mage::getStoreConfig('payment/afterpaypayovertime/' . Afterpay_Base::API_MODE_CONFIG_FIELD);
         $settings     = Afterpay_Afterpay_Model_System_Config_Source_ApiMode::getEnvironmentSettings($apiMode);
 
         //make sure we are using the same version of API for consistency purpose
@@ -83,13 +87,16 @@ class Afterpay_Afterpay_Model_Api_Routers_Routerv1
      *
      * @return string
      */
-    public function getRefundUrl($id)
+    public function getRefundUrl($payment)
     {
-        $apiMode      = Mage::getStoreConfig('payment/afterpaypayovertime/' . Afterpay_Afterpay_Model_Method_Base::API_MODE_CONFIG_FIELD);
+        $store_id = $payment->getOrder()->getStoreId();
+        $order_id = $payment->getData('afterpay_order_id');
+
+        $apiMode      = Mage::getStoreConfig('payment/afterpaypayovertime/' . Afterpay_Base::API_MODE_CONFIG_FIELD, $store_id);
         $settings     = Afterpay_Afterpay_Model_System_Config_Source_ApiMode::getEnvironmentSettings($apiMode);
 
         //make sure we are using the same version of API for consistency purpose
-        return $settings[Afterpay_Afterpay_Model_System_Config_Source_ApiMode::KEY_API_URL] . 'v1/payments/' . $id . '/refund';
+        return $settings[Afterpay_Afterpay_Model_System_Config_Source_ApiMode::KEY_API_URL] . 'v1/payments/' . $order_id . '/refund';
     }
 
     /**
@@ -109,7 +116,7 @@ class Afterpay_Afterpay_Model_Api_Routers_Routerv1
      */
     public function getWebRedirectJsUrl()
     {
-        $apiMode      = Mage::getStoreConfig('payment/afterpaypayovertime/' . Afterpay_Afterpay_Model_Method_Base::API_MODE_CONFIG_FIELD);
+        $apiMode      = Mage::getStoreConfig('payment/afterpaypayovertime/' . Afterpay_Base::API_MODE_CONFIG_FIELD);
         $settings     = Afterpay_Afterpay_Model_System_Config_Source_ApiMode::getEnvironmentSettings($apiMode);
 
         return $settings[Afterpay_Afterpay_Model_System_Config_Source_ApiMode::KEY_WEB_URL] . 'afterpay.js';
@@ -124,7 +131,7 @@ class Afterpay_Afterpay_Model_Api_Routers_Routerv1
      */
     public function getDirectCaptureApiUrl()
     {
-        $apiMode      = Mage::getStoreConfig('payment/afterpaypayovertime/' . Afterpay_Afterpay_Model_Method_Base::API_MODE_CONFIG_FIELD);
+        $apiMode      = Mage::getStoreConfig('payment/afterpaypayovertime/' . Afterpay_Base::API_MODE_CONFIG_FIELD);
         $settings     = Afterpay_Afterpay_Model_System_Config_Source_ApiMode::getEnvironmentSettings($apiMode);
 
         return $settings[Afterpay_Afterpay_Model_System_Config_Source_ApiMode::KEY_API_URL] . 'v1/payments/capture/';
@@ -138,17 +145,13 @@ class Afterpay_Afterpay_Model_Api_Routers_Routerv1
      */
     public function getGatewayApiUrl( $token = NULL )
     {
-        $apiMode      = Mage::getStoreConfig('payment/afterpaypayovertime/' . Afterpay_Afterpay_Model_Method_Base::API_MODE_CONFIG_FIELD);
+        $apiMode      = Mage::getStoreConfig('payment/afterpaypayovertime/' . Afterpay_Base::API_MODE_CONFIG_FIELD);
         $settings     = Afterpay_Afterpay_Model_System_Config_Source_ApiMode::getEnvironmentSettings($apiMode);
+        $currency = Mage::app()->getStore()->getCurrentCurrencyCode();
 
         $countryCode = 'au';
-        switch (Mage::app()->getStore()->getCurrentCurrencyCode()) {
-            case 'USD':
-                $countryCode = 'us';
-                break;
-            case 'NZD':
-                $countryCode = 'nz';
-                break;
+        if (array_key_exists($currency, Afterpay_Base::CURRENCY_PROPERTIES)){
+            $countryCode = Afterpay_Base::CURRENCY_PROPERTIES[$currency]['webCountry'];
         }
 
         //make sure we are using the same version of API for consistency purpose

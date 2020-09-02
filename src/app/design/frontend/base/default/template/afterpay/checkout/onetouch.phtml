@@ -1,13 +1,10 @@
-<?php
-$region_specific_text = (Mage::app()->getStore()->getCurrentCurrencyCode() == 'AUD') ? 'fortnightly' : ((Mage::app()->getStore()->getCurrentCurrencyCode() == 'NZD') ? 'fortnightly' : 'bi-weekly');
-?>
 <span class="paypal-or"><?php echo $this->__('-OR-'); ?></span>
 </li><li class="method-afterpay_onetouch">
 
 <h3><?php echo $this->__('Check out with Afterpay and pay over time.') ?></h3>
-<p><?php echo $this->__('Simply pay 4 ' . $region_specific_text . ' payments of %s.', $this->getInstalmentAmount()) ?></p>
+<p><?php echo $this->__('Simply pay 4 interest-free payments of %s.', $this->getInstalmentAmount()) ?></p>
 <p>
-    <?php echo $this->__('Use your payment card, instant approval.') ?>
+    <?php echo $this->__('Use your payment card, instant approval decision.') ?>
     <a href="#afterpay-what-is-modal" class="afterpay-what-is-modal-trigger">
         <?php echo $this->__('Learn more') ?>
     </a>

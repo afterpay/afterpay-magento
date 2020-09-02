@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Afterpay_Afterpay>
-            <version>3.0.5</version>
+            <version>3.1.0</version>
         </Afterpay_Afterpay>
     </modules>
     <afterpay>
@@ -185,72 +185,16 @@
                 <enable_product_page>1</enable_product_page>
                 <product_page_price_block_selectors><![CDATA[.product-shop .price-box
 .product-essential .price-box]]></product_page_price_block_selectors>
-                <product_page_html_template><![CDATA[<div style="
-     position: relative;
- font-style: italic;
- line-height: 1.4;
-" class="afterpay-installments">or 4 interest free payments of {price_here} {region_specific_text}
-<br><img src="https://static.afterpay.com/integration/logo-afterpay-colour-72x15@2x.png" style="
-    width: 76px;
-    vertical-align: middle;
-    display: inline;
-"></img><a href="#afterpay-what-is-modal" class="afterpay-what-is-modal-trigger">   Learn more </a>
-</div>
-<style type="text/css">.price-box.ciq_price_box .ciq_view_shipping{margin-top:35px}</style>]]></product_page_html_template>
                 <check_order_total_limits>1</check_order_total_limits>
             </payovertime_installments>
             <payovertime_checkout>
                 <checkout_headline_html_template><![CDATA[
 <img src="{afterpay_logo}" class="v-middle" id="afterpay-logo" />
 <span id="afterpay-callout">Interest-free payments.</span>
-<a href="#afterpay-what-is-modal" id="what-is-afterpay-trigger">
-    What is Afterpay?
-</a>
+<a href="#afterpay-what-is-modal" id="what-is-afterpay-trigger">What is Afterpay?</a>
                     ]]>
                 </checkout_headline_html_template>
                 <show_checkout_details>1</show_checkout_details>
-                <checkout_details_html_template><![CDATA[
-<ul class="form-list">
-    <li class="form-alt">
-        <div class="instalments">
-            <p class="header-text">
-                Four interest-free payments {region_specific_text} totalling {order_amount}
-            </p>
-            <ul class="cost">
-                <li>{instalment_amount}</li>
-                <li>{instalment_amount}</li>
-                <li>{instalment_amount}</li>
-                <li>{instalment_amount_last}</li>
-            </ul>
-            <ul class="icon">
-                <li>
-                    <img src="{img_circle_1}" alt="" />
-                </li>
-                <li>
-                    <img src="{img_circle_2}" alt="" />
-                </li>
-                <li>
-                    <img src="{img_circle_3}" alt="" />
-                </li>
-                <li>
-                    <img src="{img_circle_4}" alt="" />
-                </li>
-            </ul>
-            <ul class="instalment">
-                <li>First instalment</li>
-                <li>2 weeks later</li>
-                <li>4 weeks later</li>
-                <li>6 weeks later</li>
-            </ul>
-        </div>
-        <div class="instalment-footer">
-            <p>You'll be redirected to the Afterpay website when you proceed to checkout.</p>
-            <a href="http://www.afterpay.com/terms/" target="_blank">Terms & Conditions</a>
-        </div>
-    </li>
-</ul>
-                        ]]>
-                </checkout_details_html_template>
                 <checkout_mode>lightbox</checkout_mode>
             </payovertime_checkout>
             <payovertime_cart>

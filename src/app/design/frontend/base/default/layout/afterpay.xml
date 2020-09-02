@@ -6,10 +6,6 @@
             <action method="addItem"><type>skin_css</type><name>afterpay/css/afterpay.css</name></action>
             <block type="afterpay/banner" name="afterpay.banner.requirements" template="afterpay/banner_requirements.phtml" />
         </reference>
-        <reference name="before_body_end">
-            <block type="afterpay/banner" name="afterpay.banner" template="afterpay/banner.phtml" />
-            <block type="afterpay/modal" name="afterpay.modal" template="afterpay/modal.phtml" />
-        </reference>
     </default>
 
     <catalog_product_view translate="label">
@@ -20,9 +16,6 @@
                     <pageType>product_page</pageType>
                 </action>
             </block>
-        </reference>
-        <reference name="head">
-            <action method="addJs"><script>Afterpay/Installments.js</script></action>
         </reference>
     </catalog_product_view>
 
@@ -65,7 +58,6 @@
     <!-- Default Checkout & MW OneStep Checkout Handlers & Amasty One Step Checkout-->
     <checkout_onepage_index>
         <reference name="head">
-            <action method="addJs"><script>Afterpay/checkout/payovertime.js</script></action>
             <block type="afterpay/config" name="afterpay.default.config" template="afterpay/checkout/config.phtml" />
         </reference>
         <reference name="before_body_end">
@@ -78,7 +70,6 @@
     <!-- Aheadworks OneStepCheckout-->
     <aw_onestepcheckout_index_index>
         <reference name="head">
-            <action method="addJs"><script>Afterpay/checkout/payovertime.js</script></action>
             <block type="afterpay/config" name="afterpay.aw.config" template="afterpay/checkout/config.phtml" />
         </reference>
         <reference name="content">
@@ -89,7 +80,6 @@
     <!-- Iwd One Page Checkout -->
     <opc_index_index>
         <reference name="head">
-            <action method="addJs"><script>Afterpay/checkout/payovertime.js</script></action>
             <block type="afterpay/config" name="afterpay.iwd.config" template="afterpay/checkout/config.phtml" />
         </reference>
         <reference name="content">
@@ -100,7 +90,6 @@
     <!-- GoMage LightCheckout -->
     <gomage_checkout_onepage_index>
         <reference name="head">
-            <action method="addJs"><script>Afterpay/checkout/payovertime.js</script></action>
             <block type="afterpay/config" name="afterpay.gomage.config" template="afterpay/checkout/config.phtml" />
         </reference>
         <reference name="after_body_start">
@@ -111,7 +100,6 @@
     <!-- FireCheckout OnePageCheckout -->
     <firecheckout_index_index>
         <reference name="head">
-            <action method="addJs"><script>Afterpay/checkout/payovertime.js</script></action>
             <block type="afterpay/config" name="afterpay.firecheckout.config" template="afterpay/checkout/config.phtml" />
         </reference>
         <reference name="before_body_end">
@@ -133,7 +121,6 @@
     <!-- One Step Checkout by FME -->
     <checkout_onestep_index>
         <reference name="head">
-            <action method="addJs"><script>Afterpay/checkout/payovertime.js</script></action>
             <block type="afterpay/config" name="afterpay.quickcheckout.config" template="afterpay/checkout/config.phtml" />
         </reference>
         <reference name="after_body_start">
@@ -144,7 +131,6 @@
     <!-- All One Step Checkout extension -->
     <onestepcheckout_index_index>
         <reference name="head">
-            <action method="addJs"><script>Afterpay/checkout/payovertime.js</script></action>
             <block type="afterpay/config" name="afterpay.osc.config" template="afterpay/checkout/config.phtml" />
         </reference>
 

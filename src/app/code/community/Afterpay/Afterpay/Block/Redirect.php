@@ -16,6 +16,9 @@
  * @method Afterpay_Afterpay_Block_Redirect setReturnUrl(string $url);
  * @method Afterpay_Afterpay_Block_Redirect setRedirectJsUrl(string $url)
  */
+
+use Afterpay_Afterpay_Model_Method_Base as Afterpay_Base;
+
 class Afterpay_Afterpay_Block_Redirect extends Mage_Core_Block_Template
 {
     protected function _construct()
@@ -47,7 +50,7 @@ class Afterpay_Afterpay_Block_Redirect extends Mage_Core_Block_Template
      */
     public function getRedirectJsUrl()
     {
-        $apiMode      = Mage::getStoreConfig('payment/afterpaypayovertime/' . Afterpay_Afterpay_Model_Method_Base::API_MODE_CONFIG_FIELD);
+        $apiMode      = Mage::getStoreConfig('payment/afterpaypayovertime/' . Afterpay_Base::API_MODE_CONFIG_FIELD);
         $settings     = Afterpay_Afterpay_Model_System_Config_Source_ApiMode::getEnvironmentSettings($apiMode);
 
         return $settings[Afterpay_Afterpay_Model_System_Config_Source_ApiMode::KEY_WEB_URL] . 'afterpay.js';
@@ -57,22 +60,13 @@ class Afterpay_Afterpay_Block_Redirect extends Mage_Core_Block_Template
      */
     public function getCountryCode()
     {
-        $currencyCode      = Afterpay_Afterpay_Model_System_Config_Source_ApiMode::getCurrencyCode();
-        if ($currencyCode == "USD") {
-            $country = "US";
-        }
-        else if ($currencyCode == "NZD") {
-            $country = "NZ";    
-        }
-        else if ($currencyCode == "AUD") {
-            $country = "AU";    
+        $countryCode = '';
+        $currency = Afterpay_Afterpay_Model_System_Config_Source_ApiMode::getCurrencyCode();
+
+        if (array_key_exists($currency, Afterpay_Base::CURRENCY_PROPERTIES)){
+            $countryCode = Afterpay_Base::CURRENCY_PROPERTIES[$currency]['jsCountry'];
         }
 
-        $countryCode =  array(
-                                "countryCode" => $country
-                            );  
-        
-
-        return $countryCode;
+        return array("countryCode" => $countryCode);
     }
 }

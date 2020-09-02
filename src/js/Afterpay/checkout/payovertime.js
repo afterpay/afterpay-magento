@@ -25,7 +25,7 @@
                 .gsub(config.installmentAmountSubstitutionLast, config.installmentAmountLast);
         }
 
-        return template.gsub(config.regionSpecificSubstitution, config.regionText)
+        return template
             .gsub(config.imageCircleOneSubstitution, config.imageCircleOne)
             .gsub(config.imageCircleTwoSubstitution, config.imageCircleTwo)
             .gsub(config.imageCircleThreeSubstitution, config.imageCircleThree)
