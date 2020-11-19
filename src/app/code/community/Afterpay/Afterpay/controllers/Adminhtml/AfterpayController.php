@@ -12,6 +12,11 @@
  */
 class Afterpay_Afterpay_Adminhtml_AfterpayController extends Mage_Adminhtml_Controller_Action
 {
+    protected function _isAllowed()
+    {
+        return Mage::getSingleton('admin/session')->isAllowed('system/config/afterpay');
+    }
+
     public function updateAction()
     {
         $model = new Afterpay_Afterpay_Model_Observer();
