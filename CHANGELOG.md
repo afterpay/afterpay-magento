@@ -1,5 +1,24 @@
 # Afterpay Magento 1 Extension Changelog
 
+## Version 3.1.1
+
+_Wed 16 Dec 2020 (AEST)_
+
+### Supported Editions & Versions
+
+- Magento Community Edition (CE) version 1.7 and later.
+- Magento Enterprise Edition (EE) version 1.13 and later.
+
+### Highlights
+
+- Improved compatibility with PHP 7.1+.
+- Fixed a defect where the instalment amount may have been rounded incorrectly on product page.
+- Fixed a defect where Afterpay may have appeared to be available for orders of $0 on cart page.
+- Refined API calls for orders that consist of virtual products only.
+- Improved user experience by hiding Afterpay when currency is misconfigured.
+
+---
+
 ## Version 3.1.0
 
 _Wed 2 Sep 2020 (AEST)_

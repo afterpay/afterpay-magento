@@ -143,7 +143,8 @@ abstract class Afterpay_Afterpay_Model_Method_Base extends Mage_Payment_Model_Me
      */
     public function canUseForCurrency($currencyCode)
     {
-        return in_array(strtoupper($currencyCode), self::SUPPORTED_CURRENCIES);
+        $display = Mage::app()->getStore()->getCurrentCurrencyCode();
+        return $currencyCode == $display && in_array(strtoupper($currencyCode), self::SUPPORTED_CURRENCIES);
     }
 
     /**

@@ -32,8 +32,6 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
         $data = $object->getData();
 
         $billingAddress  = $object->getBillingAddress();
-        $shippingAddress = $object->getShippingAddress();
-        $shippingMethods  = $shippingAddress->getShippingRatesCollection();
 
         $taxTotal = 0;
 
@@ -46,14 +44,6 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
 
         $params['items'] = array();
 
-        //not sure what should go to priority, I guess it will say something in the description if it is Express
-        foreach ($shippingMethods as $method) {
-            $params['courier'] = array(
-                'name'          => substr($method->getMethodTitle() . " " . $method->getCarrierTitle(), 0, 128),
-                'priority'      => "STANDARD",
-            );
-        }
-
         foreach ($object->getAllVisibleItems() as $item) {
             /** @var Mage_Sales_Model_Order_Item $orderItem */
             $params['items'][] = array(
@@ -61,7 +51,7 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
                 'sku'      => $this->_truncateString( (string)$item->getSku() ),
                 'quantity' => (int)$item->getQty(),
                 'price'    => array(
-                    'amount'   => round((float)$item->getPriceInclTax(), $precision),
+                    'amount'   => number_format((float)$item->getPriceInclTax(), $precision, '.', ''),
                     'currency' => (string)Mage::app()->getStore()->getCurrentCurrencyCode()
                 )
             );
@@ -80,7 +70,7 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
                 $params['discounts'][] =  array(
                     'displayName'   =>  substr( $discount_name . ' - ' . (string)$item->getName(), 0, 128 ),
                     'amount'        =>  array(
-                                            'amount'   => round((float)$item->getDiscountAmount(), $precision),
+                                            'amount'   => number_format((float)$item->getDiscountAmount(), $precision, '.', ''),
                                             'currency' => (string)Mage::app()->getStore()->getCurrentCurrencyCode()
                                         ),
                 );
@@ -90,39 +80,11 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
             $taxTotal += $item->getTaxAmount();
         }
 
-        if ($shippingAddress->getShippingInclTax()) {
-            $params['shippingAmount'] = array(
-                'amount'   => round((float)$shippingAddress->getShippingInclTax(), $precision), // with tax
-                'currency' => (string)Mage::app()->getStore()->getCurrentCurrencyCode()
-            );
-        }
-
-        // $taxAmount = $shippingAddress->getData('tax_amount');
         if( isset($taxTotal) && round((float)$taxTotal, $precision) > 0 ) {
             $params['taxAmount'] = array(
-                'amount'   => isset($taxTotal) ? round((float)$taxTotal, $precision) : 0,
+                'amount'   => number_format((float)$taxTotal, $precision, '.', ''),
                 'currency' => (string)Mage::app()->getStore()->getCurrentCurrencyCode()
             );
-        }
-
-        // $params['orderDetail']['subTotal'] = array(
-        //     'amount'   => round((float)$data['subtotal'], $precision),
-        //     'currency' => (string)Mage::app()->getStore()->getCurrentCurrencyCode(),
-        // );
-        if( !empty( $shippingAddress ) ) {
-            if( !empty( $shippingAddress->getStreet1() ) ) {
-                $params['shipping'] = array(
-                    'name'          => (string)$shippingAddress->getFirstname() . ' ' . $shippingAddress->getLastname(),
-                    'line1'         => (string)$shippingAddress->getStreet1(),
-                    'line2'         => (string)$shippingAddress->getStreet2(),
-                    'suburb'        => (string)$shippingAddress->getCity(),
-                    'postcode'      => (string)$shippingAddress->getPostcode(),
-                    'state'         => (string)$shippingAddress->getRegion(),
-                    'phoneNumber'   => (string)$shippingAddress->getTelephone(),
-                    // 'countryCode'   => 'AU',
-                    'countryCode'   => (string)$shippingAddress->getCountry(),
-                );
-            }
         }
 
         $params['billing'] = array(
@@ -133,12 +95,46 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
             'postcode'      => (string)$billingAddress->getPostcode(),
             'state'         => (string)$billingAddress->getRegion(),
             'phoneNumber'   => (string)$billingAddress->getTelephone(),
-            // 'countryCode'   => 'AU',
             'countryCode'   => (string)$billingAddress->getCountry(),
         );
 
+        if (!$object->isVirtual())
+        {
+            $shippingAddress = $object->getShippingAddress();
+            $shippingMethods  = $shippingAddress->getShippingRatesCollection();
+
+            foreach ($shippingMethods as $method) {
+                $params['courier'] = array(
+                    'name'          => substr($method->getMethodTitle() . " " . $method->getCarrierTitle(), 0, 128),
+                    'priority'      => "STANDARD",
+                );
+            }
+
+            if ($shippingAddress->getShippingInclTax()) {
+                $params['shippingAmount'] = array(
+                    'amount'   => number_format((float)$shippingAddress->getShippingInclTax(), $precision, '.', ''), // with tax
+                    'currency' => (string)Mage::app()->getStore()->getCurrentCurrencyCode()
+                );
+            }
+
+            if( !empty( $shippingAddress ) ) {
+                if( !empty( $shippingAddress->getStreet1() ) ) {
+                    $params['shipping'] = array(
+                        'name'          => (string)$shippingAddress->getFirstname() . ' ' . $shippingAddress->getLastname(),
+                        'line1'         => (string)$shippingAddress->getStreet1(),
+                        'line2'         => (string)$shippingAddress->getStreet2(),
+                        'suburb'        => (string)$shippingAddress->getCity(),
+                        'postcode'      => (string)$shippingAddress->getPostcode(),
+                        'state'         => (string)$shippingAddress->getRegion(),
+                        'phoneNumber'   => (string)$shippingAddress->getTelephone(),
+                        'countryCode'   => (string)$shippingAddress->getCountry(),
+                    );
+                }
+            }
+        }
+
         $params['totalAmount'] = array(
-            'amount'   => round((float)$object->getGrandTotal(), $precision),
+            'amount'   => number_format((float)$object->getGrandTotal(), $precision, '.', ''),
             'currency' => (string)Mage::app()->getStore()->getCurrentCurrencyCode(),
         );
 
@@ -175,7 +171,7 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
     public function buildRefundRequest($amount, $payment)
     {
         $params['amount'] = array(
-                                'amount'    => abs( round($amount, 2) ), // Afterpay API Ver 1 requires a positive amount
+                                'amount'    => number_format($amount, 2, '.', ''),
                                 'currency'  => $payment->getOrder()->getOrderCurrencyCode(),
                             );
 
@@ -228,7 +224,7 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
 
         if (!$object->isVirtual()) {
             $shippingAddress = $object->getShippingAddress();
-            
+
         	$shipping_postcode = $shippingAddress->getPostcode();
         	$shipping_telephone = $shippingAddress->getTelephone();
         	$shipping_city = $shippingAddress->getCity();

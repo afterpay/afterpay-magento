@@ -132,6 +132,7 @@ class Afterpay_Afterpay_Helper_Checkout extends Mage_Checkout_Helper_Url
     public function noConflict()
     {
         $currency = Mage::app()->getStore()->getCurrentCurrencyCode();
-        return in_array($currency, Afterpay_Afterpay_Model_Method_Base::SUPPORTED_CURRENCIES);
+        $base = Mage::app()->getStore()->getBaseCurrencyCode();
+        return $currency == $base && in_array($currency, Afterpay_Afterpay_Model_Method_Base::SUPPORTED_CURRENCIES);
     }
 }

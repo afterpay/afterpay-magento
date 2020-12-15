@@ -88,6 +88,7 @@
                     }
 
                     var individualInstalment = price / this.config.installmentsAmount;
+                    individualInstalment = Math.round(individualInstalment * 100) / 100;
 
                     Element.insert(priceBoxes[i], {
                         after: this.config.template.replace(this.config.priceSubstitution,
