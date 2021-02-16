@@ -4,6 +4,8 @@
     <default translate="label" module="page">
         <reference name="head">
             <action method="addItem"><type>skin_css</type><name>afterpay/css/afterpay.css</name></action>
+        </reference>
+        <reference name="before_body_end">
             <block type="afterpay/banner" name="afterpay.banner.requirements" template="afterpay/banner_requirements.phtml" />
         </reference>
     </default>

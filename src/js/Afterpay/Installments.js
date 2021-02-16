@@ -8,10 +8,10 @@
  * How to use:
  *
  * Define configuration (@see Afterpay_Afterpay_Block_Catalog_Installments::getJsConfig() for detail):
- * Afterpay.Installments.config = { ... }
+ * AfterpayM1.Installments.config = { ... }
  *
  * Render installments amount on page:
- * Afterpay.Installments.render();
+ * AfterpayM1.Installments.render();
  *
  * @see app/design/frontend/base/default/template/afterpay/catalog/installments.phtml
  */
@@ -25,13 +25,13 @@
         };
     }
 
-    var Afterpay = window.Afterpay = window.Afterpay || {};
-    Afterpay.Installments = Afterpay.Installments || {};
+    var AfterpayM1 = window.AfterpayM1 = window.AfterpayM1 || {};
+    AfterpayM1.Installments = AfterpayM1.Installments || {};
 
     /** @see Afterpay_Afterpay_Block_Catalog_Installments::getJsConfig() for details */
-    Afterpay.Installments.config = null;
+    AfterpayM1.Installments.config = null;
 
-    Afterpay.Installments.render = function () {
+    AfterpayM1.Installments.render = function () {
 
         // check all pre-requisites
         if (!Prototype || !Element) {
@@ -43,7 +43,7 @@
             return;
         }
         if (!this.config instanceof Object) {
-            console.warn('Afterpay: Afterpay.Installments.config is not set, cannot render installments amount');
+            console.warn('Afterpay: AfterpayM1.Installments.config is not set, cannot render installments amount');
             return;
         }
 

@@ -170,6 +170,12 @@ class Afterpay_Afterpay_Model_Method_Payovertime extends Afterpay_Afterpay_Model
      */
     public function resetTransactionToken($quote) {
 
+        $quote
+            ->setData('afterpay_express_checkout', false)
+            ->setData('afterpay_express_amount', null)
+            ->setData('afterpay_express_shipping', null)
+            ->save();
+
         Mage::getSingleton("checkout/session")->getQuote()->getPayment()->setData('afterpay_token', NULL)->save();
 
         if( Mage::getEdition() == Mage::EDITION_ENTERPRISE ) {

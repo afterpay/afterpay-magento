@@ -13,21 +13,21 @@ jQuery( document ).ready( function() {
      *
      * - Check if using Afterpay and use new flow, do Ajax and pop up or redirect
      */
-    
+
     //hacks the form to prevent override by other plugins
     jQuery("#amscheckout-submit").on("click", function(e) {
 
         if (payment.currentMethod == 'afterpaypayovertime') {
-    
+
             e.preventDefault();
-            e.stopPropagation();    
-    
+            e.stopPropagation();
+
             // prepare params
             var params = form.serialize(true);
 
             // Ajax to start order token
             var request = new Ajax.Request(
-                window.Afterpay.saveUrl, // use Afterpay controller
+                window.AfterpayM1.saveUrl, // use Afterpay controller
                 {
                     method: 'post',
                     parameters: params,
@@ -59,7 +59,7 @@ jQuery( document ).ready( function() {
                                 });
                             }
 
-                            switch (window.Afterpay.redirectMode) {
+                            switch (window.AfterpayM1.redirectMode) {
                                 case 'lightbox':
                                     AfterPay.display({
                                         token: response.token
@@ -89,6 +89,6 @@ jQuery( document ).ready( function() {
                     }
                 }
             );
-        }       
+        }
     });
 });

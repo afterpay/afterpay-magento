@@ -14,7 +14,7 @@
         target.prototype.save = function() {
             // check payment method
             if (payment.currentMethod == 'afterpaypayovertime') {
-                this.saveUrl = window.Afterpay.saveUrl;
+                this.saveUrl = window.AfterpayM1.saveUrl;
                 /**
                  * Override on complete to do afterpay payment
                  *
@@ -46,7 +46,7 @@
                             });
                         }
 
-                        switch (window.Afterpay.redirectMode) {
+                        switch (window.AfterpayM1.redirectMode) {
                             case 'lightbox':
                                 AfterPay.display({
                                     token: response.token
@@ -72,7 +72,7 @@
                 /**
                  * Override the redirect if lightbox is selected
                  */
-                if (window.Afterpay.redirectMode == 'lightbox') {
+                if (window.AfterpayM1.redirectMode == 'lightbox') {
                     this.onSave = function(){};
                 }
             }

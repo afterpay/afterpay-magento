@@ -60,7 +60,7 @@
                      * Perform ajax to Afterpay to get order token
                      */
                     new Ajax.Request(
-                        window.Afterpay.saveUrl, // use Afterpay controller
+                        window.AfterpayM1.saveUrl, // use Afterpay controller
                         {
                             method: 'post',
                             parameters: parameters,
@@ -92,7 +92,7 @@
                                         });
                                     }
 
-                                    switch (window.Afterpay.redirectMode) {
+                                    switch (window.AfterpayM1.redirectMode) {
                                         case 'lightbox':
                                             AfterPay.display({
                                                 token: response.token

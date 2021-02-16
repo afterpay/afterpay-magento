@@ -16,7 +16,7 @@
                     shipping.setSameAsBilling(true);
                 }
                 // Set the Ajax Url to use afterpay url
-                review_url = Afterpay.saveUrl;
+                review_url = AfterpayM1.saveUrl;
 
                 /**
                  * Override the response after ajax for afterpay method
@@ -42,7 +42,7 @@
                                 AfterPay.initialize(window.afterpayCountryCode);
                             } else {
                                 AfterPay.init();
-                            } 
+                            }
                         }
                         else {
                             AfterPay.init({
@@ -50,7 +50,7 @@
                             });
                         }
 
-                        switch (window.Afterpay.redirectMode) {
+                        switch (window.AfterpayM1.redirectMode) {
                             case 'lightbox':
                                 AfterPay.display({
                                     token: response.token

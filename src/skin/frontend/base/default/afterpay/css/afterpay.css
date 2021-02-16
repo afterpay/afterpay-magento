@@ -246,8 +246,15 @@ and (max-width : 480px) {
     height: 18px;
 }
 
-#payment_form_afterpaypayovertime li { 
-    float:none 
+.method-afterpay_onetouch .express-button {
+    width: 267px;
+    max-width: 100%;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+#payment_form_afterpaypayovertime li {
+    float:none
 }
 
 /* Hide the doubled Afterpay Assets */

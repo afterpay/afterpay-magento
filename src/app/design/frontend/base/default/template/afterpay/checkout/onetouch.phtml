@@ -9,6 +9,55 @@
         <?php echo $this->__('Learn more') ?>
     </a>
 </p>
-<a href="<?php echo $this->getUrl('afterpay/onetouch') ?>" class="button btn-proceed-checkout btn-checkout">
-    <img src="https://static.afterpay.com/integration/logo-afterpay-white-149x31.png" />
-</a>
+<?php if ($this->isExpress()) { ?>
+    <img id="afterpay-express-start" class="express-button" data-afterpay-entry-point="cart" src="https://static.afterpay.com/button/checkout-with-afterpay/white-on-black.svg" alt="Checkout with Afterpay" />
+
+    <script>
+    function initAfterpayExpress(){
+        AfterPay.initializeForPopup({
+            countryCode: '<?php echo $this->getCountryCode(); ?>',
+            shippingOptionRequired: <?php echo $this->isShippingRequired()?'true':'false'; ?>,
+            buyNow: true,
+            target: '#afterpay-express-start',
+            onCommenceCheckout: function(actions){
+                jQuery.ajax({
+                    url: "<?php echo $this->getUrl('afterpay/express/start') ?>",
+                    success: function(data){
+                        if (!data.success) {
+                            actions.reject(data.message);
+                        } else {
+                            actions.resolve(data.token);
+                        }
+                    }
+                });
+            },
+            onShippingAddressChange: function (data, actions) {
+                jQuery.ajax({
+                    url: "<?php echo $this->getUrl('afterpay/express/change') ?>",
+                    method: 'POST',
+                    data: data,
+                    success: function(options){
+                        if (options.hasOwnProperty('error')) {
+                            actions.reject(AfterPay.constants.SERVICE_UNAVAILABLE, options.message);
+                        } else {
+                            actions.resolve(options);
+                        }
+                    }
+                });
+            },
+            onComplete: function (event) {
+                if (event.data.status == 'SUCCESS') {
+                    var redirectUrl = "<?php echo $this->getUrl('afterpay/express/confirm') ?>" + "?status=" + event.data.status + "&orderToken=" + event.data.orderToken;
+                    window.location.href = redirectUrl;
+                }
+            },
+        });
+    }
+    </script>
+    <script src="<?php echo $this->getJsUrl(); ?>" onload="initAfterpayExpress()"></script>
+
+<?php } else { ?>
+    <a href="<?php echo $this->getUrl('afterpay/onetouch') ?>" class="button btn-proceed-checkout btn-checkout">
+        <img src="https://static.afterpay.com/integration/logo-afterpay-white-149x31.png" />
+    </a>
+<?php } ?>

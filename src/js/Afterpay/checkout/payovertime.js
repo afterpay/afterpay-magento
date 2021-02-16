@@ -9,8 +9,8 @@
         return;
     }
 
-    var Afterpay = window.Afterpay = window.Afterpay || {};
-    Afterpay.CheckoutForm = Afterpay.CheckoutForm || {};
+    var AfterpayM1 = window.AfterpayM1 = window.AfterpayM1 || {};
+    AfterpayM1.CheckoutForm = AfterpayM1.CheckoutForm || {};
 
     var renderCheckoutTemplate = function (template, config) {
 
@@ -33,9 +33,9 @@
             .gsub(config.afterpayLogoSubstitution, config.afterpayLogo);
     };
 
-    Afterpay.CheckoutForm.detailsConfiguration = null;
+    AfterpayM1.CheckoutForm.detailsConfiguration = null;
 
-    Afterpay.CheckoutForm.detailsRender = function () {
+    AfterpayM1.CheckoutForm.detailsRender = function () {
 
         var configuration = this.detailsConfiguration;
         if (! configuration instanceof Object) {
@@ -49,9 +49,9 @@
         }
     };
 
-    Afterpay.CheckoutForm.titleConfiguration = null;
+    AfterpayM1.CheckoutForm.titleConfiguration = null;
 
-    Afterpay.CheckoutForm.titleRender = function () {
+    AfterpayM1.CheckoutForm.titleRender = function () {
 
         var configuration = this.titleConfiguration;
         if (! configuration instanceof Object) {

@@ -150,11 +150,70 @@ class Afterpay_Afterpay_Model_Api_Adapters_Adapterv1
         return $params;
     }
 
-    public function buildDirectCaptureRequest($orderToken, $merchantOrderId)
+    public function buildExpressOrderTokenRequest($object)
     {
+        $precision = 2;
+
+        $params = array(
+            'mode' => 'express',
+            'totalAmount' => array(
+                'amount' => round((float)$object->getSubtotalWithDiscount(), $precision),
+                'currency' => (string)Mage::app()->getStore()->getCurrentCurrencyCode(),
+            ),
+            'merchant' => array(
+                'redirectConfirmUrl'    => $this->getApiRouter()->getConfirmOrderUrl(),
+                'redirectCancelUrl'     => $this->getApiRouter()->getCancelOrderUrl(),
+            ),
+            'merchantReference' => (string)$object->getReservedOrderId(),
+            'items' => array(),
+            'discounts' => array(),
+        );
+
+        foreach ($object->getAllVisibleItems() as $item) {
+            /** @var Mage_Sales_Model_Order_Item $item */
+            $params['items'][] = array(
+                'name'     => (string)$item->getName(),
+                'sku'      => $this->_truncateString( (string)$item->getSku() ),
+                'quantity' => (int)$item->getQty(),
+                'price'    => array(
+                    'amount'   => round((float)$item->getPriceInclTax(), $precision),
+                    'currency' => (string)Mage::app()->getStore()->getCurrentCurrencyCode()
+                )
+            );
+            //get the total discount amount
+            $discount_amount = $item->getDiscountAmount();
+            if ( !empty($discount_amount) && round((float)$discount_amount, $precision) > 0 ) {
+                $discount_name = (string)$object->getCouponCode();
+                if( empty($discount_name) || strlen(trim($discount_name)) == '' ) {
+                    $discount_name = 'Discount:';
+                }
+                $params['discounts'][] =  array(
+                    'displayName'   =>  substr( $discount_name . ' - ' . (string)$item->getName(), 0, 128 ),
+                    'amount'        =>  array(
+                                            'amount'   => round((float)$item->getDiscountAmount(), $precision),
+                                            'currency' => (string)Mage::app()->getStore()->getCurrentCurrencyCode()
+                                        ),
+                );
+            }
+        }
+        return $params;
+    }
+
+    public function buildDirectCaptureRequest($orderToken, $merchantOrderId, $quote)
+    {
+        if ($quote->getData('afterpay_express_checkout') ) {
+            $params = array(
+                'amount' => json_decode($quote->getData('afterpay_express_amount'), true),
+                'isCheckoutAdjusted' => true,
+                'shipping' => json_decode($quote->getData('afterpay_express_shipping'), true),
+            );
+        } else {
+            $params = array();
+        }
+
         $params['token'] = $orderToken;
         $params['merchantReference'] = $merchantOrderId;
-        $params['webhookEventUrl'] = "";
+        $params['webhookEventUrl'] = '';
 
         return $params;
     }

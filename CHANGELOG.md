@@ -1,5 +1,20 @@
 # Afterpay Magento 1 Extension Changelog
 
+## Version 3.2.0
+
+_Wed 17 Feb 2021 (AEST)_
+
+### Supported Editions & Versions
+
+- Magento Community Edition (CE) version 1.7 and later.
+- Magento Enterprise Edition (EE) version 1.13 and later.
+
+### Highlights
+
+- Introduced the Express Checkout feature.
+
+---
+
 ## Version 3.1.1
 
 _Wed 16 Dec 2020 (AEST)_

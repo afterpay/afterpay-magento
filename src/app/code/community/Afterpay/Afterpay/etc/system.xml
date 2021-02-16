@@ -283,11 +283,19 @@
                             <label>Show Afterpay on Cart Page</label>
                             <frontend_type>select</frontend_type>
                             <sort_order>210</sort_order>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <source_model>afterpay/system_config_source_cartMode</source_model>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </show_onetouch>
+                        <express_key translate="label">
+                            <label>Express Checkout Public Key</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>220</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </express_key>
                     </fields>
                 </payovertime_cart>
             </groups>

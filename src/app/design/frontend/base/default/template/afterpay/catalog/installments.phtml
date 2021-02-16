@@ -3,17 +3,17 @@
 <script type="text/javascript">
 
     /** @require /js/Afterpay/Installments.js */
-    Afterpay.Installments.config = <?php echo json_encode($this->getJsConfig()) ?>;
+    AfterpayM1.Installments.config = <?php echo json_encode($this->getJsConfig()) ?>;
 
     // render installments amounts on dom:loaded event
     document.observe('dom:loaded', function () {
-        Afterpay.Installments.render();
+        AfterpayM1.Installments.render();
     });
 
     // re-render installments on every price change for configurable products
     Product.OptionsPrice.prototype.reload = Product.OptionsPrice.prototype.reload.wrap(function (callOriginal) {
         callOriginal();
-        Afterpay.Installments.render();
+        AfterpayM1.Installments.render();
     });
 
 </script>

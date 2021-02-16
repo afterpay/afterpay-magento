@@ -13,7 +13,7 @@
                 var params = this.getFormData();
                 // Ajax to start order token
                 var request = new Ajax.Request(
-                    window.Afterpay.saveUrl, // use Afterpay controller
+                    window.AfterpayM1.saveUrl, // use Afterpay controller
                     {
                         method: 'post',
                         parameters: params,
@@ -45,7 +45,7 @@
                                     });
                                 }
 
-                                switch (window.Afterpay.redirectMode) {
+                                switch (window.AfterpayM1.redirectMode) {
                                     case 'lightbox':
                                         AfterPay.display({
                                             token: response.token

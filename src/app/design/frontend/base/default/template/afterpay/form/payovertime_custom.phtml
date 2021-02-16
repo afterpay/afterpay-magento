@@ -6,15 +6,15 @@
 <script type="text/javascript">
 
     /** @require /js/Afterpay/checkout/payovertime.js */
-    Afterpay.CheckoutForm.detailsConfiguration = <?php echo json_encode($this->getDetailsConfiguration()) ?>;
+    AfterpayM1.CheckoutForm.detailsConfiguration = <?php echo json_encode($this->getDetailsConfiguration()) ?>;
 
 //    // render pay over time checkout option form on dom:loaded event
 //    document.observe('dom:loaded', function () {
 //    });
-    Afterpay.CheckoutForm.detailsRender();
+    AfterpayM1.CheckoutForm.detailsRender();
 
-    jQuery(Afterpay.CheckoutForm.detailsConfiguration.creditUsedSelector).on('change', function(){
-        Afterpay.CheckoutForm.detailsRender();
+    jQuery(AfterpayM1.CheckoutForm.detailsConfiguration.creditUsedSelector).on('change', function(){
+        AfterpayM1.CheckoutForm.detailsRender();
     });
 
 </script>

@@ -18,7 +18,7 @@
 
                 // Run ajax to process Afterpay payment using Protorype
                 var request = new Ajax.Request(
-                    window.Afterpay.saveUrl, // use Afterpay controller
+                    window.AfterpayM1.saveUrl, // use Afterpay controller
                     {
                         method: 'post',
                         parameters: form,
@@ -50,7 +50,7 @@
                                     });
                                 }
 
-                                switch (window.Afterpay.redirectMode) {
+                                switch (window.AfterpayM1.redirectMode) {
                                     case 'lightbox':
                                         AfterPay.display({
                                             token: response.token

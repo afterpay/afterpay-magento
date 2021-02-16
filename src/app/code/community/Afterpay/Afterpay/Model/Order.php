@@ -125,6 +125,71 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
     }
 
     /**
+     * Start Express Checkout
+     *
+     * @param $quote
+     *
+     * @return mixed
+     * @throws Mage_Core_Exception
+     */
+    public function startExpress($quote)
+    {
+        // Magento calculate the totals
+        $quote->collectTotals();
+
+        // Check if total is 0 and Afterpay won't processing it
+        if (!$quote->getGrandTotal() && !$quote->hasNominalItems()) {
+            Mage::throwException(Mage::helper('afterpay')->__('Afterpay does not support processing orders with zero amount. To complete your purchase, proceed to the standard checkout process.'));
+        }
+
+        // Reserved order Id and save it to quote
+        $quote->reserveOrderId()->save();
+
+        // Afterpay build order token request - accommodate both Ver 0 and 1
+        $postData = $this->getApiAdapter()->buildExpressOrderTokenRequest($quote);
+
+        $gatewayUrl = $this->getApiAdapter()->getApiRouter()->getOrdersApiUrl();
+
+        // Request order token to API
+        $result = $this->_sendRequest($gatewayUrl, $postData, 'POST', 'StartAfterpayExpress');
+        $resultObject = json_decode($result);
+
+        // Check if token is NOT in response
+        if ( empty($resultObject->token) ) {
+            throw Mage::exception('Afterpay_Afterpay', 'Afterpay API Gateway Error.');
+        } else {
+            // Save token to the sales_flat_quote_payment
+
+            $orderToken = $resultObject->token;
+
+            try {
+                $payment = $quote->getPayment();
+                $payment->setData('afterpay_token', $orderToken);
+                $payment->save();
+
+                // Added to log
+                Mage::helper('afterpay')->log(
+                    sprintf('Token successfully saved for reserved order %s. token=%s', $quote->getReservedOrderId(), $orderToken),
+                    Zend_Log::NOTICE
+                );
+            }
+            catch (Exception $e) {
+                // Add error message
+                $message = 'Exception during initial Afterpay Token saving.';
+
+                $this->helper()->log($this->__($message . ' %s', $e->getMessage()), Zend_Log::ERR);
+
+                Mage::throwException(
+                        Mage::helper('afterpay')->__($message)
+                    );
+            }
+
+            return $orderToken;
+        }
+
+    }
+
+    /**
      * Start creating order for Afterpay
      *
      * @param string                    $orderToken
@@ -134,9 +199,9 @@ class Afterpay_Afterpay_Model_Order extends Afterpay_Afterpay_Model_Method_Payov
      * @return mixed
      * @throws Afterpay_Afterpay_Exception
      */
-    public function directCapture( $orderToken, $merchantOrderId, $quote ) {
-
-        $postData = $this->getApiAdapter()->buildDirectCaptureRequest($orderToken,$merchantOrderId);
+    public function directCapture( $orderToken, $merchantOrderId, $quote )
+    {
+        $postData = $this->getApiAdapter()->buildDirectCaptureRequest($orderToken,$merchantOrderId,$quote);
 
         $gatewayUrl = $this->getApiAdapter()->getApiRouter()->getDirectCaptureApiUrl();
 

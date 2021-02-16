@@ -9,7 +9,7 @@
         window.FireCheckout.prototype.save = function (urlSuffix, forceSave) {
             // if we have paid with the afterpay pay over time method
             if (payment.currentMethod == 'afterpaypayovertime') {
-                this.urls.save = window.Afterpay.saveUrl;
+                this.urls.save = window.AfterpayM1.saveUrl;
 
                 /**
                  * Override response if using Afterpay.
@@ -45,7 +45,7 @@
                             });
                         }
 
-                        switch (window.Afterpay.redirectMode) {
+                        switch (window.AfterpayM1.redirectMode) {
                             case 'lightbox':
                                 AfterPay.display({
                                     token: response.token

@@ -26,7 +26,7 @@
             }
 
             // Registration handling
-            doAfterpayAPICall(window.Afterpay.saveUrl, params);
+            doAfterpayAPICall(window.AfterpayM1.saveUrl, params);
             return false;
 
         } else {
@@ -72,7 +72,7 @@ function doAfterpayAPICall( saveURL, params ) {
                         });
                     }
 
-                    switch (window.Afterpay.redirectMode) {
+                    switch (window.AfterpayM1.redirectMode) {
                         case 'lightbox':
                             AfterPay.display({
                                 token: response.token

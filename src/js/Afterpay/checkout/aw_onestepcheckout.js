@@ -10,7 +10,7 @@
             // check if using afterpay as a payment method
             if (awOSCPayment.currentMethod == 'afterpaypayovertime' || payment.currentMethod == 'afterpaypayovertime') {
                 // Set the place order URL based on the configuration
-                this.placeOrderUrl = window.Afterpay.saveUrl;
+                this.placeOrderUrl = window.AfterpayM1.saveUrl;
 
                 /**
                  * onComplete function will run after Ajax is finished.
@@ -46,7 +46,7 @@
                             });
                         }
 
-                        switch (window.Afterpay.redirectMode) {
+                        switch (window.AfterpayM1.redirectMode) {
                             case 'lightbox':
                                 AfterPay.display({
                                     token: response.token
