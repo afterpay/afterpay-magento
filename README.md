@@ -1,3 +1,5 @@
+[![deprecated](https://img.shields.io/badge/stability-deprecated-red)](https://business.adobe.com/blog/basics/support-magento-1-software-ends-june-30-2020)
+
 ## 1.1 New Afterpay Installation
 
 This section outlines the steps to install the Afterpay plugin on your Magento instance for the first time.
